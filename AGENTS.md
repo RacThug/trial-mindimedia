@@ -27,8 +27,9 @@ feature/*  --PR-->  develop  --PR-->  main
   link and let them merge. Merge only if the user explicitly asks you to.
 - **Never use `git push --no-verify`.** That flag is the human's escape hatch,
   not yours. If the `pre-push` hook rejects your push, the push was wrong.
-- **Never commit the `docs/` folder.** It is gitignored on purpose and is local
-  reference material only.
+- **Never commit the `docs/` folder**, with two exceptions: `docs/agents/` and
+  `docs/adr/` are tracked agent configuration and belong in git. Everything else
+  under `docs/` is gitignored on purpose and is local reference material only.
 
 ## Backstop
 
@@ -54,3 +55,20 @@ gh pr create --base develop        # then hand the PR link to the user
 # when develop is ready to release
 gh pr create --base main --head develop
 ```
+
+## Agent skills
+
+### Issue tracker
+
+Issues and PRDs live as GitHub issues in `RacThug/trial-mindimedia`, driven by
+the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+The five canonical triage roles, each label string equal to its name. See
+`docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one `CONTEXT.md` and one `docs/adr/` at the repo root. See
+`docs/agents/domain.md`.
