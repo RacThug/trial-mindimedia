@@ -1,0 +1,21 @@
+name: PR source guard
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, synchronize, edited]
+
+jobs:
+  verify-source-branch:
+    name: verify-source-branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Only allow PRs from develop into main
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          if [ "$HEAD_REF" != "develop" ]; then
+            echo "::error::Pull requests into 'main' must come from 'develop' (got '$HEAD_REF'). Merge your work into develop first."
+            exit 1
+          fi
+          echo "Source branch OK: $HEAD_REF"
