@@ -67,18 +67,38 @@ All measured. These become the Tailwind `@theme` block.
 
 ### Type
 
-Geist and Geist Variable. The entire scale is **weight 400** with uniform **-0.02em**
-tracking. Headings are large and light, never bold.
+Geist and Geist Variable. Every heading is **weight 400** with uniform **-0.02em** tracking -
+large and light, never bold. Interactive text is **500** and the Eyebrow is **600**; those
+two are the whole of the rest of the scale.
 
-| Token | Size | Line height | Tracking |
-| --- | --- | --- | --- |
-| `display` (H1) | 68px | 81.6px | -1.36px |
-| `h2` | 56px | 67.2px | -1.12px |
-| `h3` | 44px | 57.2px | -0.88px |
-| `h4` (stat) | 32px | 41.6px | -0.64px |
-| `h5` (card title) | 24px | 33.6px | -0.48px |
-| `body` | 16px | 25.6px | normal |
-| `eyebrow` | 12px | 20.4px | normal, **weight 600**, uppercase |
+| Token | Size | Line height | Tracking | Weight |
+| --- | --- | --- | --- | --- |
+| `display` (H1) | 68px | 81.6px | -1.36px | 400 |
+| `h2` | 56px | 67.2px | -1.12px | 400 |
+| `h3` | 44px | 57.2px | -0.88px | 400 |
+| `h4` (stat) | 32px | 41.6px | -0.64px | 400 |
+| `h5` (card title) | 24px | 33.6px | -0.48px | 400 |
+| `body` | 16px | 25.6px | normal | 400, or **500** for a link or button label |
+| `body-sm` | 14px | 22.4px | normal | 400 |
+| `eyebrow` | 12px | 20.4px | normal | **600**, uppercase |
+
+`body-sm` is the phone step of body copy, measured in #9 on the footer (6.12). Only the
+footer is measured so far - a Section wanting it elsewhere should measure its own case.
+
+**`text-wrap: balance` is a site-wide setting**, found by pixel-diffing the shell in #9 and
+easy to miss because it changes nothing but where a line breaks. A census of the Reference's
+204 headings and paragraphs:
+
+| `text-wrap` | Count | What it is |
+| --- | --- | --- |
+| `balance` | 140 | every prose block, **including the H1** |
+| `nowrap` | 60 | every link and short label |
+| `wrap` | 4 | stat labels |
+
+Greedy wrapping is visibly wrong: the phone tagline read `...with a premium / Framer website
+template.` against the Reference's balanced `...with a / premium Framer website template.`,
+two lines of 225px and 224px. **Every Section in #10 to #12 inherits this** - a balanced H2
+breaks nothing like a greedy one.
 
 ### Colour
 
@@ -96,11 +116,30 @@ tracking. Headings are large and light, never bold.
 
 ### Shape
 
-- Container: **1360px** max width, centred
-- Button: height **46px**, radius **48px**, padding `10px 20px`, 12px label
+- Container: **1360px** max width, centred. The shell runs on a narrower rail:
+  nav and footer content measure **1200px** at 1440 (#9). The hero's own content starts at
+  the same x=120, so the 1360 figure needs re-measuring when the Sections land in #10.
+- Button: height **46px**, radius **48px**, padding `10px 20px`, label `body` at
+  **weight 500**
   - primary: white background, black text
   - secondary: `#1c1c1c` background, white text
-- Nav: `position: fixed`, top 0, height **86px**, **fully transparent**, no backdrop blur, `z-index: 8`
+- Nav: `position: fixed`, top 0, height **86px** (**76px** on phone), `z-index: 8`.
+  Surface **`rgba(0, 0, 0, 0.7)` under `backdrop-filter: blur(12px)`**
+
+Three of those are corrections made in #9 against the live Reference, all of them from
+re-reading the element the styles are actually on:
+
+- **The nav is not transparent and is not unblurred.** The `position: fixed` wrapper is
+  transparent; the `<header>` inside it carries the tint and the blur. Over the black hero
+  the two are indistinguishable, which is how the first measurement went wrong - the
+  difference only appears once the Template Wall scrolls underneath. Sampled at scrollY 0,
+  400, 1200 and 5000 in both directions and unchanged at every one, so **"never changes on
+  scroll" still holds**.
+- **There is no 12px button label.** The nav's Bundle pill and both hero buttons measure
+  16px/25.6px at weight 500 - the `body` step, in a weight the scale did not have. The
+  `--text-button` token is gone rather than corrected.
+- **The scale is not weight 400 throughout.** Nav links, footer links and button labels are
+  all **500**; `--font-weight-medium` joins the token layer.
 
 ---
 
@@ -129,10 +168,28 @@ Thirteen sections, top to bottom. Copy is verbatim from the Reference.
 Logo `Browser.supply`, links `Templates / Live examples / Support / Blog`, X and YouTube
 icons, white `Bundle` pill.
 
-**Verified: the nav never changes on scroll.** Background, height, transform and opacity are
-identical at every scroll position, scrolling both up and down. Do not add a scrolled state.
+**Verified twice, in #5 and again in #9: the nav never changes on scroll.** Background,
+blur, height, transform and opacity are identical at every scroll position, scrolling both
+up and down. Do not add a scrolled state.
 
-Phone: logo left, hamburger right.
+Measured in #9, all three Breakpoints:
+
+| | desktop (>= 1200) | tablet (810-1199) | phone (<= 809) |
+| --- | --- | --- | --- |
+| Height | 86px | 86px | **76px** |
+| Gutter | 40px | 20px | 12px |
+| Rail | 1200px | full | full |
+| Row | 46px (the button) | 46px | 36px (the control) |
+
+Logo 18px + 12px gap + wordmark; links centred **on the viewport** rather than spaced
+between logo and actions, 16px gaps; actions 12px gap, social pair 8px.
+
+Phone: logo left, menu control right - **two bars, not three**. Open, the same header fills
+the viewport at `rgba(0, 0, 0, 0.2)` under `blur(20px)`, holding a 36px-gap column of
+[row, links (28px gaps, social last), full-width `Bundle` pill].
+
+The Reference's control is a `div` with no accessible name, no `aria-expanded` and no focus
+trap, and its open menu lets the page behind it scroll. We deviate on all four (#9).
 
 ### 6.2 Hero
 
@@ -306,10 +363,23 @@ right, with five paragraphs. Then four stat tiles in a 2x2: `6+` Years building 
 
 ### 6.12 Footer
 
-Logo, tagline `Launch your online business with a premium Framer website template.`, X and
-YouTube icons, two link columns (`Templates / Live examples / Bundle / Blog` and
-`Quiz / Support / Privacy`), `© 2026 browser.supply. Framer website templates`, and
-`Created by Ramish Aziz`.
+Wordmark - text, not the nav's logo image - tagline `Launch your online business with a
+premium Framer website template.`, X and YouTube icons, two link columns
+(`Templates / Live examples / Bundle / Blog` and `Quiz / Support / Privacy`),
+`© 2026 browser.supply. Framer website templates`, and `Created by Ramish Aziz`.
+
+Measured in #9: 40px gutters at every width over the same 1200px rail as the nav - plus a
+further 20px inside each row on phone, so phone copy starts at x=60 - then two
+rows - a 254px block (`40px 0` padding) above a 72px by-line bar (`20px 0`), divided by a
+1px `--color-surface-3` rule that overlaps rather than adding to either. Left column 16px
+gaps, tagline fixed at 292px; link columns 56px apart with 24px
+between links. Wordmark is `h5`; tagline, copyright and by-line are `text-muted`, dropping
+to **14px/22.4px on phone**, where everything centres and the two columns become one.
+The 38px portrait overflows its 32px row rather than growing it.
+
+Both prose links (`Framer`, `Ramish Aziz`) are white inside grey text with no other
+distinction, which is colour alone at 1.4:1 and fails the axe scan. We underline them - the
+same reasoning as 6.14.
 
 ### 6.13 Quiz modal
 
@@ -330,7 +400,10 @@ Reference here would fail the axe scan in section 9 and contradict the brief's
 
 Decorative media gets **no** alt text rather than invented description: the 48 Template Wall
 tiles are a backdrop, and a Testimonial avatar sits beside the person's name in text, so both
-render `alt=""`. The Reference's own alt on the eight Step 1 thumbnails is correct and useful,
+render `alt=""`. The nav's 18px logo is the same case and #9 renders it `alt=""` too: the
+wordmark `Browser.supply` sits inside the same link, so the site is named either way, and
+alt text on the mark would announce it twice. The rule is that the site must be identifiable,
+not that the image must carry the identification. The Reference's own alt on the eight Step 1 thumbnails is correct and useful,
 and it is where the names of the other templates come from: Cora, Funnelz, Editr, Partnr,
 Meraas, Reformr, Influence, plus Traction reused.
 
@@ -453,6 +526,23 @@ write each component's `sizes` against them.
 A local Playwright harness captures Clone and Reference at 1440/810/390, pixel-diffs per
 Section, and emits a percentage table for the README.
 
+#9 ran that comparison by hand over the two Sections that exist so far, and it earned its
+keep: it is what found the footer's divider rule and `text-wrap: balance`, neither of which
+a computed-style probe had reported. Measured after both fixes, pixels within a delta of 2,
+with the Reference's quiz modal held out of the DOM:
+
+| | nav | footer |
+| --- | --- | --- |
+| 1440 | 97.9% | 96.4% |
+| 810 | 96.2% | 95.5% |
+| 390 | 99.3% | 96.5% |
+
+Every region's height matches the Reference to the pixel, and the wordmark and the Bundle
+pill are byte-identical. The residual is a **1px rasterization offset** on the centred nav
+links and the social icons: realigned by one pixel they match at 97.3%, so it is subpixel
+positioning rather than layout. Worth knowing before #14 sets a threshold - a per-Section
+gate gets no higher than about 97% on text-heavy bands without allowing a 1px tolerance.
+
 It must, on **both** sides: freeze all video to poster frames, dismiss the quiz modal, and
 let Scroll-Appear settle. Otherwise it measures video frames and animation timing rather than
 layout.
@@ -475,6 +565,12 @@ of our own output.
   recalculating, placeholder routing
 - **axe**: accessibility scan inside the E2E run
 
+The Playwright side arrived in #9 (`npm run test:e2e`, `playwright.config.ts`, specs in
+`tests/e2e/`). It runs against a production build rather than `next dev`, because half of
+what it asserts is about the build: that `/api/templates` is a prerendered file a browser
+can fetch, and that the placeholder routes are static pages. Sections #12 and #13 add the
+quiz modal and Option specs to it.
+
 Model rules live in the schema, so a broken reference cannot reach a page. Measured Reference
 facts live in `tests/content/reference-facts.test.ts` instead, so growing the content fails a
 named test rather than the build - see ADR-0004.
@@ -482,8 +578,9 @@ named test rather than the build - see ADR-0004.
 ### Checks
 
 Five commands gate a PR, run before pushing: `typecheck`, `lint`, `format:check`, `test`,
-`build`. `build` is last and is not redundant - content that no test happens to read still
-fails there, because the data layer validates lazily (ADR-0004).
+`build`. `test:e2e` runs beside them and builds the app itself, so it is a sixth check
+rather than a sixth gate. `build` is last of the five and is not redundant - content that no
+test happens to read still fails there, because the data layer validates lazily (ADR-0004).
 
 `format:check` could not pass on a Windows clone until #8. Prettier writes and checks LF while
 `core.autocrlf=true` leaves a CRLF working tree, so every committed file failed locally and

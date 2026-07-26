@@ -94,6 +94,7 @@ describe('type scale (PRD section 4)', () => {
     ['h4', '32px', '41.6px', '-0.64px'],
     ['h5', '24px', '33.6px', '-0.48px'],
     ['body', '16px', '25.6px', 'normal'],
+    ['body-sm', '14px', '22.4px', 'normal'],
     ['eyebrow', '12px', '20.4px', 'normal'],
   ])('defines `%s` as %s/%s, tracking %s', (name, size, leading, tracking) => {
     expect(themeVariable(`--text-${name}`)).toBe(size)
@@ -101,8 +102,15 @@ describe('type scale (PRD section 4)', () => {
     expect(themeVariable(`--text-${name}--letter-spacing`)).toBe(tracking)
   })
 
-  it('defines the 12px button label', () => {
-    expect(themeVariable('--text-button')).toBe('12px')
+  /*
+   * There is no button step. PRD section 4 recorded a 12px label until #9
+   * re-measured the nav's Bundle pill and both hero buttons and found every one
+   * of them at `text-body` in `font-medium`. The assertion is kept, inverted,
+   * because the old value is written down in enough places that it will be
+   * offered back one day.
+   */
+  it('has no separate button label step, because none was measured', () => {
+    expect(themeVariable('--text-button')).toBeUndefined()
   })
 
   it('makes the Eyebrow the only heavier step', () => {
@@ -127,8 +135,11 @@ describe('tracking and weight (PRD section 4)', () => {
     expect(themeVariable('--tracking-wide')).toBeUndefined()
   })
 
-  it('offers only the two measured weights', () => {
+  it('offers only the three measured weights', () => {
     expect(themeVariable('--font-weight-normal')).toBe('400')
+    /* Nav links, footer links and button labels, measured in #9. The scale is
+     * not weight 400 throughout, which is what section 4 first recorded. */
+    expect(themeVariable('--font-weight-medium')).toBe('500')
     expect(themeVariable('--font-weight-semibold')).toBe('600')
     expect(themeVariable('--font-weight-bold')).toBeUndefined()
   })
@@ -163,12 +174,31 @@ describe('colour (PRD section 4)', () => {
 describe('shape (PRD section 4)', () => {
   it.each([
     ['--container-page', '1360px'],
+    ['--container-shell', '1200px'],
     ['--radius-button', '48px'],
     ['--button-height', '46px'],
     ['--button-padding-x', '20px'],
     ['--button-padding-y', '10px'],
     ['--nav-height', '86px'],
+    ['--nav-height-phone', '76px'],
     ['--nav-z-index', '8'],
+  ])('defines %s as %s', (name, value) => {
+    expect(themeVariable(name)).toBe(value)
+  })
+
+  /*
+   * The nav surface, and the single most reversible measurement on the site.
+   * PRD section 4 called the nav "fully transparent, no backdrop blur" until #9
+   * re-measured it: the fixed wrapper is transparent and the header inside it
+   * carries a tint and a blur, at every scroll position. Over the black hero the
+   * two look identical, so nothing but this assertion and the E2E test in
+   * `tests/e2e/nav.spec.ts` would notice it being "corrected" back.
+   */
+  it.each([
+    ['--nav-surface', 'rgba(0, 0, 0, 0.7)'],
+    ['--nav-blur', '12px'],
+    ['--menu-surface', 'rgba(0, 0, 0, 0.2)'],
+    ['--menu-blur', '20px'],
   ])('defines %s as %s', (name, value) => {
     expect(themeVariable(name)).toBe(value)
   })

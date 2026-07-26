@@ -21,6 +21,12 @@ out/
 # Vercel
 .vercel/
 
+# Playwright (the E2E run's own output; the specs themselves are tracked)
+test-results/
+playwright-report/
+blob-report/
+.playwright/
+
 # Environment
 .env
 .env.*
