@@ -1,0 +1,8 @@
+# Git hooks and shell scripts must keep LF endings or sh cannot run them
+.githooks/** text eol=lf
+*.sh text eol=lf
+
+# Committed assets are the byte-exact output of `npm run assets`. Without this,
+# git rewrites the line endings in the two SVGs on a Windows checkout and the
+# next pipeline run reports them as modified when nothing has changed.
+public/media/** -text

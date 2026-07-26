@@ -1,14 +1,25 @@
-# Docs (local reference only)
-docs/
+# Docs (local reference only), except tracked agent configuration.
+# `docs/*` rather than `docs/` because git cannot re-include a file whose
+# parent directory is excluded - the negations below only work at this level.
+docs/*
+!docs/agents/
+!docs/adr/
 
 # Dependencies
 node_modules/
+
+# Asset pipeline download cache (re-fetched by `npm run assets`)
+.cache/
 
 # Build output
 dist/
 build/
 .next/
 out/
+*.tsbuildinfo
+
+# Vercel
+.vercel/
 
 # Environment
 .env

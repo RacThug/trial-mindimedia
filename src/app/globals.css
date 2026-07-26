@@ -1,0 +1,156 @@
+@import 'tailwindcss';
+
+/*
+ * Design tokens, measured from the Reference. See PRD.md section 4.
+ *
+ * Every value here is a measurement, not a preference. Do not "round" one to a
+ * nicer number and do not add a token that was not measured - an unmeasured
+ * value belongs in PRD.md section 10 (Known unknowns), not here.
+ *
+ * The `-*: initial` lines wipe Tailwind's stock scales. Everything the
+ * Reference expresses through type, colour, tracking, weight, radius or
+ * breakpoint is reset to empty and then repopulated from measurements, so a
+ * `text-sm`, `text-gray-400`, `font-bold`, `rounded-lg` or `md:` simply does
+ * not compile. Each of those is a Fidelity bug that no build would otherwise
+ * report. `--spacing` is deliberately left stock: it is layout, not identity.
+ *
+ * Note this also removes a trap. Tailwind ships its own `--tracking-tight` at
+ * -0.025em; the Reference measures -0.02em. Without the reset, ours would
+ * silently shadow a well-known utility with a different number.
+ *
+ * `static` because these are a design system, not a by-product of the classes
+ * that happen to be in use today: components read them as `var(--nav-height)`
+ * from plain CSS, where Tailwind's usage tree-shaking cannot see them.
+ */
+@theme static {
+  /* ---- Breakpoints (PRD section 5) --------------------------------------
+   * Framer's defaults, and NOT Tailwind's (640/768/1024/1280). Overriding
+   * these is the single highest-leverage correctness item in the scaffold:
+   * stock breakpoints diverge at exactly the widths a reviewer resizes to.
+   *
+   * Mobile-first, so phone (<= 809px) is the unprefixed base.
+   *
+   * The tablet H1 step (60px, PRD section 5) is NOT a token: its line height
+   * was never measured, and inventing one is exactly what section 1 forbids.
+   * Measure it when the hero lands in issue #10.
+   */
+  --breakpoint-*: initial;
+  --breakpoint-tablet: 810px;
+  --breakpoint-desktop: 1200px;
+
+  /* ---- Type (PRD section 4) ---------------------------------------------
+   * Geist. The whole scale is weight 400 with uniform -0.02em tracking;
+   * headings are large and light, never bold. Only the eyebrow is heavier.
+   *
+   * Each step carries its own measured line height and tracking, so the
+   * `leading-*` and `tracking-*` utilities exist only to override a
+   * measurement. Hence the resets: there is one tracking value on this site.
+   */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+
+  --tracking-*: initial;
+  --tracking-tight: -0.02em;
+
+  --leading-*: initial;
+
+  --font-weight-*: initial;
+  --font-weight-normal: 400;
+  --font-weight-semibold: 600;
+
+  --text-*: initial;
+
+  --text-display: 68px; /* H1 */
+  --text-display--line-height: 81.6px;
+  --text-display--letter-spacing: -1.36px;
+
+  --text-h2: 56px;
+  --text-h2--line-height: 67.2px;
+  --text-h2--letter-spacing: -1.12px;
+
+  --text-h3: 44px;
+  --text-h3--line-height: 57.2px;
+  --text-h3--letter-spacing: -0.88px;
+
+  --text-h4: 32px; /* stat */
+  --text-h4--line-height: 41.6px;
+  --text-h4--letter-spacing: -0.64px;
+
+  --text-h5: 24px; /* card title */
+  --text-h5--line-height: 33.6px;
+  --text-h5--letter-spacing: -0.48px;
+
+  --text-body: 16px;
+  --text-body--line-height: 25.6px;
+  --text-body--letter-spacing: normal;
+
+  /* The Eyebrow is also uppercase. Tailwind's `--text-*` namespace has no
+   * text-transform modifier, so that one property cannot be a token and has to
+   * ride along as `uppercase` at the call site. */
+  --text-eyebrow: 12px;
+  --text-eyebrow--line-height: 20.4px;
+  --text-eyebrow--letter-spacing: normal;
+  --text-eyebrow--font-weight: 600;
+
+  --text-button: 12px; /* button label */
+
+  /* ---- Colour (PRD section 4) ------------------------------------------- */
+  --color-*: initial;
+
+  --color-transparent: transparent;
+  --color-current: currentcolor;
+
+  --color-bg: #000000; /* page */
+  --color-surface-1: #141414; /* cards */
+  --color-surface-2: #1c1c1c; /* secondary button, Option rows */
+  --color-surface-3: #2e2e2e; /* borders, dividers, hover */
+  --color-text: #ffffff; /* headings, primary body */
+  --color-text-muted: #c9c9c9; /* body copy, struck price */
+  --color-accent-blue: #8ea9fa; /* Eyebrows */
+  --color-accent-orange: #ff8800; /* FOUNDER badge, Option prices, step badges */
+  --color-accent-green: #33d478; /* NEW badge */
+
+  /* ---- Shape (PRD section 4) -------------------------------------------- */
+  --radius-*: initial;
+
+  /* Container: 1360px max width, centred. `max-w-page`. */
+  --container-page: 1360px;
+
+  /* Button: height 46px, radius 48px, padding 10px 20px, 12px label.
+   * White on black is primary, `--color-surface-2` on white is secondary.
+   * The button component itself belongs to issue #9; these are its measurements. */
+  --radius-button: 48px;
+  --button-height: 46px;
+  --button-padding-x: 20px;
+  --button-padding-y: 10px;
+
+  /* Nav: fixed, top 0, height 86px, fully transparent, no backdrop blur.
+   * Verified never to change on scroll - do not add a scrolled state. */
+  --nav-height: 86px;
+  --nav-z-index: 8;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    font-weight: var(--font-weight-normal);
+  }
+
+  /* The Reference's headings are light, not bold. Undo the UA default once
+   * here rather than fighting it with a `font-normal` on every heading. */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: var(--font-weight-normal);
+  }
+}

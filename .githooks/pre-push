@@ -1,0 +1,30 @@
+#!/bin/sh
+#
+# Blocks direct pushes to protected branches.
+# All work must land through pull requests:  feature/* -> develop -> main
+#
+# Enable with:  git config core.hooksPath .githooks
+
+protected="main develop"
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+	case "$remote_ref" in
+		refs/heads/*) branch="${remote_ref#refs/heads/}" ;;
+		*) continue ;;
+	esac
+
+	for p in $protected; do
+		if [ "$branch" = "$p" ]; then
+			echo "" >&2
+			echo "pre-push: direct pushes to '$p' are not allowed." >&2
+			echo "" >&2
+			echo "  Open a pull request instead:" >&2
+			echo "    feature/*  ->  develop   (any branch may PR into develop)" >&2
+			echo "    develop    ->  main      (only develop may PR into main)" >&2
+			echo "" >&2
+			exit 1
+		fi
+	done
+done
+
+exit 0
