@@ -1,0 +1,42 @@
+[
+  {
+    "slug": "responsive",
+    "title": "Responsive straight out of the box. No coding or design required.",
+    "media": {
+      "slug": "feature/responsive",
+      "alt": "The same site previewed side by side at desktop, tablet and phone widths"
+    }
+  },
+  {
+    "slug": "tutorials",
+    "title": "Step-by-step video tutorials included by a real human.",
+    "media": {
+      "slug": "feature/tutorials",
+      "alt": "Ramish talking to camera in one of the step-by-step video tutorials"
+    }
+  },
+  {
+    "slug": "seo",
+    "title": "Automatic SEO, sitemaps and full-control all ready in your site.",
+    "media": {
+      "slug": "feature/seo",
+      "alt": "A site settings panel with SEO title, description and search result preview fields"
+    }
+  },
+  {
+    "slug": "cms",
+    "title": "Easily create and manage content with a built-in CMS.",
+    "media": {
+      "slug": "feature/cms",
+      "alt": "A CMS collection list with one entry open for editing beside it"
+    }
+  },
+  {
+    "slug": "hosting",
+    "title": "Pro hosting included for fast and secure global sites.",
+    "media": {
+      "slug": "feature/hosting",
+      "alt": "A hand holding a glowing Framer app icon in the dark"
+    }
+  }
+]

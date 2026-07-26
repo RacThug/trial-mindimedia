@@ -1,0 +1,49 @@
+# Reliability that does not depend on anyone remembering to run it.
+#
+# `.githooks/pre-push` stops work reaching `main` or `develop` directly, but
+# nothing until now checked whether the work was correct. Every PR into either
+# protected branch runs the same five commands a developer runs locally, in the
+# same order, so a red check is the reason a PR waits rather than a reviewer
+# noticing something by hand.
+
+name: CI
+
+on:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop, main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Format
+        run: npm run format:check
+
+      - name: Test
+        run: npm run test
+
+      # Last, and deliberately so: the build is where content that no test reads
+      # would still fail, and it is the slowest signal of the five.
+      - name: Build
+        run: npm run build

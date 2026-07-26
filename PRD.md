@@ -143,6 +143,16 @@ Phone: logo left, hamburger right.
 
 Phone: rating block moves **above** the buttons, buttons stack full width.
 
+**The secondary CTA has a second copy variant** (measured in #8 from the served markup):
+phone renders `Or get matched with one`, desktop and tablet render
+`Or get matched with the perfect one`. Both link to the Typeform quiz. It is shorter copy,
+not truncation, so it cannot be reproduced with CSS.
+
+**Casing throughout this Section is CSS, not content.** The markup ships
+`Framer templates` and `Rated 4.92/5` in sentence case and uppercases them with
+`text-transform`. Reproduce that rather than typing capitals, or a screen reader reads
+spelled-out capitals where the Reference does not.
+
 ### 6.3 Template Wall
 
 Dense grid of Template thumbnails and looping videos as a decorative backdrop, with
@@ -182,6 +192,11 @@ Eyebrow `WHICH TEMPLATE IS FOR ME?`, H2 `Premium templates built to drive result
 
 Each card carries **two** screenshots, not one: `template/{selene,zenna,traction}-{a,b}` in
 the asset index.
+
+As above, the table shows rendered text. **The markup is `New`, `AI SAAS`, `Yoga Studio`
+and `SMMA`** (measured in #8), so `src/lib/content/data/templates.json` stores those and
+the card uppercases in CSS. Card links are `/templates/{slug}`; the case study's primary
+CTA points at `/templates/reformr`, a template that has no card on this page.
 
 ### 6.5 Feature bento
 
@@ -223,6 +238,20 @@ The Template Wall (6.3) carries **six more** Testimonials: Jacob, Roni and Seyed
 Aba and Nic reused from this grid. **Twelve** unique people appear on the page, not nine
 (measured in #7; slugs are `avatar/<first-name>`).
 
+**The Wall's sequence order is `Jacob, Mark, Aba, Roni, Nic, Seyed`** - measured in #8 from
+DOM order, and confirmed independently by the order of the avatars' own `alt` attributes.
+The sentence above groups the three new people before the three reused ones and is not an
+order. The grid order is as listed: Nic, Renan, Emon, Widya, Dávid, Mark, Samar, Aba, Nonso.
+
+Two character-level details, both easy to normalise away by accident:
+
+- The quotes use the **straight** apostrophe `'` (U+0027) in `it's` and `I've`. The founder's
+  prose in 6.11 uses the **curly** `’` (U+2019), and the case study has `café`. Do not let an
+  editor or a formatter unify them.
+- `Dávid` is spelled with an acute accent in the visible text but a **grave** (`Dàvid`) in the
+  Reference's own `alt` attribute. The visible spelling is the content; the alt is a defect
+  we do not copy (see 6.14).
+
 ### 6.8 Case study
 
 H3 `Matt launched his new site in less than 1 hour.` **Video** left (not a still - measured in
@@ -243,7 +272,18 @@ other two read `ONE-TIME PAYMENT`. Reproduce verbatim.
 | Custom project | $2,495 | | Landing page (default), Multi-page site |
 
 Each has an `INCLUDED:` icon list and a bottom CTA (`Browse templates`, `Get the bundle`,
-`Book a discovery call`).
+`Book a discovery call`). The lists are **5, 7 and 3 items** (measured in #8); the Bundle's
+is the long one, repeating four of the Single template's items before `Priority support`.
+
+Measured in #8, from the markup rather than the render:
+
+- The eyebrows are `One-time payemnt`, `one-time payment`, `one-time payment` - the first
+  carries both the typo **and** a capital `O`. All three are uppercased by CSS.
+- **`Multi-page site` carries no `+$` label**, so its price delta is 0. That is read off the
+  copy, not assumed: every other priced Option states its delta in its own text node, which
+  is also why the label and the `(+$39)` beside it are separate elements.
+- Option rows are **radio**, not additive checkboxes, in both Plans that have them.
+- The `Book a discovery call` CTA leaves the site, for `cal.com/ramish-design/landing-page`.
 
 **Option behaviour is a deliberate Deviation.** On the Reference these rows are inert: clicking
 `Add Figma designs` leaves the price at $129, verified. In the Clone they recalculate, **but
@@ -277,26 +317,66 @@ Fires on load. 1016x616 centred, `z-index: 10`, over a full-viewport backdrop. E
 `60-SECOND QUIZ`, H2 `Get 30% off the perfect template for your business`, body copy,
 `Take the quiz`. Must be dismissible.
 
+### 6.14 Alt text is authored, not copied - a Deviation
+
+Measured in #8: the Reference ships **106 `<img>` of which 72 have no `alt` attribute at
+all**, and three of the 34 that do are defective - `JMBG, Browser.supply customer` on Jacob's
+avatar, `Nic, , Browser.supply customer` and `Widya, , Browser.supply customer` with doubled
+commas, and `Selene Framer Template for AI SAAS companie` truncated mid-word.
+
+We write our own. Alt text is invisible, so this costs nothing in Fidelity, and copying the
+Reference here would fail the axe scan in section 9 and contradict the brief's
+"reliable, production-ready" instruction. Record it in the README as a Deviation.
+
+Decorative media gets **no** alt text rather than invented description: the 48 Template Wall
+tiles are a backdrop, and a Testimonial avatar sits beside the person's name in text, so both
+render `alt=""`. The Reference's own alt on the eight Step 1 thumbnails is correct and useful,
+and it is where the names of the other templates come from: Cora, Funnelz, Editr, Partnr,
+Meraas, Reformr, Influence, plus Traction reused.
+
 ---
 
 ## 7. Data layer
 
 JSON in the repo, read by one typed data-access module that validates on read. Server
 Components import that module directly. Route Handlers at `/api/*` wrap the same module. See
-[ADR-0002](../blob/develop/docs/adr/0002-data-access-shape.md).
+[ADR-0002](../blob/develop/docs/adr/0002-data-access-shape.md) for that asymmetry and
+[ADR-0004](../blob/develop/docs/adr/0004-content-is-entities-and-references.md) for what
+counts as content.
+
+Built in #8 as eight files under `src/lib/content/data/`, one per Collection, validated by
+Zod with the types derived from the schemas.
 
 | Collection | Count | Fields |
 | --- | --- | --- |
-| templates | 3 featured | name, category, price, currency, badge, thumbnail, href |
-| wallTiles | 16 unique, 48 placed | slug, kind (image/video), aspect |
-| testimonials | 12 (9 grid, 6 wall, 3 shared) | quote, name, avatar, rating |
-| features | 5 | title, media, span |
-| steps | 3 | number, title, body, media |
-| plans | 3 | eyebrow, name, price, compareAt, blurb, options[], included[], cta |
-| stats | 4 | value, label |
-| navLinks / footerLinks | 4 / 7 | label, href |
+| templates | 3 featured | slug, name, category, price, currency, badge, href, screenshots[] |
+| wallTiles | 16 unique, 48 placed | ordered media slugs only |
+| testimonials | 12 (9 grid, 6 wall, 3 shared) | people{quote, name, avatar, rating} + grid[] + wall[] |
+| features | 5 | slug, title, media |
+| steps | 3 | slug, title, body, media[] |
+| plans | 3 | slug, eyebrow, name, price, compareAt, currency, blurb, options[], included[], cta |
+| stats | 4 | slug, value, label |
+| links | 4 nav / 7 footer / 2 social | slug, label, href |
 
-Endpoints: `/api/templates`, `/api/testimonials`, `/api/plans`.
+Five deliberate departures from the table as first written, all covered by ADR-0004:
+
+- **No `kind` or `aspect` on wall tiles, and no `thumbnail` field.** Media is referenced by
+  slug and resolved against the generated asset index, which already owns kind and intrinsic
+  size. A committed copy of a generated value is a copy that goes stale.
+- **No `features.span`, no `steps.number`, no footer column grouping.** Layout is not
+  content; `span` changes per Breakpoint and `number` is the index.
+- **`alt` is a content field** on every meaningful visual, and absent by design on
+  decorative media (6.14).
+- **Prices are integer minor units** with a currency code, so the Option recalculation in 6.9
+  is integer arithmetic. Founder stats stay strings: `$100k+` is a marketing figure, not a
+  price.
+- **Every entity carries a stable slug.** Array order means Placement order only for
+  Collections that appear exactly once on the page.
+
+Endpoints: `/api/templates`, `/api/testimonials`, `/api/plans`, all `force-static` and
+verified prerendered in the build output. `/api/testimonials` returns the twelve people flat,
+each carrying its Placements, rather than the page's two blocks - the blocks come from the
+data layer, because layout does not belong in an HTTP contract.
 
 ---
 
@@ -394,6 +474,17 @@ of our own output.
 - **Playwright E2E**: quiz modal open/dismiss, mobile menu, pricing Option selection
   recalculating, placeholder routing
 - **axe**: accessibility scan inside the E2E run
+
+Model rules live in the schema, so a broken reference cannot reach a page. Measured Reference
+facts live in `tests/content/reference-facts.test.ts` instead, so growing the content fails a
+named test rather than the build - see ADR-0004.
+
+### Checks
+
+`.github/workflows/ci.yml` runs `typecheck`, `lint`, `format:check`, `test` and `build` on
+every PR into `develop` or `main`, added in #8. `.githooks/pre-push` stops work reaching a
+protected branch directly, but until CI existed nothing checked whether the work was correct;
+"the tests pass on my machine" is not a reliability claim.
 
 ---
 

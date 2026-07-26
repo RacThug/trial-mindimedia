@@ -27,6 +27,22 @@ A place where the Clone deliberately differs from the Reference. Every Deviation
 decision that must be recorded and justified, never an accident.
 _Avoid_: difference, change, improvement
 
+### The content
+
+**Collection**:
+One of the eight named sets of content the page is built from: Templates, wall tiles,
+Testimonials, features, steps, Plans, stats, links. A Collection is content that repeats,
+is rendered as a list, or is served over the API. Prose appearing once in one layout is
+not a Collection; it is markup.
+_Avoid_: dataset, model, table, entity
+
+**Placement**:
+Where a piece of content appears on the page and in what order - the nine Testimonials of
+the social proof grid in grid order, the six over the Template Wall in sequence order, the
+sixteen wall tiles in Reference DOM order. Placement is content, and a Testimonial may hold
+more than one. How that Placement is then arranged on screen is layout, not Placement.
+_Avoid_: position, slot, ordering, arrangement
+
 ### The page
 
 **Section**:

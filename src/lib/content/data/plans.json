@@ -1,0 +1,66 @@
+[
+  {
+    "slug": "single-template",
+    "eyebrow": "One-time payemnt",
+    "name": "Single template",
+    "price": 12900,
+    "compareAt": null,
+    "currency": "USD",
+    "blurb": "Pick a template best suited for you, customize it, and launch.",
+    "options": [
+      { "label": "Framer template", "priceDelta": 0, "default": true },
+      { "label": "Add Figma designs", "priceDelta": 3900, "default": false },
+      { "label": "Add Done-for you", "priceDelta": 37000, "default": false }
+    ],
+    "included": [
+      "Instant access to chosen template",
+      "Lifetime template updates",
+      "3 months Framer Pro",
+      "Step-by-step video tutorials",
+      "Use on unlimited sites"
+    ],
+    "cta": { "label": "Browse templates", "href": "/templates" }
+  },
+  {
+    "slug": "bundle",
+    "eyebrow": "one-time payment",
+    "name": "Bundle",
+    "price": 39900,
+    "compareAt": 188100,
+    "currency": "USD",
+    "blurb": "Every template, unlimited sites. Build however you want.",
+    "options": [],
+    "included": [
+      "All current templates",
+      "Early access to all future templates",
+      "Lifetime template updates",
+      "Use on unlimited sites",
+      "3 months Framer Pro",
+      "Step-by-step video tutorials",
+      "Priority support"
+    ],
+    "cta": { "label": "Get the bundle", "href": "/bundle" }
+  },
+  {
+    "slug": "custom-project",
+    "eyebrow": "one-time payment",
+    "name": "Custom project",
+    "price": 249500,
+    "compareAt": null,
+    "currency": "USD",
+    "blurb": "Designed from scratch for your brand, built in Framer.",
+    "options": [
+      { "label": "Landing page", "priceDelta": 0, "default": true },
+      { "label": "Multi-page site", "priceDelta": 0, "default": false }
+    ],
+    "included": [
+      "Custom design, no template",
+      "CMS, SEO and launch included",
+      "Two revision rounds"
+    ],
+    "cta": {
+      "label": "Book a discovery call",
+      "href": "https://cal.com/ramish-design/landing-page"
+    }
+  }
+]

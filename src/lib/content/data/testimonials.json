@@ -1,0 +1,78 @@
+{
+  "people": {
+    "nic": {
+      "name": "Nic",
+      "quote": "This Framer template is excellent at elevating your online presence!",
+      "avatar": "avatar/nic",
+      "rating": 5
+    },
+    "renan": {
+      "name": "Renan",
+      "quote": "Very nice. Intuitive, easy going, good to navigate. Just Awesome!",
+      "avatar": "avatar/renan",
+      "rating": 5
+    },
+    "emon": {
+      "name": "Emon",
+      "quote": "The best part of the template is it's aesthetically pleasing and business focused.",
+      "avatar": "avatar/emon",
+      "rating": 5
+    },
+    "widya": {
+      "name": "Widya",
+      "quote": "Beautiful design and is easy to set up! The tutorial helped me a lot.",
+      "avatar": "avatar/widya",
+      "rating": 5
+    },
+    "david": {
+      "name": "Dávid",
+      "quote": "Super easy to use and customise and also beautifully designed.",
+      "avatar": "avatar/david",
+      "rating": 5
+    },
+    "mark": {
+      "name": "Mark",
+      "quote": "The design is clean, easy to custmize, professional, and versatile.",
+      "avatar": "avatar/mark",
+      "rating": 5
+    },
+    "samar": {
+      "name": "Samar",
+      "quote": "The templates is so well designed and has a unique look to them.",
+      "avatar": "avatar/samar",
+      "rating": 5
+    },
+    "aba": {
+      "name": "Aba",
+      "quote": "The template is excellent! It is super easy to use and very beautiful.",
+      "avatar": "avatar/aba",
+      "rating": 5
+    },
+    "nonso": {
+      "name": "Nonso",
+      "quote": "One of the best templates I've used. Very professional and easy to modify.",
+      "avatar": "avatar/nonso",
+      "rating": 5
+    },
+    "jacob": {
+      "name": "Jacob",
+      "quote": "Brilliant template. Super well designed and easy to customise!",
+      "avatar": "avatar/jacob",
+      "rating": 5
+    },
+    "roni": {
+      "name": "Roni",
+      "quote": "Very well-built and optimized template. Made with an excellent design eye.",
+      "avatar": "avatar/roni",
+      "rating": 5
+    },
+    "seyed": {
+      "name": "Seyed",
+      "quote": "An excellent template in terms of design & customizability.",
+      "avatar": "avatar/seyed",
+      "rating": 5
+    }
+  },
+  "grid": ["nic", "renan", "emon", "widya", "david", "mark", "samar", "aba", "nonso"],
+  "wall": ["jacob", "mark", "aba", "roni", "nic", "seyed"]
+}
