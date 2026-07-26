@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import { prefersReducedMotion, useOnScreen } from './use-on-screen.ts'
 
 /*
  * A decorative clip that plays only while it is on screen.
@@ -24,39 +25,29 @@ import { useEffect, useRef } from 'react'
 type LoopingVideoProps = {
   readonly src: string
   readonly className?: string
-  /** Play as soon as this much of the tile is within a screen of the viewport. */
-  readonly rootMargin?: string
 }
 
-export function LoopingVideo({
-  src,
-  className = '',
-  rootMargin = '200px',
-}: LoopingVideoProps) {
+/** Start a clip this far before it reaches the viewport, so it is already running. */
+const ROOT_MARGIN = '200px'
+
+export function LoopingVideo({ src, className = '' }: LoopingVideoProps) {
   const ref = useRef<HTMLVideoElement>(null)
+  const onScreen = useOnScreen(ref, ROOT_MARGIN)
 
   useEffect(() => {
     const video = ref.current
     if (!video) return
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+    if (prefersReducedMotion()) return
 
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry?.isIntersecting) {
-          /* Autoplay can still be refused - a browser setting, a battery saver.
-           * The poster stays underneath either way, so there is nothing to do
-           * about the rejection but not crash on it. */
-          void video.play().catch(() => {})
-        } else {
-          video.pause()
-        }
-      },
-      { rootMargin },
-    )
-
-    observer.observe(video)
-    return () => observer.disconnect()
-  }, [rootMargin])
+    if (onScreen) {
+      /* Autoplay can still be refused - a browser setting, a battery saver. The
+       * poster stays underneath either way, so there is nothing to do about the
+       * rejection but not crash on it. */
+      void video.play().catch(() => {})
+    } else {
+      video.pause()
+    }
+  }, [onScreen])
 
   return (
     <video

@@ -57,7 +57,7 @@ export function NavBar({ links, social, logo }: NavBarProps) {
          * at x=120. Nesting these the other way round costs 40px a side. */}
         <div className="px-3 py-5 tablet:px-5 desktop:px-10">
           <div className="mx-auto flex w-full max-w-rail flex-col gap-9">
-            <div className="relative flex h-9 items-center justify-between tablet:h-[var(--button-height)]">
+            <div className="relative flex h-9 items-center justify-between tablet:h-[var(--nav-row-height)]">
               <BrandLink logo={logo} onClick={close} />
 
               {/* Absolutely centred on the row, not spaced between the brand and

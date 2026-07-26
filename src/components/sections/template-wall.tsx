@@ -42,7 +42,7 @@ export async function TemplateWall() {
        * design (PRD 6.14), so the whole wall is one thing to skip. */}
       <div
         aria-hidden="true"
-        className="mx-auto h-[var(--wall-height-phone)] max-w-100 columns-3 gap-2 [column-fill:auto] [-webkit-mask-image:var(--wall-fade)] [mask-image:var(--wall-fade)] tablet:h-auto tablet:max-w-200 tablet:columns-4 tablet:gap-3 tablet:[column-fill:balance] desktop:max-w-none desktop:gap-4"
+        className="mx-auto h-[var(--wall-height-phone)] max-w-[var(--wall-width-phone)] columns-3 gap-2 [column-fill:auto] [-webkit-mask-image:var(--wall-fade)] [mask-image:var(--wall-fade)] tablet:h-auto tablet:max-w-200 tablet:columns-4 tablet:gap-3 tablet:[column-fill:balance] desktop:max-w-none desktop:gap-4"
       >
         {tiles.map((tile) => (
           <WallTile key={tile.slug} tile={tile} />
@@ -50,15 +50,7 @@ export async function TemplateWall() {
       </div>
 
       <ProgressiveBlur />
-      <WallTestimonials
-        items={testimonials.wall.map((person) => ({
-          slug: person.slug,
-          name: person.name,
-          quote: person.quote,
-          rating: person.rating,
-          avatar: person.avatar,
-        }))}
-      />
+      <WallTestimonials items={testimonials.wall} />
     </section>
   )
 }

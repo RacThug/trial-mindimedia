@@ -201,7 +201,7 @@ describe('shape (PRD section 4)', () => {
     ['--radius-tile', '4px'],
     ['--radius-eyebrow', '8px'],
     ['--radius-badge', '4px'],
-    ['--button-height', '46px'],
+    ['--nav-row-height', '46px'],
     ['--button-padding-x', '20px'],
     ['--button-padding-y', '10px'],
     ['--nav-height', '86px'],

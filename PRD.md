@@ -321,10 +321,16 @@ Nor its clips: the Reference autoplays all six at `preload="auto"`, which is mos
 2.43 MB in section 8. The Clone paints the poster through `next/image` and starts the clip
 from an IntersectionObserver, so nothing above the fold costs a video byte.
 
-**Three Deviations on the motion**, none of which the Reference honours: the rotation stops
-under `prefers-reduced-motion`, pauses on hover and on focus, and only runs on screen. The
-first is WCAG 2.2.2 - moving content a visitor cannot stop - and the second keeps a quote
-from sliding out from under someone reading it.
+**Four Deviations on the motion**, none of which the Reference honours: the rotation stops
+under `prefers-reduced-motion`, can be stopped by a control, pauses on hover and on focus,
+and only runs on screen.
+
+The control is what WCAG 2.2.2 actually asks for - a mechanism to stop moving content -
+and hover and focus alone do not provide one, since a keyboard visitor cannot hover and
+nothing inside the block is otherwise focusable. It is `sr-only` until focused and then
+appears below the quote, so an at-rest capture is byte-identical and a keyboard visitor
+still finds it: the bargain a skip link makes. The Reference offers nothing here at all -
+its own prev/next chevrons are in the markup but `display: none` at every Breakpoint.
 
 The same 10 images, without the videos, form the Quiz CTA backdrop (6.10).
 

@@ -14,14 +14,24 @@ const DESKTOP = { width: 1440, height: 900 }
 const TABLET = { width: 810, height: 900 }
 const PHONE = { width: 390, height: 844 }
 
-/** Every wall tile's position, as the wall renders it right now. */
+/**
+ * Every wall tile's position, as the wall renders it right now.
+ *
+ * Scoped to the wall itself rather than to every `alt=""` image on the page:
+ * the featured cards carry a decorative second screenshot each, and a static-
+ * grid assertion that counts those is not asserting what it says it is.
+ */
 const tilePositions = (page: Page) =>
-  page.evaluate(() =>
-    [...document.querySelectorAll('img[alt=""], video')]
-      .map((element) => element.getBoundingClientRect())
-      .filter((box) => box.width > 60)
-      .map((box) => `${Math.round(box.x)},${Math.round(box.y)}`),
-  )
+  page.evaluate(() => {
+    const wall = [...document.querySelectorAll('div[aria-hidden="true"]')].find(
+      (element) => element.querySelectorAll('img, video').length > 8,
+    )
+    if (!wall) throw new Error('no Template Wall')
+
+    return [...wall.children]
+      .map((tile) => tile.getBoundingClientRect())
+      .map((box) => `${Math.round(box.x)},${Math.round(box.y)}`)
+  })
 
 /** The quote on screen inside the Wall's Testimonial block. */
 const visibleQuote = (page: Page) =>
@@ -120,6 +130,35 @@ test.describe("the Wall's Testimonials (PRD 6.3)", () => {
     await page.goto('/')
     await page.evaluate(() => window.scrollTo(0, 0))
     await page.waitForTimeout(300)
+
+    const before = await visibleQuote(page)
+    await page.waitForTimeout(5000)
+
+    expect(await visibleQuote(page)).toBe(before)
+  })
+
+  /*
+   * WCAG 2.2.2 wants a mechanism to stop moving content, and the Reference has
+   * none: its own prev/next chevrons are `display: none` at every Breakpoint.
+   * The control is invisible until focused, so it costs nothing in an at-rest
+   * capture and a keyboard visitor can still reach it (PRD 6.3).
+   */
+  test('can be stopped from the keyboard, by a control that is out of the way', async ({
+    page,
+  }) => {
+    await page.goto('/')
+    await showTestimonials(page)
+
+    const pause = page.getByRole('button', { name: 'Pause the quotes' })
+    await expect(pause).toBeAttached()
+    /* Reachable, and invisible until it is. */
+    expect((await pause.boundingBox())?.width ?? 0).toBeLessThan(2)
+
+    await pause.focus()
+    expect((await pause.boundingBox())!.width).toBeGreaterThan(100)
+
+    await page.keyboard.press('Enter')
+    await expect(page.getByRole('button', { name: 'Resume the quotes' })).toBeFocused()
 
     const before = await visibleQuote(page)
     await page.waitForTimeout(5000)
@@ -257,6 +296,29 @@ test.describe('the featured Templates (PRD 6.4)', () => {
       '/templates',
     )
   })
+
+  /*
+   * The H2's measure, which decides where its two lines break. At tablet the
+   * Reference draws it 674 wide inside a 632 column - wider than what holds it -
+   * so a `max-width` would silently resolve to 632 and balance against a
+   * different measure. Nothing else would report that.
+   */
+  for (const [name, viewport, width] of [
+    ['desktop', DESKTOP, 616],
+    ['tablet', TABLET, 674],
+    ['phone', PHONE, 350],
+  ] as const) {
+    test(`sets the H2 measure to ${width}px on ${name}`, async ({ page }) => {
+      await page.setViewportSize(viewport)
+      await page.goto('/')
+
+      const box = await page
+        .getByRole('heading', { name: 'Premium templates built to drive results.' })
+        .boundingBox()
+
+      expect(Math.round(box!.width)).toBe(width)
+    })
+  }
 
   test('uppercase the badge and categories in CSS, not in the content', async ({
     page,

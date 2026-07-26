@@ -106,12 +106,9 @@ function Rating() {
 
       <p className="flex items-center gap-3 text-text-warm">
         <StarIcon />
-        {/* 12px/18px at weight 700 with 0.07em of tracking, uppercased by CSS
-         * from sentence case - measured in #10, and the one place on the page
-         * that goes heavier than the Eyebrow's 600. */}
-        <span className="text-[12px] leading-[18px] font-bold tracking-[0.84px] uppercase">
-          Rated 4.92/5
-        </span>
+        {/* Sentence case in the markup, uppercased by CSS, so a screen reader
+         * reads a phrase rather than spelling it out (PRD 6.2). */}
+        <span className="text-rating uppercase">Rated 4.92/5</span>
       </p>
     </div>
   )

@@ -30,9 +30,10 @@
    *
    * Mobile-first, so phone (<= 809px) is the unprefixed base.
    *
-   * The tablet H1 step (60px, PRD section 5) is NOT a token: its line height
-   * was never measured, and inventing one is exactly what section 1 forbids.
-   * Measure it when the hero lands in issue #10.
+   * Both boundaries were re-checked in #10 by rendering at 809, 810, 1199 and
+   * 1200 and reading the H1 back. They land exactly here, and tablet is a
+   * layout of its own rather than a stretched phone: it is the only Breakpoint
+   * that shortens the hero's secondary CTA (PRD 6.2).
    */
   --breakpoint-*: initial;
   --breakpoint-tablet: 810px;
@@ -125,6 +126,17 @@
   --text-eyebrow--letter-spacing: normal;
   --text-eyebrow--font-weight: 600;
 
+  /* The hero's `RATED 4.92/5`, and the one step that is not Geist on the
+   * Reference: it is Inter Display, 12px/18px at weight 700 with 0.07em of
+   * tracking, in `--color-text-warm`, uppercased by CSS. We render it in Geist
+   * at the same metrics rather than load a second family for twelve characters,
+   * which costs about 5px of width on one label (PRD section 4). Also uppercase,
+   * which for the reason above rides along at the call site. */
+  --text-rating: 12px;
+  --text-rating--line-height: 18px;
+  --text-rating--letter-spacing: 0.84px;
+  --text-rating--font-weight: 700;
+
   /* There is no button-label step. Re-measured in #9 on the nav's Bundle pill
    * and both hero buttons: every label is `text-body` at `font-medium`, not the
    * 12px PRD section 4 first recorded. `--text-button` is gone rather than
@@ -171,12 +183,12 @@
    * `font-medium` - see the note where `--text-button` used to be.
    * White on black is primary, `--color-surface-2` on white is secondary.
    *
-   * `--button-height` is the height of the row a button sits in, measured on
+   * `--nav-row-height` is the height of the row a button sits in, measured on
    * the nav in #9, and not the button's own: #10 re-measured that unrounded at
    * 45.59, which is exactly the padding plus the line height, so the button
    * sets no height at all. See `ui/button.tsx`. */
   --radius-button: 48px;
-  --button-height: 46px;
+  --nav-row-height: 46px;
   --button-padding-x: 20px;
   --button-padding-y: 10px;
 
@@ -251,14 +263,23 @@
   --wall-blur-height: 346px;
   --wall-blur-offset: 85px;
 
-  /* Phone only. The wall's height is its tallest column everywhere, and at the
-   * two wider Breakpoints that falls out of the content. On phone the Reference
-   * runs a taller column than a balanced fill produces, so the height is set and
-   * the columns fill into it. 4.91 is the sum of six tile aspect ratios and 40px
-   * is the five 8px gaps between them: at the measured 390 viewport this is the
+  /* Phone only, and the one Breakpoint where the wall is capped rather than
+   * filling its rail: 400px, measured off Framer's own `sizes` arithmetic and
+   * confirmed on the render.
+   *
+   * The wall's height is its tallest column everywhere, and at the two wider
+   * Breakpoints that falls out of the content. On phone the Reference runs a
+   * taller column than a balanced fill produces, so the height is set and the
+   * columns fill into it. 4.91 is the sum of six tile aspect ratios and 40px is
+   * the five 8px gaps between them: at the measured 390 viewport this is the
    * Reference's own 652px, and it stays proportional at any other phone width
-   * rather than freezing one viewport's number. */
-  --wall-height-phone: calc(4.91 * (min(100vw, 400px) - 16px) / 3 + 40px);
+   * rather than freezing one viewport's number.
+   *
+   * `wall-tile.tsx` spells the same column arithmetic out again in its `sizes`,
+   * because a `sizes` attribute is read before any stylesheet and cannot ask a
+   * custom property what it holds. Those two have to move together. */
+  --wall-width-phone: min(100vw, 400px);
+  --wall-height-phone: calc(4.91 * (var(--wall-width-phone) - 16px) / 3 + 40px);
 }
 
 @layer base {
