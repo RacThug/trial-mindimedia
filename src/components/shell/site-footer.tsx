@@ -32,6 +32,22 @@ import { TextLink } from './text-link.tsx'
  */
 const INLINE_LINK = 'text-text underline underline-offset-2'
 
+/*
+ * `text-wrap: balance`, measured on the Reference and easy to miss because it
+ * only shows in where a line breaks.
+ *
+ * A census of its 204 headings and paragraphs found 140 balanced, 60 nowrap and
+ * 4 plain - the balanced ones being every prose block including the H1, and the
+ * nowrap ones every link and short label. Greedy wrapping put "premium" on the
+ * first line of the phone tagline where the Reference reads
+ * "Launch your online business with a / premium Framer website template.", with
+ * its two lines 225px and 224px wide.
+ *
+ * It applies to every Section, not just here: a balanced H2 breaks nothing like
+ * a greedy one, so #10 to #12 inherit this.
+ */
+const PROSE = 'text-balance'
+
 export async function SiteFooter() {
   const links = await getLinks()
   const [firstColumn, secondColumn] = footerColumns(links.footer)
@@ -49,8 +65,10 @@ export async function SiteFooter() {
              * wordmark introduces no section - a heading element here would put
              * a contentless entry in the outline of every page on the site, and
              * the h5 in the token is a size. */}
-            <p className="text-h5 text-text">Browser.supply</p>
-            <p className="w-[292px] text-center text-body-sm text-text-muted tablet:text-left tablet:text-body">
+            <p className={`text-h5 text-text ${PROSE}`}>Browser.supply</p>
+            <p
+              className={`w-[292px] text-center text-body-sm text-text-muted tablet:text-left tablet:text-body ${PROSE}`}
+            >
               Launch your online business with a premium Framer website template.
             </p>
             <SocialLinks links={links.social} />
@@ -65,8 +83,11 @@ export async function SiteFooter() {
           </nav>
         </div>
 
-        <div className="flex flex-col items-center gap-7 p-5 text-body-sm text-text-muted tablet:flex-row tablet:justify-between tablet:px-0 tablet:py-5 tablet:text-body">
-          <p className="text-center tablet:text-left">
+        {/* A 1px rule in `--color-surface-3` divides the two rows. `-mt-px`
+         * because the Reference's own two blocks measure 254 and 72 against a
+         * 326px footer - the line overlaps rather than adding to them. */}
+        <div className="-mt-px flex flex-col items-center gap-7 border-t border-surface-3 p-5 text-body-sm text-text-muted tablet:flex-row tablet:justify-between tablet:px-0 tablet:py-5 tablet:text-body">
+          <p className={`text-center tablet:text-left ${PROSE}`}>
             © 2026 browser.supply.{' '}
             <SiteLink href="https://framer.link/ramishdesign" className={INLINE_LINK}>
               Framer

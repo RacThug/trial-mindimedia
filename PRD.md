@@ -85,6 +85,21 @@ two are the whole of the rest of the scale.
 `body-sm` is the phone step of body copy, measured in #9 on the footer (6.12). Only the
 footer is measured so far - a Section wanting it elsewhere should measure its own case.
 
+**`text-wrap: balance` is a site-wide setting**, found by pixel-diffing the shell in #9 and
+easy to miss because it changes nothing but where a line breaks. A census of the Reference's
+204 headings and paragraphs:
+
+| `text-wrap` | Count | What it is |
+| --- | --- | --- |
+| `balance` | 140 | every prose block, **including the H1** |
+| `nowrap` | 60 | every link and short label |
+| `wrap` | 4 | stat labels |
+
+Greedy wrapping is visibly wrong: the phone tagline read `...with a premium / Framer website
+template.` against the Reference's balanced `...with a / premium Framer website template.`,
+two lines of 225px and 224px. **Every Section in #10 to #12 inherits this** - a balanced H2
+breaks nothing like a greedy one.
+
 ### Colour
 
 | Token | Value | Use |
@@ -355,8 +370,9 @@ premium Framer website template.`, X and YouTube icons, two link columns
 
 Measured in #9: 40px gutters at every width over the same 1200px rail as the nav - plus a
 further 20px inside each row on phone, so phone copy starts at x=60 - then two
-rows - a 254px block (`40px 0` padding) above a 72px by-line bar (`20px 0`), no divider
-rule. Left column 16px gaps, tagline fixed at 292px; link columns 56px apart with 24px
+rows - a 254px block (`40px 0` padding) above a 72px by-line bar (`20px 0`), divided by a
+1px `--color-surface-3` rule that overlaps rather than adding to either. Left column 16px
+gaps, tagline fixed at 292px; link columns 56px apart with 24px
 between links. Wordmark is `h5`; tagline, copyright and by-line are `text-muted`, dropping
 to **14px/22.4px on phone**, where everything centres and the two columns become one.
 The 38px portrait overflows its 32px row rather than growing it.
@@ -509,6 +525,23 @@ write each component's `sizes` against them.
 
 A local Playwright harness captures Clone and Reference at 1440/810/390, pixel-diffs per
 Section, and emits a percentage table for the README.
+
+#9 ran that comparison by hand over the two Sections that exist so far, and it earned its
+keep: it is what found the footer's divider rule and `text-wrap: balance`, neither of which
+a computed-style probe had reported. Measured after both fixes, pixels within a delta of 2,
+with the Reference's quiz modal held out of the DOM:
+
+| | nav | footer |
+| --- | --- | --- |
+| 1440 | 97.9% | 96.4% |
+| 810 | 96.2% | 95.5% |
+| 390 | 99.3% | 96.5% |
+
+Every region's height matches the Reference to the pixel, and the wordmark and the Bundle
+pill are byte-identical. The residual is a **1px rasterization offset** on the centred nav
+links and the social icons: realigned by one pixel they match at 97.3%, so it is subpixel
+positioning rather than layout. Worth knowing before #14 sets a threshold - a per-Section
+gate gets no higher than about 97% on text-heavy bands without allowing a 1px tolerance.
 
 It must, on **both** sides: freeze all video to poster frames, dismiss the quiz modal, and
 let Scroll-Appear settle. Otherwise it measures video frames and animation timing rather than

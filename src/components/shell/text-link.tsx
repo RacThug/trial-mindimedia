@@ -8,8 +8,12 @@ import { SiteLink, type SiteLinkProps } from '../ui/site-link.tsx'
  * only the styling.
  */
 
+/* `text-nowrap` is measured, not defensive: every link and short label in the
+ * Reference's nav and footer computes `text-wrap: nowrap`, so `Live examples`
+ * never becomes two lines however narrow the column gets. See the note on
+ * `text-wrap` in `site-footer.tsx`. */
 const CLASSES =
-  'text-body font-medium text-text ' +
+  'text-body font-medium text-nowrap text-text ' +
   'focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-text'
 
 export function TextLink({ children, ...rest }: Omit<SiteLinkProps, 'className'>) {
