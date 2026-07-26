@@ -151,7 +151,23 @@ Testimonial cards floating over it.
 **Verified static.** All 50 tiles tracked for 3 seconds at a fixed scroll position: **0
 moved**. This is not a marquee and must not be built as one. The perceived motion is the
 looping videos inside the tiles. Testimonials likewise do not auto-advance: identical quotes
-after 5 seconds.
+after 5 seconds. They do carry **prev/next chevron controls**, so the block is a manual
+carousel, not a static row (measured in #7: two 40x40 SVG arrows in the markup).
+
+Grid, measured from the Reference's own layout arithmetic in #7:
+
+| | Columns | Tile width |
+| --- | --- | --- |
+| desktop 1440 | 4 | `(100vw - 48px) / 4` = 348px |
+| tablet 810 | 4 | `(800px - 36px) / 4` = 191px |
+| phone 390 | 3 | `(400px - 16px) / 3` = 128px |
+
+**16 unique tiles**, 10 images and 6 videos, each placed three times: 48 of the 50 tracked
+tiles above carry media, so two of them do not. Framer's
+own `sizes` attribute collapses to `100vw` below 1200px, so the Reference ships tablet and
+phone visitors an image roughly four times wider than it draws. Do not copy that.
+
+The same 10 images, without the videos, form the Quiz CTA backdrop (6.10).
 
 ### 6.4 Featured templates
 
@@ -163,6 +179,9 @@ Eyebrow `WHICH TEMPLATE IS FOR ME?`, H2 `Premium templates built to drive result
 | Selene | AI SAAS | $129 USD | NEW |
 | Zenna | YOGA STUDIO | $129 USD | |
 | Traction | SMMA | $129 USD | |
+
+Each card carries **two** screenshots, not one: `template/{selene,zenna,traction}-{a,b}` in
+the asset index.
 
 ### 6.5 Feature bento
 
@@ -186,6 +205,10 @@ Three step cards with orange `STEP 1/2/3` badges:
 2. `Make it yours.` / `Change text, customize colors, and swap images with ease.`
 3. `Go live instantly.` / `Launch your site in seconds with just one click, all in one platform.`
 
+Step 1's visual is a grid of **eight** Template thumbnails at a flat 275px, one of which is
+the Traction card's own screenshot reused. Steps 2 and 3 are videos of the Framer editor and
+its publish button.
+
 ### 6.7 Social proof grid
 
 Eyebrow `HAS ANYONE ELSE TRIED IT?`, H2 `Trusted by 2k+ customers around the globe.`,
@@ -196,11 +219,15 @@ stars, quote, avatar, name. Note `Dávid` carries an acute accent, and the Refer
 two genuine typos in quotes (`custmize`, and `The templates is so well designed`). **Reproduce
 them verbatim.** They are content, not defects.
 
+The Template Wall (6.3) carries **six more** Testimonials: Jacob, Roni and Seyed, plus Mark,
+Aba and Nic reused from this grid. **Twelve** unique people appear on the page, not nine
+(measured in #7; slugs are `avatar/<first-name>`).
+
 ### 6.8 Case study
 
-H3 `Matt launched his new site in less than 1 hour.` Image left, copy right, four paragraphs,
-one with a left border rule. CTAs `View template Matt used` (primary) and
-`View other customers' sites` (secondary).
+H3 `Matt launched his new site in less than 1 hour.` **Video** left (not a still - measured in
+#7, `story/case-study`), copy right, four paragraphs, one with a left border rule. CTAs
+`View template Matt used` (primary) and `View other customers' sites` (secondary).
 
 ### 6.9 Pricing
 
@@ -261,8 +288,8 @@ Components import that module directly. Route Handlers at `/api/*` wrap the same
 | Collection | Count | Fields |
 | --- | --- | --- |
 | templates | 3 featured | name, category, price, currency, badge, thumbnail, href |
-| wallTiles | ~40 | src, kind (image/video), aspect |
-| testimonials | 9 | quote, name, avatar, rating |
+| wallTiles | 16 unique, 48 placed | slug, kind (image/video), aspect |
+| testimonials | 12 (9 grid, 6 wall, 3 shared) | quote, name, avatar, rating |
 | features | 5 | title, media, span |
 | steps | 3 | number, title, body, media |
 | plans | 3 | eyebrow, name, price, compareAt, blurb, options[], included[], cta |
@@ -298,6 +325,35 @@ Levers, in order of payoff:
 3. **AVIF/WebP** via `next/image` with correct `sizes`.
 4. **`next/font`** self-hosting Geist.
 5. **Explicit aspect ratios on every wall tile**, or the grid will wreck CLS.
+
+### Assets
+
+Built by `npm run assets` from `scripts/assets/manifest.ts`, committed under `public/media`,
+reached through `src/lib/media`. Measured in #7:
+
+| | Framer originals | Committed |
+| --- | --- | --- |
+| Video, 13 clips | 49.50 MB | 3.42 MB |
+| Stills, 47 files | 12.70 MB | 1.28 MB, plus 13 generated poster frames |
+| **Total** | **62.20 MB over 60 files** | **4.70 MB over 73 files**, 92.4% saved |
+
+Every entry carries width and height, so nothing renders without an aspect ratio (lever 5).
+`next/image` re-encodes the stills again per request: `wall/tile-02` is 43 kB committed and
+**18 kB** of AVIF at its 696px DPR-2 render width, 4.6 kB at phone width.
+
+Four Deviations, all in the encode:
+
+- Video is capped at its rendered size rather than served at source resolution. The founder
+  clip is 4K on the Reference for a half-column player.
+- Three 60fps clips are re-encoded at 30. All are decorative loops.
+- `feature/hosting` is HEVC with an AAC track on the Reference, which several browsers
+  cannot decode at all. It becomes H.264, muted, like the other twelve.
+- `feature/hosting`'s poster is not its first frame, which is black - it fades up. See
+  `scripts/assets/build.ts`.
+
+Image fidelity is gated by `npm run assets:verify`: luma SSIM against the Framer original,
+budget >= 0.98, worst graded asset 0.9840. Two dark, film-grained screenshots sit on a
+recorded lower floor with the reasoning in `scripts/assets/verify.ts`.
 
 ### Fidelity
 
