@@ -74,7 +74,11 @@ two are the whole of the rest of the scale.
 | Token | Size | Line height | Tracking | Weight |
 | --- | --- | --- | --- | --- |
 | `display` (H1) | 68px | 81.6px | -1.36px | 400 |
+| `display-tablet` | 60px | 72px | -1.2px | 400 |
+| `display-phone` | 44px | 52.8px | -0.88px | 400 |
 | `h2` | 56px | 67.2px | -1.12px | 400 |
+| `h2-tablet` | 48px | 57.6px | -0.96px | 400 |
+| `h2-phone` | 36px | 43.2px | -0.72px | 400 |
 | `h3` | 44px | 57.2px | -0.88px | 400 |
 | `h4` (stat) | 32px | 41.6px | -0.64px | 400 |
 | `h5` (card title) | 24px | 33.6px | -0.48px | 400 |
@@ -84,6 +88,17 @@ two are the whole of the rest of the scale.
 
 `body-sm` is the phone step of body copy, measured in #9 on the footer (6.12). Only the
 footer is measured so far - a Section wanting it elsewhere should measure its own case.
+
+**Both display steps were measured in #10**, at 810 and 390 on the hero's H1 and the
+featured Templates' H2. Section 5 had the tablet H1's size with no line height and called
+inventing one forbidden; it is 72px. Every step keeps the 1.2 line height and the -0.02em
+tracking, so only the size moves.
+
+One step sits outside the scale: the hero's `RATED 4.92/5` label is **12px/18px at weight
+700 with 0.07em of tracking**, in `#fffbf7` rather than white, and in **Inter Display**
+rather than Geist. It is the only Inter Display on the page. We render it in Geist at the
+same metrics - a Deviation worth about 5px of width on one label, against a second font
+family for twelve characters.
 
 **`text-wrap: balance` is a site-wide setting**, found by pixel-diffing the shell in #9 and
 easy to miss because it changes nothing but where a line breaks. A census of the Reference's
@@ -113,14 +128,25 @@ breaks nothing like a greedy one.
 | `accent-blue` | `#8ea9fa` | section eyebrows |
 | `accent-orange` | `#ff8800` | FOUNDER badge, add-on prices, step badges |
 | `accent-green` | `#33d478` | NEW badge |
+| `text-warm` | `#fffbf7` | stars and the hero's rating label (#10) |
+
+Both tinted pills are **radial gradients, not flat fills** (#10). The Eyebrow is
+`radial-gradient(86% 150% at 47% 50%, rgba(102,140,255,0) 0%, rgba(102,140,255,0.5) 100%)`
+- note the wash is `#668cff` while the text on it is `#8ea9fa` - and the NEW badge is
+`radial-gradient(50% 50%, rgba(51,212,120,0) 0%, rgba(51,212,120,0.2) 100%)`.
 
 ### Shape
 
-- Container: **1360px** max width, centred. The shell runs on a narrower rail:
-  nav and footer content measure **1200px** at 1440 (#9). The hero's own content starts at
-  the same x=120, so the 1360 figure needs re-measuring when the Sections land in #10.
-- Button: height **46px**, radius **48px**, padding `10px 20px`, label `body` at
-  **weight 500**
+- Container: **one rail of 1200px**, centred, at every Breakpoint that has one. Measured in
+  #10 on the hero and the featured Templates at 1440: both are 1200, the same rail the nav
+  and footer run on, so the 1360 figure is gone rather than corrected. Gutters are 40px at
+  desktop and tablet and 20px on phone.
+- Button: radius **48px**, padding `10px 20px`, label `body` at **weight 500**, and **no
+  set height**. #9 read the height as 46px; #10 re-measured it unrounded at **45.59px**,
+  which is exactly `10 + 25.6 + 10`. The 46 is the height of the nav's row, not the
+  button's own, and forcing it pushed the phone layout 0.82px down the page.
+- Radii, all measured in #10: Template card screenshot **12px**, Template Wall tile
+  **4px**, Eyebrow pill **8px**, NEW badge **4px**.
   - primary: white background, black text
   - secondary: `#1c1c1c` background, white text
 - Nav: `position: fixed`, top 0, height **86px** (**76px** on phone), `z-index: 8`.
@@ -148,14 +174,19 @@ re-reading the element the styles are actually on:
 Measured, and they are Framer's defaults. **Tailwind's stock breakpoints are wrong for this
 job and must be overridden**, or layout will diverge at exactly the widths a reviewer tests.
 
-| Name | Range | H1 size |
-| --- | --- | --- |
-| desktop | >= 1200px | 68px |
-| tablet | 810px - 1199px | 60px |
-| phone | <= 809px | 44px |
+| Name | Range | H1 | H2 |
+| --- | --- | --- | --- |
+| desktop | >= 1200px | 68/81.6 | 56/67.2 |
+| tablet | 810px - 1199px | 60/72 | 48/57.6 |
+| phone | <= 809px | 44/52.8 | 36/43.2 |
 
 Nav collapses to a hamburger at the tablet-to-phone boundary: 6 visible links become 1
 control.
+
+Both boundaries were re-checked in #10 by rendering at 809, 810, 1199 and 1200 and reading
+the H1 back: the steps land exactly on 810 and 1200, and **tablet is a layout of its own
+rather than a stretched phone** - it is the only Breakpoint that shortens the hero's
+secondary CTA (6.2).
 
 ---
 
@@ -198,12 +229,33 @@ trap, and its open menu lets the page behind it scroll. We deviate on all four (
 - CTAs: `Pick your template` (primary), `Or get matched with the perfect one` (secondary)
 - Avatar stack + star + `RATED 4.92/5`
 
-Phone: rating block moves **above** the buttons, buttons stack full width.
+Phone: rating block moves **above** the buttons, buttons stack full width. It is one row
+that reverses, not two blocks: DOM order stays buttons-then-rating at every width.
 
-**The secondary CTA has a second copy variant** (measured in #8 from the served markup):
-phone renders `Or get matched with one`, desktop and tablet render
+**The secondary CTA has a second copy variant, and it belongs to tablet.** #8 read the
+served markup and recorded phone as the short one; #10 measured the render at 390, 500,
+700, 809, 810, 900, 1100, 1199, 1200 and 1440, and it is **810-1199 alone** that renders
+`Or get matched with one`. Phone and desktop both render
 `Or get matched with the perfect one`. Both link to the Typeform quiz. It is shorter copy,
-not truncation, so it cannot be reproduced with CSS.
+not truncation, so it cannot be reproduced with CSS - the Clone ships both nodes and hides
+one, which is why an assertion on it has to read the accessible name rather than the text.
+
+Measured in #10, all three Breakpoints:
+
+| | desktop (>= 1200) | tablet (810-1199) | phone (<= 809) |
+| --- | --- | --- | --- |
+| Section padding | `160 40 60` | `160 40 60` | `120 20 40` |
+| Section height | 533 | 514 | 606 |
+| Eyebrow to body | 44 | 44 | 44 |
+| H1 width | 1120 | 674 | full |
+| H1 to CTA row | 32 | 32 | 40 |
+| CTA row | row, spread | row, spread | column-reverse, 28 apart |
+| Buttons | row, 12 apart | row, 12 apart | stacked, 16 apart, full width |
+
+The Eyebrow pill is 28px tall, `4px 12px` of padding, an 8px gap, and carries Framer's own
+logo at 20px in `#8ea9fa` - drawn from an inline data URI rather than the icon sprite, so
+it never went through the asset pipeline. The rating block is 229x40: three 40px avatars at
+a 24px step with the first on top, then 20px, then a 21px star 12px from its label.
 
 **Casing throughout this Section is CSS, not content.** The markup ships
 `Framer templates` and `Rated 4.92/5` in sentence case and uppercases them with
@@ -217,22 +269,62 @@ Testimonial cards floating over it.
 
 **Verified static.** All 50 tiles tracked for 3 seconds at a fixed scroll position: **0
 moved**. This is not a marquee and must not be built as one. The perceived motion is the
-looping videos inside the tiles. Testimonials likewise do not auto-advance: identical quotes
-after 5 seconds. They are **manually advanced** rather than fixed: the block carries
-prev/next chevron controls (measured in #7, two 40x40 SVG arrows in the markup).
+looping videos inside the tiles.
 
-Grid, measured from the Reference's own layout arithmetic in #7:
+**The Testimonials over it do auto-advance, and this document said they did not.** Measured
+in #10 with the block in view at 1440: Jacob, Mark, Aba, Roni, Nic, Seyed, Jacob, one every
+**3.2s**, over a ~1.4s ease that carries most of its distance in the first third. The
+earlier "identical quotes after 5 seconds" is reproducible and is not a bad reading - it is
+what the Reference does with the block **off screen**, because it pauses when it is not
+being looked at, and the Wall is below the fold at scrollY 0. Sample it in view or not at
+all. The prev/next chevron controls #7 found in the markup are real but `display: none` at
+every Breakpoint, so nothing advances it by hand either.
 
-| | Columns | Tile width |
-| --- | --- | --- |
-| desktop 1440 | 4 | `(100vw - 48px) / 4` = 348px |
-| tablet 810 | 4 | `(800px - 36px) / 4` = 191px |
-| phone 390 | 3 | `(400px - 16px) / 3` = 128px |
+Grid, measured in #7 from the Reference's own layout arithmetic and again in #10 from the
+render:
 
-**16 unique tiles**, 10 images and 6 videos, each placed three times: 48 of the 50 tracked
-tiles above carry media, so two of them do not. Framer's
-own `sizes` attribute collapses to `100vw` below 1200px, so the Reference ships tablet and
-phone visitors an image roughly four times wider than it draws. Do not copy that.
+| | Columns | Tile width | Column gap |
+| --- | --- | --- | --- |
+| desktop 1440 | 4 | `(100vw - 48px) / 4` = 348px | 16px |
+| tablet 810 | 4 | `(min(100vw, 800px) - 36px) / 4` = 191px | 12px |
+| phone 390 | 3 | `(min(100vw, 400px) - 16px) / 3` = 125px | 8px |
+
+The wall is **full width at desktop, 800px centred at tablet, and capped at 400px on
+phone**, and its height is its tallest column: 1144, 637 and 652. Tiles carry a 4px radius
+and `object-fit: cover`.
+
+**16 unique tiles**, 10 images and 6 videos. The Reference ships its column split three
+times over, once per Breakpoint - which is where the "48 placed" count comes from, since
+only 16 are ever visible - and its desktop and tablet splits are exactly what a balanced
+column fill produces: tiles 1-4, 5-8, 9-12, 13-16. So #10 builds one flat list under CSS
+`columns` and lets the browser split it, which matches at both those widths and is the only
+shape that can serve three Breakpoints without shipping the media three times. Phone is a
+Deviation: the Reference hand-arranges its three columns round-robin into a taller wall than
+a balanced fill gives, so the Clone sets the height and fills into it. Which tile lands in
+which column differs there, under a fade that hides the difference.
+
+Three treatments make it read as a backdrop rather than a gallery, all measured in #10:
+
+- The grid is masked by `linear-gradient(#000 51%, transparent 102%)`, so the tiles fade out
+  over the bottom half and a short column's ragged edge never shows.
+- The Testimonial block is 298px tall, centred on the wall's **bottom edge**, and masked
+  transparent-black-black-transparent at 0/25/75/100%.
+- A **progressive blur** sits over the bottom: eight layers of `backdrop-filter`, each
+  double the last from 0.40625px to 52px, each masked to its own eighth of a 346px band
+  that ends 85px below the wall. The Reference writes those masks `to top` and then flips
+  the whole stack with `matrix(-1, 0, 0, -1, 0, 0)`; read without the rotation they put the
+  heavy blur at the top of the band, which is a hard seam and visibly wrong.
+
+Framer's own `sizes` attribute collapses to `100vw` below 1200px, so the Reference ships
+tablet and phone visitors an image roughly four times wider than it draws. Do not copy that.
+Nor its clips: the Reference autoplays all six at `preload="auto"`, which is most of the
+2.43 MB in section 8. The Clone paints the poster through `next/image` and starts the clip
+from an IntersectionObserver, so nothing above the fold costs a video byte.
+
+**Three Deviations on the motion**, none of which the Reference honours: the rotation stops
+under `prefers-reduced-motion`, pauses on hover and on focus, and only runs on screen. The
+first is WCAG 2.2.2 - moving content a visitor cannot stop - and the second keeps a quote
+from sliding out from under someone reading it.
 
 The same 10 images, without the videos, form the Quiz CTA backdrop (6.10).
 
@@ -248,7 +340,25 @@ Eyebrow `WHICH TEMPLATE IS FOR ME?`, H2 `Premium templates built to drive result
 | Traction | SMMA | $129 USD | |
 
 Each card carries **two** screenshots, not one: `template/{selene,zenna,traction}-{a,b}` in
-the asset index.
+the asset index. Both sit in the same box, stacked, which is what the second one is for -
+the Clone crossfades to it on hover in 300ms. The Reference's own hover treatment was never
+isolated (section 10), so the crossfade is ours and the second screenshot is measured.
+
+Measured in #10, all three Breakpoints:
+
+| | desktop (>= 1200) | tablet (810-1199) | phone (<= 809) |
+| --- | --- | --- | --- |
+| Section padding | `160 40 60` | `160 40 40` | `140 20 40` |
+| Heading to cards | 44 | 44 | 44 |
+| H2 width | 616 | 674 | full |
+| Header row | row, bottom-aligned, `View all` right | as desktop | column, 36 apart, button full width |
+| Cards | 3 x 387, 20 apart | 3 x 230, 20 apart | stacked, 20 apart |
+
+The H2's width is a width and not a maximum: at tablet it is 674 inside a 632 column, wider
+than what holds it, and a `max-width` would quietly resolve to 632 and balance the text
+against the wrong measure. Card internals: a 4:3 screenshot at a 12px radius, 20px down to
+a 70px block of title row over meta row 16px apart, the badge 12px from the name and the
+price 4px from its currency.
 
 As above, the table shows rendered text. **The markup is `New`, `AI SAAS`, `Yoga Studio`
 and `SMMA`** (measured in #8), so `src/lib/content/data/templates.json` stores those and
@@ -597,7 +707,18 @@ Honest gaps. Measure during the build, do not guess.
    distance are unmeasured. Motion drives it via its own rAF loop, so it does not surface in
    `getAnimations()` or computed styles. Needs frame-by-frame capture.
 2. **Hover states.** Probing the Selene card found no transform on the card element itself,
-   so whatever hover treatment exists sits on inner elements not yet isolated.
+   so whatever hover treatment exists sits on inner elements not yet isolated. #10 narrowed
+   it without closing it: both screenshots are stacked in the same box, so a crossfade is
+   what they are for, but its duration and easing are still ours.
+3. **Scroll-Appear is not yet built.** #10 shipped the first three Sections without it; the
+   hero, the Wall and the featured Templates are present on load. It lands with the
+   parameters in item 1, and is the reason a Fidelity capture of these Sections needs no
+   settling time yet.
+4. **The Testimonial slide easing is approximated.** Sampling the Reference's transform
+   every 40ms gives 3.2s between advances and ~1.4s of travel that is 52% done at 130ms and
+   90% at 570ms. That is a spring; the Clone runs
+   `cubic-bezier(0.16, 1, 0.3, 1)` over 1400ms, which tracks it closely but is a fit rather
+   than a measurement.
 
 ---
 

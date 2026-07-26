@@ -9,7 +9,7 @@ import { TextLink } from './text-link.tsx'
 /*
  * The footer, measured in #9 at 1440, 810 and 390.
  *
- * Its shape is one rail (`max-w-shell`, the same 1200px the nav runs on) holding
+ * Its shape is one rail (`max-w-rail`, the same 1200px the nav runs on) holding
  * two rows: the brand-and-links block, then the by-line bar. On phone every part
  * of it centres and the two link columns become one.
  *
@@ -54,7 +54,7 @@ export async function SiteFooter() {
 
   return (
     <footer className="px-10">
-      <div className="mx-auto w-full max-w-shell">
+      <div className="mx-auto w-full max-w-rail">
         <div className="flex flex-col items-center gap-8 px-5 py-10 tablet:flex-row tablet:items-start tablet:justify-between tablet:gap-0 tablet:px-0">
           <div className="flex flex-col items-center gap-4 tablet:flex-1 tablet:items-start">
             {/* The wordmark alone: the Reference drops the 18px logo here and

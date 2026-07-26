@@ -75,6 +75,51 @@ export function CloseIcon() {
 }
 
 /**
+ * The five-pointed star, on the hero's rating and on every Testimonial.
+ *
+ * Lifted from the sprite in #10, where it is one symbol referenced by `<use>`
+ * eleven times over. Measured 21x21 with the fill the Reference's own "Primary"
+ * token carries - a warm off-white, not the page's `--color-text`. It is
+ * `currentColor` here so a caller can say so once on the row.
+ */
+export function StarIcon() {
+  return (
+    <svg
+      viewBox="0 0 21 21"
+      width="21"
+      height="21"
+      fill="currentColor"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M 11.289 1.372 C 11.144 1.068 10.837 0.875 10.5 0.875 C 10.163 0.875 9.856 1.068 9.711 1.372 L 7.398 6.2 L 2.074 6.899 C 1.739 6.943 1.459 7.175 1.355 7.496 C 1.251 7.818 1.341 8.17 1.586 8.402 L 5.48 12.083 L 4.503 17.34 C 4.441 17.671 4.575 18.009 4.847 18.207 C 5.12 18.406 5.482 18.43 5.778 18.27 L 10.5 15.717 L 15.221 18.27 C 15.518 18.431 15.881 18.407 16.153 18.208 C 16.426 18.009 16.56 17.672 16.498 17.34 L 15.521 12.083 L 19.414 8.402 C 19.66 8.17 19.75 7.817 19.645 7.496 C 19.541 7.175 19.261 6.942 18.926 6.899 L 13.602 6.199 Z" />
+    </svg>
+  )
+}
+
+/**
+ * The mark inside the hero's Eyebrow: Framer's own logo, 20x20.
+ *
+ * The Reference draws it as a background image from an inline data URI rather
+ * than from the sprite, which is why it never went through the asset pipeline.
+ * Its viewBox is 19.5, not 20 - the glyph's natural size (#10).
+ */
+export function FramerIcon() {
+  return (
+    <svg
+      viewBox="0 0 19.5 19.5"
+      width="20"
+      height="20"
+      fill="currentColor"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M 4.659 2.665 L 15.375 2.665 L 15.375 7.868 L 10.017 7.868 Z M 4.659 7.868 L 10.017 7.868 L 15.375 13.072 L 4.659 13.072 Z M 4.659 13.072 L 10.017 13.072 L 10.017 18.275 Z" />
+    </svg>
+  )
+}
+
+/**
  * The two social glyphs, by the slug `getLinks().social` stores.
  *
  * Typed by `string` rather than by the two keys it happens to hold, so that a
