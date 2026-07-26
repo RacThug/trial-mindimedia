@@ -1,0 +1,153 @@
+@import 'tailwindcss';
+
+/*
+ * Design tokens, measured from the Reference. See PRD.md section 4.
+ *
+ * Every value here is a measurement, not a preference. Do not "round" one to a
+ * nicer number and do not add a token that was not measured - an unmeasured
+ * value belongs in PRD.md section 10 (Known unknowns), not here.
+ *
+ * The `-*: initial` lines wipe Tailwind's stock scales so the only type steps,
+ * colours and breakpoints available are the Reference's own. That is deliberate:
+ * a stray `text-sm` or `md:` is a Fidelity bug that would otherwise compile.
+ *
+ * `static` because these are a design system, not a by-product of the classes
+ * that happen to be in use today: components read them as `var(--nav-height)`
+ * from plain CSS, where Tailwind's usage tree-shaking cannot see them.
+ */
+@theme static {
+  /* ---- Breakpoints (PRD section 5) --------------------------------------
+   * Framer's defaults, and NOT Tailwind's (640/768/1024/1280). Overriding
+   * these is the single highest-leverage correctness item in the scaffold:
+   * stock breakpoints diverge at exactly the widths a reviewer resizes to.
+   *
+   * Mobile-first, so phone (<= 809px) is the unprefixed base.
+   */
+  --breakpoint-*: initial;
+  --breakpoint-tablet: 810px;
+  --breakpoint-desktop: 1200px;
+
+  /* ---- Type (PRD section 4) ---------------------------------------------
+   * Geist. The whole scale is weight 400 with uniform -0.02em tracking;
+   * headings are large and light, never bold. Only the eyebrow is heavier.
+   */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+
+  --tracking-tight: -0.02em;
+
+  --text-*: initial;
+
+  --text-display: 68px; /* H1 */
+  --text-display--line-height: 81.6px;
+  --text-display--letter-spacing: -1.36px;
+
+  --text-h2: 56px;
+  --text-h2--line-height: 67.2px;
+  --text-h2--letter-spacing: -1.12px;
+
+  --text-h3: 44px;
+  --text-h3--line-height: 57.2px;
+  --text-h3--letter-spacing: -0.88px;
+
+  --text-h4: 32px; /* stat */
+  --text-h4--line-height: 41.6px;
+  --text-h4--letter-spacing: -0.64px;
+
+  --text-h5: 24px; /* card title */
+  --text-h5--line-height: 33.6px;
+  --text-h5--letter-spacing: -0.48px;
+
+  --text-body: 16px;
+  --text-body--line-height: 25.6px;
+  --text-body--letter-spacing: normal;
+
+  --text-eyebrow: 12px;
+  --text-eyebrow--line-height: 20.4px;
+  --text-eyebrow--letter-spacing: normal;
+  --text-eyebrow--font-weight: 600;
+
+  --text-button: 12px; /* button label */
+
+  /* ---- Colour (PRD section 4) ------------------------------------------- */
+  --color-*: initial;
+
+  --color-transparent: transparent;
+  --color-current: currentcolor;
+
+  --color-bg: #000000; /* page */
+  --color-surface-1: #141414; /* cards */
+  --color-surface-2: #1c1c1c; /* secondary button, nested rows */
+  --color-surface-3: #2e2e2e; /* borders, dividers, hover */
+  --color-text: #ffffff; /* headings, primary body */
+  --color-text-muted: #c9c9c9; /* body copy, struck price */
+  --color-accent-blue: #8ea9fa; /* section eyebrows */
+  --color-accent-orange: #ff8800; /* FOUNDER badge, add-on prices, step badges */
+  --color-accent-green: #33d478; /* NEW badge */
+
+  /* ---- Shape (PRD section 4) -------------------------------------------- */
+
+  /* Container: 1360px max width, centred. `max-w-page`. */
+  --container-page: 1360px;
+
+  /* Button: height 46px, radius 48px, padding 10px 20px, 12px label. */
+  --radius-button: 48px;
+  --button-height: 46px;
+  --button-padding-x: 20px;
+  --button-padding-y: 10px;
+
+  /* Nav: fixed, top 0, height 86px, fully transparent, no backdrop blur. */
+  --nav-height: 86px;
+  --nav-z-index: 8;
+}
+
+/*
+ * The measured button. Two variants, no third.
+ */
+@utility btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--button-height);
+  padding-inline: var(--button-padding-x);
+  padding-block: var(--button-padding-y);
+  border-radius: var(--radius-button);
+  font-size: var(--text-button);
+  letter-spacing: var(--tracking-tight);
+  white-space: nowrap;
+}
+
+@utility btn-primary {
+  background-color: var(--color-text);
+  color: var(--color-bg);
+}
+
+@utility btn-secondary {
+  background-color: var(--color-surface-2);
+  color: var(--color-text);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    font-size: var(--text-body);
+    line-height: var(--text-body--line-height);
+    font-weight: 400;
+  }
+
+  /* The Reference's headings are light, not bold. Undo the UA default once
+   * here rather than fighting it with a `font-normal` on every heading. */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: 400;
+  }
+}

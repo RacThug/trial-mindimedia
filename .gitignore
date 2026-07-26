@@ -13,6 +13,10 @@ dist/
 build/
 .next/
 out/
+*.tsbuildinfo
+
+# Vercel
+.vercel/
 
 # Environment
 .env
