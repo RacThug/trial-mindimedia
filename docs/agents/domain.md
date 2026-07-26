@@ -11,7 +11,20 @@ How the engineering skills should consume this repo's domain documentation when 
 
 If any of these files don't exist, **proceed silently**. Don't flag their absence; don't suggest creating them upfront. The `/domain-modeling` skill (reached via `/grill-with-docs` and `/improve-codebase-architecture`) creates them lazily when terms or decisions actually get resolved.
 
-As of this setup, neither `CONTEXT.md` nor `docs/adr/` exists yet. That is the expected starting state.
+Both `CONTEXT.md` and `docs/adr/` now exist. Read them.
+
+## The current spec
+
+`PRD.md` at the repo root specifies the work in progress. It mirrors
+[issue #5](https://github.com/RacThug/trial-mindimedia/issues/5), which is canonical if the
+two ever disagree. Individual work packages are that issue's sub-issues.
+
+Every value in the PRD is measured from the live reference site, not estimated. Treat those
+numbers as facts, and do not silently substitute plausible-looking defaults for them. Two in
+particular are counter-intuitive and have already been verified against the live site:
+
+- The template wall is a **static grid**, not a marquee. Nothing in it moves.
+- Breakpoints are **1200px and 810px**, not any framework's defaults.
 
 ## File structure
 
