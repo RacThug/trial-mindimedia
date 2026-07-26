@@ -481,10 +481,13 @@ named test rather than the build - see ADR-0004.
 
 ### Checks
 
-`.github/workflows/ci.yml` runs `typecheck`, `lint`, `format:check`, `test` and `build` on
-every PR into `develop` or `main`, added in #8. `.githooks/pre-push` stops work reaching a
-protected branch directly, but until CI existed nothing checked whether the work was correct;
-"the tests pass on my machine" is not a reliability claim.
+Five commands gate a PR, run before pushing: `typecheck`, `lint`, `format:check`, `test`,
+`build`. `build` is last and is not redundant - content that no test happens to read still
+fails there, because the data layer validates lazily (ADR-0004).
+
+`format:check` could not pass on a Windows clone until #8. Prettier writes and checks LF while
+`core.autocrlf=true` leaves a CRLF working tree, so every committed file failed locally and
+would pass anywhere else; `.gitattributes` now pins LF in the working tree on every platform.
 
 ---
 
