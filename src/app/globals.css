@@ -264,10 +264,10 @@
    *
    * The second column is offset by the 816px measured between the two, not by
    * half: both run at one speed, so the distance between them is a constant. */
-  --marquee-tile-height: 199px;
-  --marquee-cycle: 1720px; /* 8 * (199 + 16) */
-  --marquee-duration: 59.3s; /* 1720px / 29px per second */
-  --marquee-offset: -28.1s; /* 816px / 29px per second */
+  --thumbnails-tile-height: 199px;
+  --thumbnails-cycle: 1720px; /* 8 * (199 + 16) */
+  --thumbnails-duration: 59.3s; /* 1720px / 29px per second */
+  --thumbnails-offset: -28.1s; /* 816px / 29px per second */
 
   /* Both tinted pills are radial gradients rather than flat fills, which is why
    * neither reads as a solid colour in a screenshot. Measured in #10 from the
@@ -423,6 +423,12 @@
  * The Reference draws every one of these as an `::after` overlay for the same
  * reason. An inset shadow is the same overlay without the extra element, follows
  * the radius, and costs nothing in layout.
+ *
+ * **They replace rather than compose**: each sets the whole `box-shadow`, so
+ * `rule-b tablet:rule-r` is a bottom edge on phone and a right edge above it,
+ * not both. That is what the measurements ask for - the bento's framed card
+ * carries `0 0 1px 0` at 390 and `0 1px 0 0` at 810 - but it is why `rule-rb`
+ * and `rule-x` exist as their own utilities rather than as two classes.
  */
 @utility rule-ring {
   box-shadow: inset 0 0 0 1px var(--color-surface-3);
@@ -458,11 +464,11 @@
  * invisible. Under `prefers-reduced-motion` the animation is dropped and the
  * column stands still, which is also what the Reference should have done.
  */
-@keyframes marquee-up {
+@keyframes thumbnails-travel {
   from {
     transform: translateY(0);
   }
   to {
-    transform: translateY(calc(-1 * var(--marquee-cycle)));
+    transform: translateY(calc(-1 * var(--thumbnails-cycle)));
   }
 }

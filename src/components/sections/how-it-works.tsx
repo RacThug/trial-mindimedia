@@ -1,5 +1,5 @@
 import { CardVisual } from '@/components/media/card-visual.tsx'
-import { ThumbnailMarquee } from '@/components/media/thumbnail-marquee.tsx'
+import { ThumbnailColumns } from '@/components/media/thumbnail-column.tsx'
 import { SectionBand } from '@/components/ui/section-band.tsx'
 import { getSteps, type Step, type Visual } from '@/lib/content'
 
@@ -21,7 +21,7 @@ import { getSteps, type Step, type Visual } from '@/lib/content'
  * which end is the whole layout:
  *
  * - **step 1**: badge at the top, title and body at the bottom, and the tilted
- *   thumbnail column travelling behind both (`ThumbnailMarquee`).
+ *   thumbnail column travelling behind both (`ThumbnailColumns`).
  * - **step 2**: the clip at the top, badge and text below it.
  * - **step 3**: badge and text at the top, the clip below them.
  *
@@ -49,25 +49,30 @@ export async function HowItWorks() {
       headingWidth="desktop:w-[747px]"
     >
       <div className="flex flex-col overflow-clip rounded-steps rule-ring tablet:h-[500px] tablet:flex-row desktop:h-[453px]">
-        {steps.map((step, index) => (
-          <div
-            key={step.slug}
-            className={
-              'relative overflow-clip tablet:h-full tablet:flex-1 ' +
-              /* Step 1 is the only card whose height is set on phone: its
-               * thumbnails have no height of their own to give it one. */
-              (step.media.length > 1 ? 'h-[362px] ' : '') +
-              (index === 1 ? 'rule-y tablet:rule-x' : '')
-            }
-          >
-            {/* The card carries no padding of its own - its content column
-             * does - so that this `inset-0` is the card's own edge. The
-             * thumbnails run under the badge and the text and are cut off by
-             * the card, which is what the Reference does. */}
-            {step.media.length > 1 && <ThumbnailMarquee media={step.media} />}
-            <StepCard step={step} index={index} />
-          </div>
-        ))}
+        {steps.map((step, index) => {
+          const placement = placementOf(step, index)
+
+          return (
+            <div
+              key={step.slug}
+              className={
+                'relative overflow-clip tablet:h-full tablet:flex-1 ' +
+                /* The card behind its thumbnails is the only one whose height is
+                 * set on phone: they have no height of their own to give it
+                 * one. */
+                (placement === 'behind' ? 'h-[362px] ' : '') +
+                (index === 1 ? 'rule-y tablet:rule-x' : '')
+              }
+            >
+              {/* The card carries no padding of its own - its content column
+               * does - so that this `inset-0` is the card's own edge. The
+               * thumbnails run under the badge and the text and are cut off by
+               * the card, which is what the Reference does. */}
+              {placement === 'behind' && <ThumbnailColumns media={step.media} />}
+              <StepCard step={step} index={index} placement={placement} />
+            </div>
+          )
+        })}
       </div>
     </SectionBand>
   )
@@ -80,10 +85,24 @@ export async function HowItWorks() {
  */
 type VisualPlacement = 'behind' | 'top' | 'bottom'
 
-function StepCard({ step, index }: { readonly step: Step; readonly index: number }) {
+/** One step's shape, read once and then passed around rather than re-derived. */
+function placementOf(step: Step, index: number): VisualPlacement {
+  /* The step with a list of thumbnails rather than a single clip is the one
+   * they sit behind; of the other two, the middle card leads with its clip. */
+  if (step.media.length > 1) return 'behind'
+  return index === 1 ? 'top' : 'bottom'
+}
+
+function StepCard({
+  step,
+  index,
+  placement,
+}: {
+  readonly step: Step
+  readonly index: number
+  readonly placement: VisualPlacement
+}) {
   const [visual] = step.media
-  const placement: VisualPlacement =
-    step.media.length > 1 ? 'behind' : index === 1 ? 'top' : 'bottom'
 
   const badge = <StepBadge index={index} />
   const text = (

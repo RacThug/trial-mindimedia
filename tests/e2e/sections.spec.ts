@@ -389,6 +389,36 @@ test.describe('the feature bento (PRD 6.5)', () => {
     })
   }
 
+  /*
+   * The stack's heights, which the spans do not pin: three of the five fall out
+   * of their content and would drift with a font or a copy change without ever
+   * failing a width assertion.
+   */
+  test('stacks to the measured heights on phone', async ({ page }) => {
+    await page.setViewportSize(PHONE)
+    await page.goto('/')
+
+    const heights = await page.evaluate(() => {
+      const band = [...document.querySelectorAll('main > section')].find((section) =>
+        section.textContent?.includes('Everything you need to launch'),
+      )
+      if (!band) throw new Error('no feature bento')
+
+      return [...band.querySelectorAll('h3')].map((title) => {
+        let card: Element = title
+        while (
+          card.parentElement &&
+          card.parentElement.querySelectorAll('h3').length === 1
+        ) {
+          card = card.parentElement
+        }
+        return Math.round(card.getBoundingClientRect().height)
+      })
+    })
+
+    expect(heights).toEqual([346, 332, 285, 285, 352])
+  })
+
   test('defers every clip on the page, the bento included', async ({ page }) => {
     await page.setViewportSize(DESKTOP)
     await page.goto('/')
@@ -436,6 +466,32 @@ const thumbnailY = (page: Page) =>
 
 test.describe('how it works (PRD 6.6)', () => {
   test.use({ viewport: DESKTOP })
+
+  /*
+   * Two of the three step cards are their content plus the measured 28px
+   * between their groups; only the first has a height of its own. Pinned for
+   * the same reason as the bento's.
+   */
+  test('stacks to the measured heights on phone', async ({ page }) => {
+    await page.setViewportSize(PHONE)
+    await page.goto('/')
+
+    const heights = await page.evaluate(() => {
+      const band = [...document.querySelectorAll('main > section')].find((section) =>
+        section.textContent?.includes('Go live within 1 hour'),
+      )
+      const frame = [...(band?.querySelectorAll('div') ?? [])].find((element) =>
+        element.className.includes('rounded-steps'),
+      )
+      if (!frame) throw new Error('no step cards')
+
+      return [...frame.children].map((card) =>
+        Math.round(card.getBoundingClientRect().height),
+      )
+    })
+
+    expect(heights).toEqual([362, 439, 461])
+  })
 
   test('numbers its badges from their position, not from a field', async ({ page }) => {
     await page.goto('/')

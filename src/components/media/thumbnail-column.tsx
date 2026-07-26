@@ -18,19 +18,24 @@ import type { Visual } from '@/lib/content'
  *
  * A CSS animation rather than JS, which is what lets `motion-reduce` stop it
  * outright - and the tiles are then simply eight stills at their measured tilt.
+ *
+ * Not named for what it looks like. CONTEXT.md rules the word "marquee" out of
+ * this vocabulary because the Template Wall is a static grid that reads as one,
+ * and borrowing it here would put the banned word back into the codebase for
+ * the one thing it would be true of.
  */
 
 const COLUMN = 'relative h-full w-[275px] shrink-0 rotate-[16deg]'
 const TILE =
-  'h-[var(--marquee-tile-height)] w-[275px] shrink-0 overflow-hidden rounded-visual'
+  'h-[var(--thumbnails-tile-height)] w-[275px] shrink-0 overflow-hidden rounded-visual'
 
-export function ThumbnailMarquee({ media }: { readonly media: readonly Visual[] }) {
+export function ThumbnailColumns({ media }: { readonly media: readonly Visual[] }) {
   return (
     <div className="pointer-events-none absolute inset-0 flex items-center justify-center gap-7 overflow-hidden">
       <Column media={media} />
       {/* The second column runs the same tiles, 816px further along - measured,
        * and a constant, since both travel at one speed. */}
-      <Column media={media} style={{ animationDelay: 'var(--marquee-offset)' }} />
+      <Column media={media} style={{ animationDelay: 'var(--thumbnails-offset)' }} />
     </div>
   )
 }
@@ -49,34 +54,38 @@ function Column({
        * of the card look past the strip's ends otherwise, and at the far end of
        * the travel there would be nothing there to see. */}
       <ul
-        className="absolute inset-x-0 top-[calc(50%-var(--marquee-cycle))] flex flex-col gap-4 [animation:marquee-up_var(--marquee-duration)_linear_infinite] motion-reduce:[animation:none]"
+        className="absolute inset-x-0 top-[calc(50%-var(--thumbnails-cycle))] flex flex-col gap-4 [animation:thumbnails-travel_var(--thumbnails-duration)_linear_infinite] motion-reduce:[animation:none]"
         style={style}
       >
         {media.map((item) => (
-          <li key={item.slug} className={TILE}>
-            <Image
-              src={item.src}
-              alt={item.alt}
-              width={275}
-              height={199}
-              sizes="275px"
-              className="size-full object-cover"
-            />
-          </li>
+          <Tile key={item.slug} visual={item} />
         ))}
         {media.map((item) => (
-          <li key={`${item.slug}-repeat`} className={TILE} aria-hidden="true">
-            <Image
-              src={item.src}
-              alt=""
-              width={275}
-              height={199}
-              sizes="275px"
-              className="size-full object-cover"
-            />
-          </li>
+          <Tile key={`${item.slug}-repeat`} visual={item} repeat />
         ))}
       </ul>
     </div>
+  )
+}
+
+/** One thumbnail. The repeat is the same picture with nothing left to say. */
+function Tile({
+  visual,
+  repeat = false,
+}: {
+  readonly visual: Visual
+  readonly repeat?: boolean
+}) {
+  return (
+    <li className={TILE} aria-hidden={repeat || undefined}>
+      <Image
+        src={visual.src}
+        alt={repeat ? '' : visual.alt}
+        width={275}
+        height={199}
+        sizes="275px"
+        className="size-full object-cover"
+      />
+    </li>
   )
 }
