@@ -8,6 +8,9 @@ docs/*
 # Dependencies
 node_modules/
 
+# Asset pipeline download cache (re-fetched by `npm run assets`)
+.cache/
+
 # Build output
 dist/
 build/
