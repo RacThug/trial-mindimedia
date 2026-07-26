@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect } from 'react'
-import { ButtonLink, buttonClasses } from '@/components/ui/button'
-import { PlaceholderPage } from '@/components/ui/placeholder-page'
+import { ButtonLink, buttonClasses } from '@/components/ui/button.tsx'
+import { PlaceholderPage } from '@/components/ui/placeholder-page.tsx'
 
 /*
  * The route-level error boundary. It renders inside the root layout, so a

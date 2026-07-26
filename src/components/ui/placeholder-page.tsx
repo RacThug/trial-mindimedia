@@ -1,4 +1,4 @@
-import { ButtonLink } from './button'
+import { ButtonLink } from './button.tsx'
 
 /*
  * Every off-page link on the Reference points somewhere real, so every one of
@@ -26,7 +26,7 @@ export function PlaceholderPage({
   action,
 }: PlaceholderPageProps) {
   return (
-    <main className="mx-auto flex min-h-[70dvh] max-w-shell flex-col items-center justify-center gap-6 px-5 pt-[var(--nav-height)] pb-20 text-center desktop:px-10">
+    <main className="mx-auto flex min-h-[70dvh] max-w-shell flex-col items-center justify-center gap-6 px-5 pt-[var(--nav-height-phone)] pb-20 text-center tablet:pt-[var(--nav-height)] desktop:px-10">
       <p className="text-eyebrow uppercase text-accent-blue">{eyebrow}</p>
       <h1 className="text-h3 text-text tablet:text-h2">{title}</h1>
       <p className="max-w-[520px] text-body text-text-muted">{children}</p>

@@ -67,18 +67,23 @@ All measured. These become the Tailwind `@theme` block.
 
 ### Type
 
-Geist and Geist Variable. The entire scale is **weight 400** with uniform **-0.02em**
-tracking. Headings are large and light, never bold.
+Geist and Geist Variable. Every heading is **weight 400** with uniform **-0.02em** tracking -
+large and light, never bold. Interactive text is **500** and the Eyebrow is **600**; those
+two are the whole of the rest of the scale.
 
-| Token | Size | Line height | Tracking |
-| --- | --- | --- | --- |
-| `display` (H1) | 68px | 81.6px | -1.36px |
-| `h2` | 56px | 67.2px | -1.12px |
-| `h3` | 44px | 57.2px | -0.88px |
-| `h4` (stat) | 32px | 41.6px | -0.64px |
-| `h5` (card title) | 24px | 33.6px | -0.48px |
-| `body` | 16px | 25.6px | normal |
-| `eyebrow` | 12px | 20.4px | normal, **weight 600**, uppercase |
+| Token | Size | Line height | Tracking | Weight |
+| --- | --- | --- | --- | --- |
+| `display` (H1) | 68px | 81.6px | -1.36px | 400 |
+| `h2` | 56px | 67.2px | -1.12px | 400 |
+| `h3` | 44px | 57.2px | -0.88px | 400 |
+| `h4` (stat) | 32px | 41.6px | -0.64px | 400 |
+| `h5` (card title) | 24px | 33.6px | -0.48px | 400 |
+| `body` | 16px | 25.6px | normal | 400, or **500** for a link or button label |
+| `body-sm` | 14px | 22.4px | normal | 400 |
+| `eyebrow` | 12px | 20.4px | normal | **600**, uppercase |
+
+`body-sm` is the phone step of body copy, measured in #9 on the footer (6.12). Only the
+footer is measured so far - a Section wanting it elsewhere should measure its own case.
 
 ### Colour
 
@@ -99,7 +104,8 @@ tracking. Headings are large and light, never bold.
 - Container: **1360px** max width, centred. The shell runs on a narrower rail:
   nav and footer content measure **1200px** at 1440 (#9). The hero's own content starts at
   the same x=120, so the 1360 figure needs re-measuring when the Sections land in #10.
-- Button: height **46px**, radius **48px**, padding `10px 20px`, label `body` at **weight 500**
+- Button: height **46px**, radius **48px**, padding `10px 20px`, label `body` at
+  **weight 500**
   - primary: white background, black text
   - secondary: `#1c1c1c` background, white text
 - Nav: `position: fixed`, top 0, height **86px** (**76px** on phone), `z-index: 8`.
@@ -347,7 +353,8 @@ premium Framer website template.`, X and YouTube icons, two link columns
 (`Templates / Live examples / Bundle / Blog` and `Quiz / Support / Privacy`),
 `© 2026 browser.supply. Framer website templates`, and `Created by Ramish Aziz`.
 
-Measured in #9: 40px gutters at every width over the same 1200px rail as the nav, then two
+Measured in #9: 40px gutters at every width over the same 1200px rail as the nav - plus a
+further 20px inside each row on phone, so phone copy starts at x=60 - then two
 rows - a 254px block (`40px 0` padding) above a 72px by-line bar (`20px 0`), no divider
 rule. Left column 16px gaps, tagline fixed at 292px; link columns 56px apart with 24px
 between links. Wordmark is `h5`; tagline, copyright and by-line are `text-muted`, dropping
@@ -377,7 +384,10 @@ Reference here would fail the axe scan in section 9 and contradict the brief's
 
 Decorative media gets **no** alt text rather than invented description: the 48 Template Wall
 tiles are a backdrop, and a Testimonial avatar sits beside the person's name in text, so both
-render `alt=""`. The Reference's own alt on the eight Step 1 thumbnails is correct and useful,
+render `alt=""`. The nav's 18px logo is the same case and #9 renders it `alt=""` too: the
+wordmark `Browser.supply` sits inside the same link, so the site is named either way, and
+alt text on the mark would announce it twice. The rule is that the site must be identifiable,
+not that the image must carry the identification. The Reference's own alt on the eight Step 1 thumbnails is correct and useful,
 and it is where the names of the other templates come from: Cora, Funnelz, Editr, Partnr,
 Meraas, Reformr, Influence, plus Traction reused.
 
@@ -536,8 +546,8 @@ named test rather than the build - see ADR-0004.
 
 Five commands gate a PR, run before pushing: `typecheck`, `lint`, `format:check`, `test`,
 `build`. `test:e2e` runs beside them and builds the app itself, so it is a sixth check
-rather than a sixth gate. `build` is last and is not redundant - content that no test happens to read still
-fails there, because the data layer validates lazily (ADR-0004).
+rather than a sixth gate. `build` is last of the five and is not redundant - content that no
+test happens to read still fails there, because the data layer validates lazily (ADR-0004).
 
 `format:check` could not pass on a Windows clone until #8. Prettier writes and checks LF while
 `core.autocrlf=true` leaves a CRLF working tree, so every committed file failed locally and

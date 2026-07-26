@@ -2,9 +2,9 @@
 
 import Image from 'next/image'
 import { useEffect, useState } from 'react'
-import { buttonClasses } from '@/components/ui/button'
+import { buttonClasses } from '@/components/ui/button.tsx'
 import type { Template } from '@/lib/content'
-import { formatMoney } from '@/lib/content/money'
+import { formatMoney } from '@/lib/content/money.ts'
 
 /*
  * The one place in the build that reads content over HTTP.

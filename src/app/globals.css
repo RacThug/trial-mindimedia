@@ -133,9 +133,9 @@
    * nav and footer content is 1200px wide at 1440, not 1360. `max-w-shell`. */
   --container-shell: 1200px;
 
-  /* Button: height 46px, radius 48px, padding 10px 20px, 12px label.
-   * White on black is primary, `--color-surface-2` on white is secondary.
-   * The button component itself belongs to issue #9; these are its measurements. */
+  /* Button: height 46px, radius 48px, padding 10px 20px. The label is `body` at
+   * `font-medium` - see the note where `--text-button` used to be.
+   * White on black is primary, `--color-surface-2` on white is secondary. */
   --radius-button: 48px;
   --button-height: 46px;
   --button-padding-x: 20px;

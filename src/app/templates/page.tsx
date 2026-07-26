@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { TemplateCatalogue } from './template-catalogue'
+import { TemplateCatalogue } from './template-catalogue.tsx'
 
 export const metadata: Metadata = { title: 'Templates' }
 
@@ -13,7 +13,7 @@ export const metadata: Metadata = { title: 'Templates' }
  */
 export default function TemplatesPage() {
   return (
-    <main className="px-5 pt-[calc(var(--nav-height)+40px)] pb-24 desktop:px-10">
+    <main className="px-5 pt-[calc(var(--nav-height-phone)+40px)] pb-24 tablet:pt-[calc(var(--nav-height)+40px)] desktop:px-10">
       <div className="mx-auto flex max-w-shell flex-col gap-10">
         <div className="flex flex-col gap-6">
           <p className="text-eyebrow uppercase text-accent-blue">Templates</p>

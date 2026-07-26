@@ -1,6 +1,6 @@
 import { getLinks } from '@/lib/content'
 import { media } from '@/lib/media'
-import { NavBar } from './nav-bar'
+import { NavBar } from './nav-bar.tsx'
 
 /*
  * The server half of the nav: it reads content and the asset index, and hands

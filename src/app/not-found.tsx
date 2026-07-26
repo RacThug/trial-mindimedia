@@ -1,4 +1,4 @@
-import { PlaceholderPage } from '@/components/ui/placeholder-page'
+import { PlaceholderPage } from '@/components/ui/placeholder-page.tsx'
 
 /*
  * #8 left this out of scope on the grounds that content is validated at build

@@ -1,9 +1,10 @@
 import Image from 'next/image'
 import { getLinks, type Link as ContentLink } from '@/lib/content'
 import { media } from '@/lib/media'
-import { footerColumns } from './footer-columns'
-import { SocialLinks } from './social-links'
-import { TextLink } from './text-link'
+import { SiteLink } from '../ui/site-link.tsx'
+import { footerColumns } from './footer-columns.ts'
+import { SocialLinks } from './social-links.tsx'
+import { TextLink } from './text-link.tsx'
 
 /*
  * The footer, measured in #9 at 1440, 810 and 390.
@@ -41,9 +42,14 @@ export async function SiteFooter() {
         <div className="flex flex-col items-center gap-8 px-5 py-10 tablet:flex-row tablet:items-start tablet:justify-between tablet:gap-0 tablet:px-0">
           <div className="flex flex-col items-center gap-4 tablet:flex-1 tablet:items-start">
             {/* The wordmark alone: the Reference drops the 18px logo here and
-             * sets the name as an h5, so this is text rather than the nav's
-             * image-plus-label pair. */}
-            <h2 className="text-h5 text-text">Browser.supply</h2>
+             * sets the name at the h5 step, so this is text rather than the
+             * nav's image-plus-label pair.
+             *
+             * A `<p>`, not a heading. The Reference uses `<h5>`, but the
+             * wordmark introduces no section - a heading element here would put
+             * a contentless entry in the outline of every page on the site, and
+             * the h5 in the token is a size. */}
+            <p className="text-h5 text-text">Browser.supply</p>
             <p className="w-[292px] text-center text-body-sm text-text-muted tablet:text-left tablet:text-body">
               Launch your online business with a premium Framer website template.
             </p>
@@ -62,9 +68,9 @@ export async function SiteFooter() {
         <div className="flex flex-col items-center gap-7 p-5 text-body-sm text-text-muted tablet:flex-row tablet:justify-between tablet:px-0 tablet:py-5 tablet:text-body">
           <p className="text-center tablet:text-left">
             © 2026 browser.supply.{' '}
-            <a href="https://framer.link/ramishdesign" className={INLINE_LINK}>
+            <SiteLink href="https://framer.link/ramishdesign" className={INLINE_LINK}>
               Framer
-            </a>{' '}
+            </SiteLink>{' '}
             website templates
           </p>
 
@@ -82,9 +88,9 @@ export async function SiteFooter() {
                 height={38}
                 className="size-[38px] rounded-[6px] object-cover"
               />
-              <a href="https://x.com/ramishdotdesign" className={INLINE_LINK}>
+              <SiteLink href="https://x.com/ramishdotdesign" className={INLINE_LINK}>
                 Ramish Aziz
-              </a>
+              </SiteLink>
             </span>
           </p>
         </div>

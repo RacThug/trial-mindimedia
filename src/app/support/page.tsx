@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { PlaceholderPage } from '@/components/ui/placeholder-page'
+import { PlaceholderPage } from '@/components/ui/placeholder-page.tsx'
 
 export const metadata: Metadata = { title: 'Support' }
 

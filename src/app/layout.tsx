@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { GeistSans } from 'geist/font/sans'
-import { SiteFooter } from '@/components/shell/site-footer'
-import { SiteNav } from '@/components/shell/site-nav'
+import { SiteFooter } from '@/components/shell/site-footer.tsx'
+import { SiteNav } from '@/components/shell/site-nav.tsx'
 import './globals.css'
 
 /*

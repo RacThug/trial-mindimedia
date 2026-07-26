@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import { SiteLink, type SiteLinkProps } from './site-link.tsx'
 
 /*
  * The Reference's one button, measured in #9: height 46px, radius 48px, padding
@@ -28,35 +28,18 @@ export function buttonClasses(variant: ButtonVariant = 'primary', extra = ''): s
   return `${BASE} ${SURFACE[variant]} ${extra}`.trim()
 }
 
-type ButtonLinkProps = {
-  readonly href: string
-  readonly children: React.ReactNode
-  readonly variant?: ButtonVariant
-  readonly className?: string
-  readonly onClick?: () => void
-}
+type ButtonLinkProps = SiteLinkProps & { readonly variant?: ButtonVariant }
 
-/**
- * A link that looks like a button. Internal hrefs are root-relative and go
- * through `next/link`; anything else leaves the site and gets a plain anchor,
- * which is the same split `href` enforces in the content schema.
- */
+/** A link that looks like a button. */
 export function ButtonLink({
-  href,
   children,
   variant = 'primary',
   className = '',
-  onClick,
+  ...rest
 }: ButtonLinkProps) {
-  const classes = buttonClasses(variant, className)
-
-  return href.startsWith('/') ? (
-    <Link href={href} className={classes} onClick={onClick}>
+  return (
+    <SiteLink {...rest} className={buttonClasses(variant, className)}>
       {children}
-    </Link>
-  ) : (
-    <a href={href} className={classes} onClick={onClick}>
-      {children}
-    </a>
+    </SiteLink>
   )
 }
