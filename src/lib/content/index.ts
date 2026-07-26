@@ -17,7 +17,7 @@
  * index to look one up in.
  */
 
-import { isVideo, media, type MediaImage } from '../media/index.ts'
+import { isVideo, media, type MediaImage, type MediaSlug } from '../media/index.ts'
 import { ContentError, parseCollection } from './parse.ts'
 import {
   featuresSchema,
@@ -169,6 +169,18 @@ function asset(slug: string): Asset {
 
 function visual(ref: { slug: string; alt: string }): Visual {
   return { ...asset(ref.slug), alt: ref.alt }
+}
+
+/**
+ * Resolve one asset for markup that owns its own visual: the case study's clip
+ * (PRD 6.8) and the founder's (6.11) appear once, in one layout, so they are not
+ * content and no Collection carries them (ADR-0004). They still need the
+ * intrinsic size and the poster that every other visual on the page gets, and
+ * that is what this hands back - typed by slug, so a missing asset is a compile
+ * error rather than a hole in the layout.
+ */
+export function resolveVisual(slug: MediaSlug, alt: string): Visual {
+  return visual({ slug, alt })
 }
 
 /** Parse once per process. Replaced wholesale by a fetch when content moves. */

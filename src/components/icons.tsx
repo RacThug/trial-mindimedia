@@ -120,6 +120,35 @@ export function FramerIcon() {
 }
 
 /**
+ * The arrow on the three buttons that carry one, drawn at 20x20 (#11).
+ *
+ * Three of the page's thirteen buttons have it - `See real customer websites`
+ * (6.7), `Take the quiz` and `Book a coaching call with me` - and the rest are
+ * label-only, which is why this is not part of `ButtonLink`. Lifted from the
+ * sprite: a 1.5px stroke with round caps in a 24 viewBox, whose two remaining
+ * paths are a square translated to y 27.75 and so never render.
+ */
+export function ArrowRightIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="20"
+      height="20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <path d="M 8.25 12 L 15.75 12" />
+      <path d="M 12.75 9 L 15.75 12 L 12.75 15" />
+    </svg>
+  )
+}
+
+/**
  * The two social glyphs, by the slug `getLinks().social` stores.
  *
  * Typed by `string` rather than by the two keys it happens to hold, so that a
