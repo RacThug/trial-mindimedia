@@ -10,11 +10,13 @@
  * thread back from a committed file to the Reference, so it is recorded rather
  * than discarded.
  *
- * The encode caps are measured, not chosen. Each image's `sizes` attribute on
- * the Reference was evaluated at 1440, 810 and 390 to get its true rendered
- * width, and the cap here is twice the largest of those - enough for a DPR-2
- * screen, with `next/image` free to serve something smaller. Where Framer's own
- * `sizes` was degenerate the layout arithmetic is quoted in the group comment.
+ * The encode caps are anchored to measurement rather than picked. Each image's
+ * `sizes` attribute on the Reference was evaluated at 1440, 810 and 390 to get
+ * its true rendered width, recorded below as `rendered`; every cap is at least
+ * twice the largest of those, which covers a DPR-2 screen and leaves
+ * `next/image` free to serve something smaller. Two groups carry more headroom
+ * than that, and each says why. Where Framer's own `sizes` was degenerate the
+ * layout arithmetic is quoted in the group comment.
  */
 
 /** Groups exist to keep `public/media` navigable; they are the first slug segment. */
@@ -38,12 +40,28 @@ type Common = {
   readonly url: string
 }
 
+/**
+ * CSS pixels the asset is drawn at on the Reference, one per Breakpoint.
+ *
+ * Read off the Reference's own `sizes` attribute, evaluated at 1440, 810 and
+ * 390. These are the numbers `next/image` needs a matching `sizes` written
+ * against once the Sections exist (#10 to #12), and the numbers `maxWidth` is
+ * derived from, so they are recorded rather than left in a commit message.
+ */
+export type RenderedWidths = {
+  readonly desktop: number
+  readonly tablet: number
+  readonly phone: number
+}
+
 export type SourceImage = Common & {
   readonly kind: 'image'
   /** Longest committed width in px. Never upscales past the original. */
   readonly maxWidth: number
   readonly format: 'webp' | 'jpeg'
   readonly quality: number
+  /** Absent where the Reference gives no `sizes` to read, never guessed. */
+  readonly rendered?: RenderedWidths
 }
 
 export type SourceVideo = Common & {
@@ -67,7 +85,7 @@ const CDN = 'https://framerusercontent.com'
 
 const url = (id: string) => `${CDN}/${id}`
 
-type ImagePreset = Pick<SourceImage, 'maxWidth' | 'format' | 'quality'>
+type ImagePreset = Pick<SourceImage, 'maxWidth' | 'format' | 'quality' | 'rendered'>
 type VideoPreset = Pick<SourceVideo, 'maxWidth' | 'crf' | 'fps'>
 
 function image(slug: string, id: string, preset: ImagePreset): SourceImage {
@@ -92,14 +110,65 @@ function verbatim(slug: string, id: string): SourceVerbatim {
  * already-lossy JPEGs, and re-encoding one is a second generation of loss.
  * Both numbers are the lowest that clear `npm run assets:verify`.
  */
-const WALL_TILE: ImagePreset = { maxWidth: 800, format: 'webp', quality: 90 }
-const TEMPLATE_SHOT: ImagePreset = { maxWidth: 800, format: 'webp', quality: 90 }
-const BENTO_SHOT: ImagePreset = { maxWidth: 1120, format: 'webp', quality: 90 }
-const STEP_THUMB: ImagePreset = { maxWidth: 640, format: 'webp', quality: 90 }
-const AVATAR: ImagePreset = { maxWidth: 200, format: 'webp', quality: 92 }
-const LOGO: ImagePreset = { maxWidth: 128, format: 'webp', quality: 95 }
-/* JPEG, not WebP: link unfurlers are the one consumer that still fails on WebP. */
+const WALL_TILE: ImagePreset = {
+  maxWidth: 800,
+  format: 'webp',
+  quality: 90,
+  rendered: { desktop: 348, tablet: 191, phone: 128 },
+}
+/* Cards vary a few px between the three; the widest of each Breakpoint is kept. */
+const TEMPLATE_SHOT: ImagePreset = {
+  maxWidth: 800,
+  format: 'webp',
+  quality: 90,
+  rendered: { desktop: 387, tablet: 275, phone: 351 },
+}
+const BENTO_SHOT: ImagePreset = {
+  maxWidth: 1120,
+  format: 'webp',
+  quality: 90,
+  rendered: { desktop: 552, tablet: 317, phone: 302 },
+}
+const STEP_THUMB: ImagePreset = {
+  maxWidth: 640,
+  format: 'webp',
+  quality: 90,
+  rendered: { desktop: 275, tablet: 275, phone: 275 },
+}
+/*
+ * 200px is far more than the 42px the two measurable avatars draw at. The other
+ * fourteen sit in fixed-size elements the Reference gives no `sizes` for, so the
+ * cap carries headroom for whatever those turn out to be rather than a number
+ * inferred from their siblings. Sixteen files at this width cost 180 kB total.
+ */
+const AVATAR: ImagePreset = {
+  maxWidth: 200,
+  format: 'webp',
+  quality: 92,
+  rendered: { desktop: 42, tablet: 42, phone: 42 },
+}
+/* Likewise: 18px in the nav, but the footer and Quiz modal marks are unmeasured. */
+const LOGO: ImagePreset = {
+  maxWidth: 128,
+  format: 'webp',
+  quality: 95,
+  rendered: { desktop: 18, tablet: 18, phone: 18 },
+}
+/*
+ * Never drawn on the page, so it has no rendered width. JPEG, not WebP: link
+ * unfurlers are the one consumer that still fails on WebP. 1200x630 is the size
+ * every unfurler expects.
+ */
 const OG_CARD: ImagePreset = { maxWidth: 1200, format: 'jpeg', quality: 85 }
+
+/*
+ * A poster is rejected as blank below this standard deviation of luma, which
+ * asks "is anything visible" rather than "is this bright" - a dark but detailed
+ * UI screenshot has to pass. The gap is wide: `feature/hosting` fades up from
+ * black so its first frame scores 0.00, where the next darkest poster on the
+ * page scores 29.3. It only ever rejects frames with nothing in them.
+ */
+export const POSTER_MIN_STDEV = 10
 
 const WALL_CLIP: VideoPreset = { maxWidth: 720, crf: 30, fps: 30 }
 const BENTO_CLIP: VideoPreset = { maxWidth: 1120, crf: 27, fps: 30 }

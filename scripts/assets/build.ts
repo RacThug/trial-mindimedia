@@ -17,37 +17,32 @@
  */
 
 import { execFile } from 'node:child_process'
-import { mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, readdir, rename, rm, stat, writeFile } from 'node:fs/promises'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
 import ffmpegPath from 'ffmpeg-static'
 import ffprobeStatic from 'ffprobe-static'
 import sharp from 'sharp'
-import { SOURCE_ASSETS, type SourceAsset } from './manifest.ts'
+import type { MediaAsset, MediaImage } from '../../src/lib/media/types.ts'
+import {
+  POSTER_MIN_STDEV,
+  SOURCE_ASSETS,
+  type SourceAsset,
+  type SourceImage,
+  type SourceVerbatim,
+  type SourceVideo,
+} from './manifest.ts'
+import { CACHE, INDEX_FILE, PUBLIC_MEDIA, mediaKey, publicUrl } from './paths.ts'
 
 const run = promisify(execFile)
-
-const REPO = fileURLToPath(new URL('../..', import.meta.url))
-const CACHE = path.join(REPO, '.cache/framer')
-const PUBLIC_MEDIA = path.join(REPO, 'public/media')
-const INDEX_FILE = path.join(REPO, 'src/lib/media/asset-index.json')
-
-/** What `asset-index.json` records for one file. */
-type IndexedFile = { src: string; width: number; height: number }
-type IndexedAsset = IndexedFile & { poster?: IndexedFile }
 
 /** Every file this run wrote, keyed by path under `public/media`, with its size. */
 const written = new Map<string, number>()
 
-async function writtenFile(absolute: string): Promise<void> {
+async function recordWritten(absolute: string): Promise<void> {
   const { size } = await stat(absolute)
-  written.set(path.relative(PUBLIC_MEDIA, absolute).replaceAll('\\', '/'), size)
+  written.set(mediaKey(absolute), size)
 }
-
-/** Public URL for a file inside `public/media`. */
-const publicUrl = (absolute: string) =>
-  `/media/${path.relative(PUBLIC_MEDIA, absolute).replaceAll('\\', '/')}`
 
 /* -------------------------------------------------------------------------- */
 /* download                                                                    */
@@ -61,12 +56,30 @@ async function download(asset: SourceAsset): Promise<string> {
   } catch {
     /* Not cached yet. */
   }
+
   const response = await fetch(asset.url)
   if (!response.ok) {
     throw new Error(`${asset.slug}: ${asset.url} returned ${response.status}`)
   }
+  const body = Buffer.from(await response.arrayBuffer())
+
+  const declared = Number(response.headers.get('content-length'))
+  if (declared && declared !== body.byteLength) {
+    throw new Error(
+      `${asset.slug}: got ${body.byteLength} bytes of a declared ${declared}`,
+    )
+  }
+
+  /*
+   * Written beside the target and renamed, because the cache is trusted on
+   * existence alone. A fetch that dies mid-body would otherwise leave a
+   * truncated file that every later run happily reuses, and the damage would
+   * surface as an image that decodes short rather than as a failure.
+   */
   await mkdir(path.dirname(cached), { recursive: true })
-  await writeFile(cached, Buffer.from(await response.arrayBuffer()))
+  const partial = `${cached}.partial`
+  await writeFile(partial, body)
+  await rename(partial, cached)
   return cached
 }
 
@@ -74,8 +87,7 @@ async function download(asset: SourceAsset): Promise<string> {
 /* images                                                                      */
 /* -------------------------------------------------------------------------- */
 
-async function encodeImage(asset: SourceAsset, source: string): Promise<IndexedAsset> {
-  if (asset.kind !== 'image') throw new Error('not an image')
+async function encodeImage(asset: SourceImage, source: string): Promise<MediaImage> {
   const out = path.join(PUBLIC_MEDIA, `${asset.slug}.${asset.format}`)
   await mkdir(path.dirname(out), { recursive: true })
 
@@ -89,7 +101,7 @@ async function encodeImage(asset: SourceAsset, source: string): Promise<IndexedA
       ? await pipeline.webp({ quality: asset.quality, effort: 6 }).toFile(out)
       : await pipeline.jpeg({ quality: asset.quality, mozjpeg: true }).toFile(out)
 
-  await writtenFile(out)
+  await recordWritten(out)
   return { src: publicUrl(out), width: info.width, height: info.height }
 }
 
@@ -134,8 +146,7 @@ async function probe(file: string): Promise<Probe> {
 /** Rounds down to an even number: yuv420p cannot represent odd dimensions. */
 const even = (n: number) => Math.max(2, Math.floor(n / 2) * 2)
 
-async function encodeVideo(asset: SourceAsset, source: string): Promise<IndexedAsset> {
-  if (asset.kind !== 'video') throw new Error('not a video')
+async function encodeVideo(asset: SourceVideo, source: string): Promise<MediaAsset> {
   const out = path.join(PUBLIC_MEDIA, `${asset.slug}.mp4`)
   await mkdir(path.dirname(out), { recursive: true })
 
@@ -168,7 +179,7 @@ async function encodeVideo(asset: SourceAsset, source: string): Promise<IndexedA
     '+faststart',
     out,
   ])
-  await writtenFile(out)
+  await recordWritten(out)
 
   const encoded = await probe(out)
   const still = await posterFrame(asset.slug, out, encoded.duration)
@@ -177,7 +188,7 @@ async function encodeVideo(asset: SourceAsset, source: string): Promise<IndexedA
     .resize({ width: Math.min(width, POSTER_MAX_WIDTH), withoutEnlargement: true })
     .webp({ quality: 72, effort: 6 })
     .toFile(poster)
-  await writtenFile(poster)
+  await recordWritten(poster)
 
   return {
     src: publicUrl(out),
@@ -209,14 +220,6 @@ const POSTER_MAX_WIDTH = 720
  * scrolls into view.
  */
 const POSTER_SEEKS = [0, 0.06, 0.15, 0.3, 0.5]
-
-/*
- * Standard deviation of luma, which asks "is anything visible" rather than "is
- * this bright" - a dark but detailed UI screenshot has to pass. The gap is wide:
- * the blank frame scores 0.00 and the next darkest poster on the page scores
- * 29.3, so this only ever rejects frames with nothing in them.
- */
-const POSTER_MIN_STDEV = 10
 
 /** Picks the first frame with something in it, falling back to the least blank. */
 async function posterFrame(
@@ -254,13 +257,12 @@ async function posterFrame(
 /* verbatim                                                                    */
 /* -------------------------------------------------------------------------- */
 
-async function copyVerbatim(asset: SourceAsset, source: string): Promise<IndexedAsset> {
-  if (asset.kind !== 'verbatim') throw new Error('not a verbatim asset')
+async function copyVerbatim(asset: SourceVerbatim, source: string): Promise<MediaImage> {
   const out = path.join(PUBLIC_MEDIA, `${asset.slug}.${asset.ext}`)
   await mkdir(path.dirname(out), { recursive: true })
   const bytes = await readFile(source)
   await writeFile(out, bytes)
-  await writtenFile(out)
+  await recordWritten(out)
 
   const { width, height } = await sharp(bytes).metadata()
   return { src: publicUrl(out), width: width ?? 0, height: height ?? 0 }
@@ -270,7 +272,14 @@ async function copyVerbatim(asset: SourceAsset, source: string): Promise<Indexed
 /* orphans                                                                     */
 /* -------------------------------------------------------------------------- */
 
-/** Deletes anything under `public/media` this run did not write. */
+/**
+ * Deletes anything under `public/media` this run did not write.
+ *
+ * `public/media` belongs to this script and to nothing else: a slug renamed in
+ * the manifest has to take its old file with it, or the tree fills with assets
+ * no one can trace and no one dares delete. Anything hand-authored goes
+ * elsewhere under `public/`, which is never touched here.
+ */
 async function pruneOrphans(): Promise<string[]> {
   const removed: string[] = []
   async function walk(dir: string): Promise<void> {
@@ -282,7 +291,7 @@ async function pruneOrphans(): Promise<string[]> {
           await rm(absolute, { recursive: true })
         continue
       }
-      const key = path.relative(PUBLIC_MEDIA, absolute).replaceAll('\\', '/')
+      const key = mediaKey(absolute)
       if (!written.has(key)) {
         await rm(absolute)
         removed.push(key)
@@ -303,7 +312,7 @@ async function main(): Promise<void> {
   await mkdir(PUBLIC_MEDIA, { recursive: true })
   await mkdir(path.dirname(INDEX_FILE), { recursive: true })
 
-  const index: Record<string, IndexedAsset> = {}
+  const index: Record<string, MediaAsset> = {}
   let originalBytes = 0
 
   for (const asset of SOURCE_ASSETS) {

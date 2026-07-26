@@ -1,9 +1,9 @@
 import { readFile, readdir, stat } from 'node:fs/promises'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import sharp from 'sharp'
 import { describe, expect, it } from 'vitest'
-import { SOURCE_ASSETS } from '../../scripts/assets/manifest.ts'
+import { POSTER_MIN_STDEV, SOURCE_ASSETS } from '../../scripts/assets/manifest.ts'
+import { PUBLIC_DIR, REPO } from '../../scripts/assets/paths.ts'
 import { isVideo, media, type MediaImage } from '../../src/lib/media/index.ts'
 
 /*
@@ -17,13 +17,10 @@ import { isVideo, media, type MediaImage } from '../../src/lib/media/index.ts'
  * reference survives, and every video has a poster frame.
  */
 
-const REPO = fileURLToPath(new URL('../..', import.meta.url))
-const PUBLIC = path.join(REPO, 'public')
-
 const entries = Object.entries(media) as [string, MediaImage][]
 
 async function size(src: string): Promise<number> {
-  return (await stat(path.join(PUBLIC, src))).size
+  return (await stat(path.join(PUBLIC_DIR, src))).size
 }
 
 describe('the generated asset index', () => {
@@ -112,11 +109,11 @@ describe('video posters (issue #7)', () => {
     /*
      * "Every video has a poster frame" is satisfied by a black rectangle, and
      * `feature/hosting` fades up from black, so frame one of it is exactly that.
-     * Standard deviation of luma asks whether anything is visible instead: the
-     * blank frame scores 0.00 where the darkest real poster scores 29.3.
+     * The threshold is the pipeline's own, imported rather than restated, so
+     * loosening one without the other is not possible.
      */
-    const stats = await sharp(path.join(PUBLIC, asset.poster.src)).greyscale().stats()
-    expect(stats.channels[0]!.stdev).toBeGreaterThan(10)
+    const stats = await sharp(path.join(PUBLIC_DIR, asset.poster.src)).greyscale().stats()
+    expect(stats.channels[0]!.stdev).toBeGreaterThanOrEqual(POSTER_MIN_STDEV)
   })
 })
 

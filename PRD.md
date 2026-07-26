@@ -151,8 +151,8 @@ Testimonial cards floating over it.
 **Verified static.** All 50 tiles tracked for 3 seconds at a fixed scroll position: **0
 moved**. This is not a marquee and must not be built as one. The perceived motion is the
 looping videos inside the tiles. Testimonials likewise do not auto-advance: identical quotes
-after 5 seconds. They do carry **prev/next chevron controls**, so the block is a manual
-carousel, not a static row (measured in #7: two 40x40 SVG arrows in the markup).
+after 5 seconds. They are **manually advanced** rather than fixed: the block carries
+prev/next chevron controls (measured in #7, two 40x40 SVG arrows in the markup).
 
 Grid, measured from the Reference's own layout arithmetic in #7:
 
@@ -329,7 +329,15 @@ Levers, in order of payoff:
 ### Assets
 
 Built by `npm run assets` from `scripts/assets/manifest.ts`, committed under `public/media`,
-reached through `src/lib/media`. Measured in #7:
+reached through `src/lib/media`.
+
+Section 1 counts **106 `<img>` and 12 videos** from the element census. Deduplicated by
+source URL those are **47 unique stills and 13 clips**. Most of the gap is the Template Wall,
+whose 16 tiles are each placed three times and then repeated wholesale behind the Quiz CTA,
+plus the Testimonial avatars shared between the Wall and the social proof grid. The extra
+clip is the case study (6.8).
+
+Measured in #7:
 
 | | Framer originals | Committed |
 | --- | --- | --- |
@@ -353,7 +361,12 @@ Four Deviations, all in the encode:
 
 Image fidelity is gated by `npm run assets:verify`: luma SSIM against the Framer original,
 budget >= 0.98, worst graded asset 0.9840. Two dark, film-grained screenshots sit on a
-recorded lower floor with the reasoning in `scripts/assets/verify.ts`.
+recorded lower floor with the reasoning in `scripts/assets/verify.ts`. It needs the download
+cache, so it runs beside `npm run assets` and is not a CI gate.
+
+Each asset's measured render width per Breakpoint is recorded as `rendered` in the manifest,
+and `next.config.ts` builds its `deviceSizes` ladder from those numbers. Sections #10 to #12
+write each component's `sizes` against them.
 
 ### Fidelity
 

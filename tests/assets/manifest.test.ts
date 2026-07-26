@@ -7,8 +7,12 @@ import { MEDIA_GROUPS, SOURCE_ASSETS } from '../../scripts/assets/manifest.ts'
  * each other in `public/media`, and a duplicated `id` commits the same bytes
  * twice. Neither breaks a build. Both are caught here.
  *
- * The counts are the census itself (PRD section 1, issue #7): 60 unique media
- * files, of which 13 are video.
+ * The counts are that census, run for this issue against the Reference's markup
+ * on 2026-07-26. Issue #7 estimates "~106 images and 12 videos" from the element
+ * count; deduplicated by source URL those are 47 unique stills and 13 clips.
+ * Most of the gap is the Template Wall, whose 16 tiles are each placed three
+ * times and then repeated wholesale behind the Quiz CTA, and the Testimonial
+ * avatars shared between the Wall and the social proof grid.
  */
 
 describe('the source manifest', () => {
@@ -16,8 +20,13 @@ describe('the source manifest', () => {
     expect(SOURCE_ASSETS).toHaveLength(60)
   })
 
-  it('covers all 13 unique videos', () => {
+  it('covers all 13 unique videos, one more than issue #7 estimated', () => {
+    /* The extra is `story/case-study`, which the PRD had down as a still. */
     expect(SOURCE_ASSETS.filter((a) => a.kind === 'video')).toHaveLength(13)
+  })
+
+  it('covers the 47 unique stills behind 106 img elements', () => {
+    expect(SOURCE_ASSETS.filter((a) => a.kind !== 'video')).toHaveLength(47)
   })
 
   it('gives every asset a unique slug', () => {
@@ -66,6 +75,15 @@ describe('the source manifest', () => {
       /* `next/image` re-encodes on top of this, so the source stays generous. */
       expect(asset.quality).toBeGreaterThanOrEqual(85)
       expect(asset.quality).toBeLessThanOrEqual(95)
+    },
+  )
+
+  it.each(SOURCE_ASSETS.filter((a) => a.kind === 'image' && a.rendered))(
+    '$slug commits enough pixels for its measured render at DPR 2',
+    (asset) => {
+      if (asset.kind !== 'image' || !asset.rendered) throw new Error('unreachable')
+      const widest = Math.max(...Object.values(asset.rendered))
+      expect(asset.maxWidth).toBeGreaterThanOrEqual(widest * 2)
     },
   )
 

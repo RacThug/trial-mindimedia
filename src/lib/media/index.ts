@@ -14,28 +14,23 @@
  */
 
 import assetIndex from './asset-index.json'
+import type { MediaAsset, MediaImage, MediaVideo } from './types.ts'
 
-/** A still: an image, or the poster frame standing in for a clip. */
-export type MediaImage = {
-  readonly src: string
-  readonly width: number
-  readonly height: number
-}
-
-export type MediaVideo = MediaImage & {
-  /** Every clip has one. `preload="none"` means this is what a visitor sees. */
-  readonly poster: MediaImage
-}
+export type { MediaAsset, MediaImage, MediaVideo }
 
 /**
  * Every committed asset, by slug. Slugs read `group/name`; see
  * `scripts/assets/manifest.ts` for what each group covers.
+ *
+ * The `satisfies` is what makes the generated file part of the type system: a
+ * pipeline that emitted an entry without a `width`, or a poster without a `src`,
+ * fails `npm run typecheck` instead of reaching a component.
  */
-export const media = assetIndex.assets
+export const media = assetIndex.assets satisfies Record<string, MediaAsset>
 
 export type MediaSlug = keyof typeof media
 
 /** True for the thirteen clips, which are the only entries carrying a poster. */
-export function isVideo(asset: MediaImage | MediaVideo): asset is MediaVideo {
+export function isVideo(asset: MediaAsset): asset is MediaVideo {
   return 'poster' in asset
 }

@@ -12,15 +12,28 @@ const nextConfig: NextConfig = {
      */
     formats: ['image/avif', 'image/webp'],
     /*
-     * The Reference's Breakpoints, not Next's defaults. `next/image` picks a
-     * variant from these against each component's `sizes`, so widths that do not
-     * line up with the layout mean every image is a little too large or a little
-     * too small. Measured renders: Template Wall tiles 128/191/348, step
-     * thumbnails 275, featured Template cards 351/387, feature bento 552 - each
-     * doubled here for DPR 2, plus 1920 for the widest still on the page.
+     * The Reference's layout, not Next's defaults. `next/image` serves the
+     * smallest entry at or above the width a component's `sizes` resolves to, so
+     * a ladder that does not line up with the layout ships every image a little
+     * too large. Each rung below is a measured render width at DPR 2, recorded
+     * as `rendered` in `scripts/assets/manifest.ts`:
+     *
+     *    256  Template Wall tile, phone       (128)
+     *    382  Template Wall tile, tablet      (191)
+     *    550  step thumbnail, all three       (275)
+     *    634  feature bento, tablet           (317)
+     *    702  featured Template card, phone   (351)
+     *    774  featured Template card, desktop (387)
+     *    696  Template Wall tile, desktop     (348)
+     *   1104  feature bento, desktop          (552)
+     *   1920  headroom, DPR 3 on the bento    (552 x 3 = 1656)
+     *
+     * `imageSizes` covers the fixed-size elements, which carry a width rather
+     * than a `sizes`: the 18px nav logo, the 32px footer portrait and the 40 to
+     * 42px avatars, each at DPR 1 to 3.
      */
-    deviceSizes: [256, 382, 550, 696, 774, 1104, 1360, 1920],
-    imageSizes: [32, 40, 64, 84, 128, 200],
+    deviceSizes: [256, 382, 550, 634, 696, 702, 774, 1104, 1920],
+    imageSizes: [36, 40, 64, 84, 96, 128],
   },
 }
 
