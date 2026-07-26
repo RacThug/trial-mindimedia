@@ -1,0 +1,39 @@
+[
+  {
+    "slug": "pick",
+    "title": "Pick a template.",
+    "body": "Browse the collection of expert-crafted templates and select one best for you.",
+    "media": [
+      { "slug": "template/traction-a", "alt": "The Traction Framer template" },
+      { "slug": "step/pick-02", "alt": "The Cora Framer template" },
+      { "slug": "step/pick-03", "alt": "The Funnelz Framer template" },
+      { "slug": "step/pick-04", "alt": "The Editr Framer template" },
+      { "slug": "step/pick-05", "alt": "The Partnr Framer template" },
+      { "slug": "step/pick-06", "alt": "The Meraas Framer template" },
+      { "slug": "step/pick-07", "alt": "The Reformr Framer template" },
+      { "slug": "step/pick-08", "alt": "The Influence Framer template" }
+    ]
+  },
+  {
+    "slug": "customise",
+    "title": "Make it yours.",
+    "body": "Change text, customize colors, and swap images with ease.",
+    "media": [
+      {
+        "slug": "step/customise",
+        "alt": "The Framer editor with a template's colour styles open beside its desktop, tablet and phone breakpoints"
+      }
+    ]
+  },
+  {
+    "slug": "publish",
+    "title": "Go live instantly.",
+    "body": "Launch your site in seconds with just one click, all in one platform.",
+    "media": [
+      {
+        "slug": "step/publish",
+        "alt": "The Framer editor with a template open and the Publish button in the top right"
+      }
+    ]
+  }
+]
