@@ -1,8 +1,8 @@
 'use client'
 
-import Image from 'next/image'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { ArrowRightIcon, CloseIcon } from '@/components/icons.tsx'
+import { TickerStrip } from '@/components/media/ticker-strip.tsx'
 import { QUIZ_BLURB, QUIZ_HREF } from '@/components/sections/quiz-copy.ts'
 import { ButtonLink } from '@/components/ui/button.tsx'
 import { media } from '@/lib/media'
@@ -74,9 +74,14 @@ const TICKER = [
 /*
  * Measured: 476x369 tiles 32px apart, travelling at 30.4px/s. The tiles are
  * cropped to that box rather than drawn at their own aspect - the sources are
- * all 1.59 wide and the Reference shows them at 1.29.
+ * all 1.59 wide and the Reference shows them at 1.29 - so the cycle is a
+ * straight multiplication rather than the aspect sum the Quiz CTA's columns
+ * need, and both columns run five tiles, so both take the same time.
  */
-const TICKER_DURATION = `${((5 * (369 + 32)) / 30.44).toFixed(2)}s`
+const TILE_HEIGHT = 369
+const TILE_GAP = 32
+const PIXELS_PER_SECOND = 30.44
+const TICKER_DURATION = `${((5 * (TILE_HEIGHT + TILE_GAP)) / PIXELS_PER_SECOND).toFixed(2)}s`
 
 export function QuizModal() {
   const ref = useRef<HTMLDialogElement>(null)
@@ -129,7 +134,7 @@ export function QuizModal() {
       }}
       aria-labelledby="quiz-modal-heading"
       tabIndex={-1}
-      className="inset-0 m-auto h-165 w-[calc(100vw-84px)] max-w-none overflow-clip rounded-card bg-bg p-0 text-text rule-ring backdrop:bg-[rgba(0,0,0,0.9)] focus:outline-none tablet:h-154 tablet:w-170 desktop:w-254"
+      className="inset-0 m-auto h-[660px] w-[calc(100vw-84px)] max-w-none overflow-clip rounded-card bg-bg p-0 text-text rule-ring backdrop:bg-[var(--modal-scrim)] focus:outline-none tablet:h-[616px] tablet:w-[680px] desktop:w-[1016px]"
     >
       <Ticker />
 
@@ -172,65 +177,38 @@ export function QuizModal() {
   )
 }
 
-/*
- * The panel's own dimming, measured in #12 and the same two-gradient shape the
- * Quiz CTA uses: opaque to 54% of the panel and gone by 100%, intersected with a
- * ramp up from nothing. It peaks at about 54% alpha a little past the middle,
- * which is what lets white copy sit over ten bright screenshots.
- */
-const TICKER_MASK =
-  'linear-gradient(#000000 54%, rgba(0, 0, 0, 0) 100%), linear-gradient(rgba(0, 0, 0, 0) 0%, #000000 100%)'
-
 /**
  * The panel's backdrop: two columns of screenshots tilted 16deg and travelling
- * in opposite directions, on the same doubled-strip trick the Quiz CTA's tickers
- * use - see `ticker-columns.tsx` for why the gaps are margins.
+ * in opposite directions, on the strip `ticker-strip.tsx` owns.
  *
  * Each column is twice the panel tall and hung half a panel above it, the way
  * `ThumbnailColumns` hangs its strip: rotated, a column's corners look past the
  * ends of a strip that starts at the panel's own top edge, and at the far end of
  * the travel there would be nothing there to see.
+ *
+ * The tiles are 5px-rounded, not the 4 of `--radius-tile`. One measurement each,
+ * and one pixel apart, so neither borrows the other's token.
  */
 function Ticker() {
   return (
     <div
       aria-hidden="true"
-      className="absolute inset-0 flex items-start justify-center gap-16 overflow-hidden"
-      style={{
-        maskImage: TICKER_MASK,
-        maskComposite: 'intersect, add',
-        WebkitMaskImage: TICKER_MASK,
-        WebkitMaskComposite: 'intersect, add',
-      }}
+      className="absolute inset-0 flex items-start justify-center gap-16 overflow-hidden modal-ticker-mask"
     >
       {TICKER.map((column) => (
         <div
           key={column.direction}
           className="relative h-[200%] w-[319px] shrink-0 -translate-y-1/4 rotate-[16deg] tablet:w-[476px]"
         >
-          <ul
-            className="absolute inset-x-0 top-0 [animation-name:ticker-travel] [animation-timing-function:linear] [animation-iteration-count:infinite] motion-reduce:[animation-name:none]"
-            style={{
-              animationDuration: TICKER_DURATION,
-              animationDirection: column.direction === 'up' ? 'normal' : 'reverse',
-            }}
-          >
-            {[...column.shots, ...column.shots].map((shot, index) => (
-              <li
-                key={index}
-                className="mb-8 h-[247px] w-[319px] overflow-hidden rounded-[5px] tablet:h-[369px] tablet:w-[476px]"
-              >
-                <Image
-                  src={shot.src}
-                  alt=""
-                  width={shot.width}
-                  height={shot.height}
-                  sizes="(min-width: 810px) 476px, 319px"
-                  className="size-full object-cover"
-                />
-              </li>
-            ))}
-          </ul>
+          <TickerStrip
+            tiles={column.shots}
+            direction={column.direction}
+            duration={TICKER_DURATION}
+            gap="mb-8"
+            tile="h-[247px] w-[319px] tablet:h-[369px] tablet:w-[476px]"
+            sizes="(min-width: 810px) 476px, 319px"
+            radius="rounded-[5px]"
+          />
         </div>
       ))}
     </div>

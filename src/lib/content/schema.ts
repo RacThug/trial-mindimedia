@@ -17,11 +17,10 @@
  */
 
 import { z } from 'zod'
-import { PLAN_GLYPH_NAMES } from '../../components/ui/plan-glyphs.ts'
+import { PLAN_GLYPH_NAMES } from '../glyphs/plans.ts'
 import { media } from '../media/index.ts'
 
 const MEDIA_SLUGS: ReadonlySet<string> = new Set(Object.keys(media))
-const GLYPH_NAMES: ReadonlySet<string> = new Set(PLAN_GLYPH_NAMES)
 
 const nonEmpty = z.string().min(1)
 
@@ -39,21 +38,17 @@ const mediaSlug = nonEmpty.superRefine((value, ctx) => {
 /**
  * `lightning` - one of the Plan cards' fourteen glyphs (PRD 6.9).
  *
- * Cross-referenced here for the same reason a media slug is: the pairing of a
- * line of copy with a glyph is content, the glyph itself is markup, and a name
- * that resolves to neither should fail with a message rather than throw at
- * render. `plan-glyphs.ts` is deliberately free of React so that this import
- * costs the data layer nothing.
+ * Cross-referenced for the same reason a media slug is: the pairing of a line of
+ * copy with a glyph is content, the glyph itself is markup, and a name that
+ * resolves to neither should fail with a message rather than throw at render.
+ *
+ * An enum rather than the `superRefine` a media slug needs, because the glyph
+ * set is a literal the compiler already knows: the parsed type is one of the
+ * fourteen and not `string`, so `PlanIcon` looks a name up without a cast and
+ * without a runtime guard. `lib/glyphs` carries no React, so the content
+ * module stays the leaf it is in ADR-0002.
  */
-const glyphName = nonEmpty.superRefine((value, ctx) => {
-  if (!GLYPH_NAMES.has(value)) {
-    ctx.addIssue({
-      code: 'custom',
-      input: value,
-      message: `unknown plan glyph "${value}"`,
-    })
-  }
-})
+const glyphName = z.enum(PLAN_GLYPH_NAMES)
 
 /** `custom-project` - stable identity, and safe in a URL or a React key. */
 const entitySlug = z

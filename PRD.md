@@ -351,9 +351,9 @@ appears below the quote, so an at-rest capture is byte-identical and a keyboard 
 still finds it: the bargain a skip link makes. The Reference offers nothing here at all -
 its own prev/next chevrons are in the markup but `display: none` at every Breakpoint.
 
-**Eleven** of these images, and none of the six clips, form the Quiz CTA backdrop (6.10) -
-measured in #12, where they are also four columns that travel rather than a second copy of
-this static grid. See 6.10.
+**Ten** of these images, and none of the six clips, form the Quiz CTA backdrop (6.10) - one
+of them in two columns, for eleven placements. Measured in #12, where they are also four
+columns that **travel**, rather than a second copy of this static grid. See 6.10.
 
 ### 6.4 Featured templates
 
@@ -627,8 +627,9 @@ Eyebrow `60-SECOND QUIZ`, H2 `Not sure which template is for you?`, a paragraph,
 `Take the quiz`, over a dimmed backdrop of Template stills.
 
 **The backdrop travels.** This section first called it "a dimmed Template Wall backdrop", and
-the images are indeed eleven of the Wall's sixteen with none of its six clips - but they are
-four columns going up and down at **29.1px/s**, columns 1 and 3 rising and 2 and 4 falling.
+the images are indeed ten of the Wall's sixteen with none of its six clips, one placed twice
+for eleven placements - but they are four columns going up and down at **29.1px/s**, columns
+1 and 3 rising and 2 and 4 falling.
 Measured in #12 by sampling the columns' transforms twice, two seconds apart, with the band
 in view. The Template Wall (6.3) is the static grid that looks like a marquee; this is the
 marquee that looks like the Wall, and mixing the two up is the easiest mistake on this page.
@@ -850,18 +851,26 @@ Built by `npm run assets` from `scripts/assets/manifest.ts`, committed under `pu
 reached through `src/lib/media`.
 
 Section 1 counts **106 `<img>` and 12 videos** from the element census. Deduplicated by
-source URL those are **47 unique stills and 13 clips**. Most of the gap is the Template Wall,
-whose 16 tiles are each placed three times and then repeated wholesale behind the Quiz CTA,
-plus the Testimonial avatars shared between the Wall and the social proof grid. The extra
-clip is the case study (6.8).
+source URL those are **57 unique stills and 13 clips**. Most of the gap is the Template Wall,
+whose 16 tiles are each placed three times and then reused - ten of them, moving - behind the
+Quiz CTA, plus the Testimonial avatars shared between the Wall and the social proof grid. The
+extra clip is the case study (6.8).
 
-Measured in #7:
+**Ten of the 57 the census missed**, and the reason is worth keeping: it was taken from the
+loaded page, and the quiz modal (6.13) does not render for six seconds. Its backdrop is ten
+screenshots that appear nowhere else on the page, added in #12 as `quiz/*`. Anything else
+that only exists after a delay is still uncounted.
+
+Measured in #7, and again in #12 with those ten:
 
 | | Framer originals | Committed |
 | --- | --- | --- |
 | Video, 13 clips | 49.50 MB | 3.42 MB |
-| Stills, 47 files | 12.70 MB | 1.28 MB, plus 13 generated poster frames |
-| **Total** | **62.20 MB over 60 files** | **4.70 MB over 73 files**, 92.4% saved |
+| Stills, 57 files | 22.94 MB | 1.50 MB, plus 13 generated poster frames |
+| **Total** | **73.63 MB over 70 files** | **5.19 MB over 83 files**, 93.0% saved |
+
+The modal's ten are the one group whose weight is not in the initial load at all: it mounts
+on a timer, so they are fetched after everything the budget above covers.
 
 Every entry carries width and height, so nothing renders without an aspect ratio (lever 5).
 `next/image` re-encodes the stills again per request: `wall/tile-02` is 43 kB committed and
@@ -973,7 +982,20 @@ Honest gaps. Measure during the build, do not guess.
    29px/s over three samples and read the 816px between them off one capture. The speed is a
    measurement; the phase is a constant that depends on when you look, so the Clone reproduces
    the offset it measured rather than claiming the Reference starts there.
-5. **The Testimonial slide easing is approximated.** Sampling the Reference's transform
+5. **No pause control on the three decorative travelling backdrops.** Step 1's thumbnail
+   columns (6.6) and the two ticker backdrops (6.10, 6.13) stop under
+   `prefers-reduced-motion` and offer nothing else. WCAG 2.2.2 wants a mechanism to stop
+   moving content that runs past five seconds, and the Wall's Testimonials (6.3) have one; an
+   axe scan cannot see the difference, which is why this is written down rather than left to
+   be noticed. It is one mechanism across three Sections in two work packages - a page-level
+   control, or one per band - and the choice belongs to whoever builds it rather than to
+   whichever Section lands next.
+6. **The tickers' speed is a desktop measurement.** 29.1px/s on the Quiz CTA and 30.4px/s in
+   the modal are the columns' rate at the width they were measured at. Both strips wrap on
+   half their own height, so a narrower Breakpoint carries a shorter strip at the same
+   duration and therefore travels proportionally slower. Whether the Reference holds px/s or
+   holds the proportion below 1200px is unmeasured.
+7. **The Testimonial slide easing is approximated.** Sampling the Reference's transform
    every 40ms gives 3.2s between advances and ~1.4s of travel that is 52% done at 130ms and
    90% at 570ms. That is a spring; the Clone runs
    `cubic-bezier(0.16, 1, 0.3, 1)` over 1400ms, which tracks it closely but is a fit rather

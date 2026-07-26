@@ -61,12 +61,19 @@ produces. The Clone sets the measured height and lets the columns fill into it, 
 lands in which column differs there. The wall reads the same, and the half where the
 difference shows is under the fade anyway.
 
-### Four on the Wall's motion (PRD 6.3)
+### Four on the Wall's Testimonial rotation (PRD 6.3)
 
 The Reference honours none of these, and each is a WCAG obligation rather than a preference:
-the Testimonial rotation stops under `prefers-reduced-motion`, it pauses while off screen, it
-has a keyboard-reachable pause control that is invisible until focused, and the same holds
-for Step 1's travelling thumbnails (6.6) and the Quiz CTA's ticker columns (6.10).
+the rotation stops under `prefers-reduced-motion`, it pauses while off screen, it pauses on
+hover and on focus, and it has a keyboard-reachable pause control that is invisible until
+focused - which is what WCAG 2.2.2 actually asks for, where the Reference's own prev/next
+chevrons are `display: none` at every Breakpoint.
+
+The page's three **decorative** travelling backdrops - Step 1's thumbnail columns (6.6) and
+the two ticker backdrops (6.10, 6.13) - stop under `prefers-reduced-motion` and have **no
+pause control**. That is a known gap rather than a decision: 2.2.2 covers them too. It is one
+mechanism across three Sections in two work packages, so it is recorded in PRD section 10
+rather than fitted to one of them.
 
 ### Two prose links are underlined (PRD 6.12, 6.14)
 

@@ -126,7 +126,7 @@ const CELL_RULES = ['rule-rb', 'rule-b', 'rule-r', ''] as const
 
 function StatTiles({ stats }: { readonly stats: readonly Stat[] }) {
   return (
-    <dl className="grid grid-cols-2 shadow-[inset_0_1px_0_var(--color-surface-3)]">
+    <dl className="grid grid-cols-2 rule-t">
       {stats.map((stat, index) => (
         <div
           key={stat.slug}

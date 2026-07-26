@@ -26,19 +26,19 @@ import { QUIZ_BLURB, QUIZ_HREF } from './quiz-copy.ts'
  * That is not decoration: this is the one Eyebrow on the page with a picture
  * behind it, and without the blur the pill reads as a rectangle of noise.
  *
- * The tickers are eleven of the Template Wall's sixteen tiles and none of its
- * six clips, in the four columns the Reference runs them in - see
+ * The tickers are ten of the Template Wall's sixteen tiles and none of its six
+ * clips, in the four columns the Reference runs them in - see
  * `ticker-columns.tsx` for why they move and the Wall does not.
  */
 
 /*
  * Which of the Wall's tiles lands in which column, in the Reference's own order,
- * measured in #12. Eleven of the sixteen appear and none of the six clips does;
- * `wall/tile-14` is in two columns, which is why it is named twice. Columns 1
- * and 3 travel up, 2 and 4 down.
+ * measured in #12. **Ten** of the sixteen appear and none of the six clips does;
+ * `wall/tile-14` is in two of the four columns, so there are eleven placements
+ * and it is named twice. Columns 1 and 3 travel up, 2 and 4 down.
  *
  * By slug rather than by index into `wall-tiles.json`: this is a selection of
- * eleven from sixteen in an order of its own, which reads as eleven names and
+ * ten from sixteen in an order of its own, which reads as a list of names and
  * does not read at all as `[8, 13, 6]`.
  */
 const COLUMN_TILES = [

@@ -13,9 +13,16 @@
  * There is no tick repeated down the list: the Reference picks a different glyph
  * for every line of copy, and the same line of copy carries the same glyph on
  * every card. That pairing is content, so it lives in `plans.json` as a name;
- * this file is what a name resolves to. Split from `plan-icon.tsx` so the data
- * layer's own test can check that every name in the JSON is one of these without
- * importing React to do it.
+ * this file is what a name resolves to.
+ *
+ * It sits under `src/lib` rather than beside `plan-icon.tsx`, and the reason is
+ * the direction of the arrow: `content/schema.ts` cross-references a glyph name
+ * the way it cross-references a media slug against the generated asset index, so
+ * a name that resolves to nothing fails validation with a message rather than
+ * throwing at render. The content module is the leaf (ADR-0002), so it cannot
+ * reach into `src/components` to find out what a name means - this is the same
+ * shape as `lib/media`, one directory holding what a slug resolves to. Nothing
+ * here imports React; `ui/plan-icon.tsx` is what draws it.
  *
  * Two of the fourteen carry the Reference's own linecap and linejoin rather than
  * the round default: `play-circle`'s ring is butt/miter, and is drawn that way.
@@ -192,5 +199,14 @@ export const PLAN_GLYPHS = {
 
 export type PlanGlyphName = keyof typeof PLAN_GLYPHS
 
-/** For the test that pins every name in `plans.json` to a glyph that exists. */
-export const PLAN_GLYPH_NAMES = Object.keys(PLAN_GLYPHS) as readonly PlanGlyphName[]
+/**
+ * The same names as a tuple, which is what `z.enum` needs to narrow `icon` from
+ * `string` to one of the fourteen. Derived from the map rather than typed out
+ * again, so a glyph cannot be added without becoming valid content; the cast is
+ * the one thing `Object.keys` cannot tell TypeScript, and the `satisfies` above
+ * is what makes the keys trustworthy in the first place.
+ */
+export const PLAN_GLYPH_NAMES = Object.keys(PLAN_GLYPHS) as [
+  PlanGlyphName,
+  ...PlanGlyphName[],
+]
