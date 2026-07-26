@@ -93,6 +93,10 @@ describe('type scale (PRD section 4)', () => {
     ['h3', '44px', '57.2px', '-0.88px'],
     ['h4', '32px', '41.6px', '-0.64px'],
     ['h5', '24px', '33.6px', '-0.48px'],
+    /* The page's second 24px step, measured in #11: the feature bento's card
+     * titles are 24/36 where a step card's title and a Testimonial's quote at
+     * the same size are 24/33.6. */
+    ['feature', '24px', '36px', '-0.48px'],
     ['body', '16px', '25.6px', 'normal'],
     ['body-sm', '14px', '22.4px', 'normal'],
     ['eyebrow', '12px', '20.4px', 'normal'],
@@ -113,6 +117,10 @@ describe('type scale (PRD section 4)', () => {
     ['display-phone', '44px', '52.8px', '-0.88px'],
     ['h2-tablet', '48px', '57.6px', '-0.96px'],
     ['h2-phone', '36px', '43.2px', '-0.72px'],
+    /* The H3 steps too, measured in #11 on the case study's heading. Unlike the
+     * H1 and H2 it keeps a 1.3 line height rather than 1.2 at every step. */
+    ['h3-tablet', '36px', '46.8px', '-0.72px'],
+    ['h3-phone', '28px', '36.4px', '-0.56px'],
   ])('defines `%s` as %s/%s, tracking %s', (name, size, leading, tracking) => {
     expect(themeVariable(`--text-${name}`)).toBe(size)
     expect(themeVariable(`--text-${name}--line-height`)).toBe(leading)
@@ -134,6 +142,34 @@ describe('type scale (PRD section 4)', () => {
     expect(themeVariable('--text-eyebrow--font-weight')).toBe('600')
   })
 
+  /*
+   * Measured in #11 and not in the PRD until then: every heading step is the
+   * variable face at 450, and the bento's own 24px step is the one that is not.
+   * At 400 a Testimonial's quote fits its cell on two lines where the Reference
+   * takes three, so this is a layout number as much as a type one.
+   */
+  it.each([
+    'display',
+    'display-tablet',
+    'display-phone',
+    'h2',
+    'h2-tablet',
+    'h2-phone',
+    'h3',
+    'h3-tablet',
+    'h3-phone',
+    'h4',
+    'h5',
+  ])('sets the heading weight on the `%s` step', (name) => {
+    expect(themeVariable(`--text-${name}--font-weight`)).toBe(
+      'var(--font-weight-heading)',
+    )
+  })
+
+  it('leaves the feature bento step at 400, which is the measured exception', () => {
+    expect(themeVariable('--text-feature--font-weight')).toBe('var(--font-weight-normal)')
+  })
+
   it.each(['xs', 'sm', 'base', 'lg', 'xl', '2xl'])(
     "drops Tailwind's stock `%s` type step",
     (name) => {
@@ -152,8 +188,11 @@ describe('tracking and weight (PRD section 4)', () => {
     expect(themeVariable('--tracking-wide')).toBeUndefined()
   })
 
-  it('offers only the four measured weights', () => {
+  it('offers only the five measured weights', () => {
     expect(themeVariable('--font-weight-normal')).toBe('400')
+    /* Every heading step, measured in #11 as `font-variation-settings: "wght"
+     * 450` on the Reference's variable face. */
+    expect(themeVariable('--font-weight-heading')).toBe('450')
     /* Nav links, footer links and button labels, measured in #9. The scale is
      * not weight 400 throughout, which is what section 4 first recorded. */
     expect(themeVariable('--font-weight-medium')).toBe('500')
@@ -201,6 +240,12 @@ describe('shape (PRD section 4)', () => {
     ['--radius-tile', '4px'],
     ['--radius-eyebrow', '8px'],
     ['--radius-badge', '4px'],
+    /* The three framed Sections, measured in #11: the bento and the social
+     * proof grid round at 16, the step cards at 20, and a visual framed inside
+     * a card at 8. */
+    ['--radius-frame', '16px'],
+    ['--radius-steps', '20px'],
+    ['--radius-visual', '8px'],
     ['--nav-row-height', '46px'],
     ['--button-padding-x', '20px'],
     ['--button-padding-y', '10px'],

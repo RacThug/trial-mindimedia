@@ -40,8 +40,9 @@
   --breakpoint-desktop: 1200px;
 
   /* ---- Type (PRD section 4) ---------------------------------------------
-   * Geist. The whole scale is weight 400 with uniform -0.02em tracking;
-   * headings are large and light, never bold. Only the eyebrow is heavier.
+   * Geist, with uniform -0.02em tracking: headings are large and light, never
+   * bold. They are not 400 either - every heading step is the variable face at
+   * 450, measured in #11; see `--font-weight-heading`.
    *
    * Each step carries its own measured line height and tracking, so the
    * `leading-*` and `tracking-*` utilities exist only to override a
@@ -56,6 +57,22 @@
 
   --font-weight-*: initial;
   --font-weight-normal: 400;
+  /* Every heading step on the page - measured in #11, and PRD section 4 had the
+   * scale at 400 throughout until then. The Reference sets
+   * `font-variation-settings: "wght" 450` on the variable face for the H1, H2,
+   * H3, H4 and H5 steps alike; body copy stays on the static face at 400, and
+   * the ONE exception is the feature bento's card titles (6.5), which is why
+   * `--text-feature` exists as its own step.
+   *
+   * It is 2% of extra width, which sounds like nothing and is not: at 450 a
+   * Testimonial's quote wraps to three lines in a 352px cell and at 400 it fits
+   * on two, so the grid is a different shape. The same holds anywhere a heading
+   * sits near a break, which is every H1 and H2 on this page.
+   *
+   * It rides on the type steps rather than on `h1`-`h6`, because what carries it
+   * is the step and not the tag: the social proof grid's quotes are the H5 step
+   * inside a `<blockquote>`, and the bento's titles are `<h3>` at 400. */
+  --font-weight-heading: 450;
   /* Nav links, footer links and every button label. Measured in #9: the scale
    * is not weight 400 throughout after all - interactive text is 500. */
   --font-weight-medium: 500;
@@ -70,6 +87,7 @@
   --text-display: 68px; /* H1 */
   --text-display--line-height: 81.6px;
   --text-display--letter-spacing: -1.36px;
+  --text-display--font-weight: var(--font-weight-heading);
 
   /* The H1 and H2 both step down twice, and neither step was measured before
    * #10 - PRD section 5 recorded the tablet H1's size with no line height at
@@ -78,34 +96,64 @@
   --text-display-tablet: 60px;
   --text-display-tablet--line-height: 72px;
   --text-display-tablet--letter-spacing: -1.2px;
+  --text-display-tablet--font-weight: var(--font-weight-heading);
 
   --text-display-phone: 44px;
   --text-display-phone--line-height: 52.8px;
   --text-display-phone--letter-spacing: -0.88px;
+  --text-display-phone--font-weight: var(--font-weight-heading);
 
   --text-h2: 56px;
   --text-h2--line-height: 67.2px;
   --text-h2--letter-spacing: -1.12px;
+  --text-h2--font-weight: var(--font-weight-heading);
 
   --text-h2-tablet: 48px;
   --text-h2-tablet--line-height: 57.6px;
   --text-h2-tablet--letter-spacing: -0.96px;
+  --text-h2-tablet--font-weight: var(--font-weight-heading);
 
   --text-h2-phone: 36px;
   --text-h2-phone--line-height: 43.2px;
   --text-h2-phone--letter-spacing: -0.72px;
+  --text-h2-phone--font-weight: var(--font-weight-heading);
 
   --text-h3: 44px;
   --text-h3--line-height: 57.2px;
   --text-h3--letter-spacing: -0.88px;
+  --text-h3--font-weight: var(--font-weight-heading);
 
   --text-h4: 32px; /* stat */
   --text-h4--line-height: 41.6px;
   --text-h4--letter-spacing: -0.64px;
+  --text-h4--font-weight: var(--font-weight-heading);
+
+  /* The H3 steps down twice as well, measured in #11 on the case study's
+   * heading at 1440, 810 and 390. Like the H1 and the H2 it keeps its tracking
+   * at -0.02em, but its line height is 1.3 rather than 1.2 at every step. */
+  --text-h3-tablet: 36px;
+  --text-h3-tablet--line-height: 46.8px;
+  --text-h3-tablet--letter-spacing: -0.72px;
+  --text-h3-tablet--font-weight: var(--font-weight-heading);
+
+  --text-h3-phone: 28px;
+  --text-h3-phone--line-height: 36.4px;
+  --text-h3-phone--letter-spacing: -0.56px;
+  --text-h3-phone--font-weight: var(--font-weight-heading);
 
   --text-h5: 24px; /* card title */
   --text-h5--line-height: 33.6px;
   --text-h5--letter-spacing: -0.48px;
+  --text-h5--font-weight: var(--font-weight-heading);
+
+  /* The page has TWO 24px steps, which is the sort of thing a scale gets
+   * "tidied" out of. Measured in #11: a step card's title and a Testimonial's
+   * quote are `--text-h5` at 24/33.6, and every feature bento title is 24/36 -
+   * same size, same tracking, 2.4px more leading, at all three Breakpoints. */
+  --text-feature: 24px;
+  --text-feature--line-height: 36px;
+  --text-feature--letter-spacing: -0.48px;
+  --text-feature--font-weight: var(--font-weight-normal);
 
   --text-body: 16px;
   --text-body--line-height: 25.6px;
@@ -200,6 +248,27 @@
   --radius-eyebrow: 8px;
   --radius-badge: 4px;
 
+  /* Sections 6.5 to 6.8 are drawn as framed grids rather than as loose cards:
+   * one 1px `--color-surface-3` outline around the whole block, with the cells
+   * dividing themselves by their own edges. Measured in #11 - the bento and the
+   * social proof grid round at 16, the three step cards at 20, and a visual
+   * framed inside a card at 8. */
+  --radius-frame: 16px;
+  --radius-steps: 20px;
+  --radius-visual: 8px;
+
+  /* Step 1's thumbnail column (PRD 6.6). Two 275px columns of eight 275x199
+   * tiles, 16px apart, each column rotated 16deg and travelling upwards at a
+   * measured 29px/s. The cycle is the height of one full column - eight tiles
+   * and their eight gaps - so a doubled list lands exactly on itself.
+   *
+   * The second column is offset by the 816px measured between the two, not by
+   * half: both run at one speed, so the distance between them is a constant. */
+  --thumbnails-tile-height: 199px;
+  --thumbnails-cycle: 1720px; /* 8 * (199 + 16) */
+  --thumbnails-duration: 59.3s; /* 1720px / 29px per second */
+  --thumbnails-offset: -28.1s; /* 816px / 29px per second */
+
   /* Both tinted pills are radial gradients rather than flat fills, which is why
    * neither reads as a solid colour in a screenshot. Measured in #10 from the
    * Eyebrow (hero and featured Templates alike) and the NEW badge; the gradients
@@ -214,6 +283,16 @@
     50% 50%,
     rgba(51, 212, 120, 0) 0%,
     rgba(51, 212, 120, 0.2) 100%
+  );
+
+  /* The step badge (PRD 6.6), measured in #11: the Eyebrow's wash and geometry
+   * exactly - same stops, same 8px radius, same `4px 12px` - in
+   * `--color-accent-orange`. It is the Eyebrow in another colour rather than a
+   * badge like the NEW pill, which is a 4px radius and a different gradient. */
+  --badge-surface-orange: radial-gradient(
+    86% 150% at 47% 50%,
+    rgba(255, 136, 0, 0) 0%,
+    rgba(255, 136, 0, 0.5) 100%
   );
 
   /* Nav: fixed, top 0, z-index 8. Verified again in #9 at scrollY 0, 400, 1200
@@ -287,23 +366,109 @@
     -webkit-text-size-adjust: 100%;
   }
 
+  /*
+   * Geist's OpenType features, measured off the Reference in #11. They are not
+   * decoration: `ss02` alone is 0.8% of width, which is the difference between a
+   * Testimonial's quote wrapping to three lines in its cell and to two.
+   *
+   * The Reference runs three sets - one for prose, one for headings and one for
+   * button labels - so they are keyed by element here rather than by type step,
+   * because that is how the Reference applies them and because Tailwind's
+   * `--text-*` modifiers cover weight, leading and tracking but not features.
+   */
   body {
     background-color: var(--color-bg);
     color: var(--color-text);
     font-family: var(--font-sans);
+    font-feature-settings: 'blwf', 'cv03', 'cv04', 'cv09', 'cv11', 'ss02';
     font-size: var(--text-body);
     line-height: var(--text-body--line-height);
     font-weight: var(--font-weight-normal);
   }
 
   /* The Reference's headings are light, not bold. Undo the UA default once
-   * here rather than fighting it with a `font-normal` on every heading. */
+   * here rather than fighting it with a `font-normal` on every heading; the
+   * measured 450 rides on the type steps themselves, so a heading that carries
+   * one is 450 and a `<p>` that carries one is too (see
+   * `--font-weight-heading`). */
   h1,
   h2,
   h3,
   h4,
   h5,
-  h6 {
+  h6,
+  blockquote {
     font-weight: var(--font-weight-normal);
+    font-feature-settings: 'ss02', 'ss03';
+  }
+
+  /* Button labels and links, which the Reference runs on a set of their own. */
+  a,
+  button {
+    font-feature-settings: 'ss01';
+  }
+}
+
+/*
+ * The hairlines that frame and divide Sections 6.5 to 6.8, drawn as inset
+ * shadows rather than as borders.
+ *
+ * This is not a stylistic preference. A card in these Sections has a measured
+ * height and a measured width, and a real border eats a pixel of both: a 1px
+ * frame moves its whole interior in by one and a `border-b` on a 542px row
+ * leaves 541 for the card inside it. Measured against the Reference in #11, that
+ * came to 5px of drift down the social proof grid alone - which a Fidelity diff
+ * reports as a layout mistake rather than as a border.
+ *
+ * The Reference draws every one of these as an `::after` overlay for the same
+ * reason. An inset shadow is the same overlay without the extra element, follows
+ * the radius, and costs nothing in layout.
+ *
+ * **They replace rather than compose**: each sets the whole `box-shadow`, so
+ * `rule-b tablet:rule-r` is a bottom edge on phone and a right edge above it,
+ * not both. That is what the measurements ask for - the bento's framed card
+ * carries `0 0 1px 0` at 390 and `0 1px 0 0` at 810 - but it is why `rule-rb`
+ * and `rule-x` exist as their own utilities rather than as two classes.
+ */
+@utility rule-ring {
+  box-shadow: inset 0 0 0 1px var(--color-surface-3);
+}
+@utility rule-r {
+  box-shadow: inset -1px 0 0 var(--color-surface-3);
+}
+@utility rule-b {
+  box-shadow: inset 0 -1px 0 var(--color-surface-3);
+}
+@utility rule-rb {
+  box-shadow:
+    inset -1px 0 0 var(--color-surface-3),
+    inset 0 -1px 0 var(--color-surface-3);
+}
+@utility rule-x {
+  box-shadow:
+    inset 1px 0 0 var(--color-surface-3),
+    inset -1px 0 0 var(--color-surface-3);
+}
+@utility rule-y {
+  box-shadow:
+    inset 0 1px 0 var(--color-surface-3),
+    inset 0 -1px 0 var(--color-surface-3);
+}
+@utility rule-none {
+  box-shadow: none;
+}
+
+/*
+ * Step 1's thumbnail column travels; the Template Wall does not (PRD 6.3, 6.6).
+ * The list is rendered twice and shifted by exactly one copy, so the wrap is
+ * invisible. Under `prefers-reduced-motion` the animation is dropped and the
+ * column stands still, which is also what the Reference should have done.
+ */
+@keyframes thumbnails-travel {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(calc(-1 * var(--thumbnails-cycle)));
   }
 }

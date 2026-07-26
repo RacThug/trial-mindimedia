@@ -67,24 +67,43 @@ All measured. These become the Tailwind `@theme` block.
 
 ### Type
 
-Geist and Geist Variable. Every heading is **weight 400** with uniform **-0.02em** tracking -
-large and light, never bold. Interactive text is **500** and the Eyebrow is **600**; those
-two are the whole of the rest of the scale.
+Geist and Geist Variable, with uniform **-0.02em** tracking - large and light, never bold.
+Every heading step is **weight 450**, not 400: measured in #11 as
+`font-variation-settings: "wght" 450` on the variable face, with body copy on the static
+face at 400. Interactive text is **500** and the Eyebrow is **600**.
 
 | Token | Size | Line height | Tracking | Weight |
 | --- | --- | --- | --- | --- |
-| `display` (H1) | 68px | 81.6px | -1.36px | 400 |
-| `display-tablet` | 60px | 72px | -1.2px | 400 |
-| `display-phone` | 44px | 52.8px | -0.88px | 400 |
-| `h2` | 56px | 67.2px | -1.12px | 400 |
-| `h2-tablet` | 48px | 57.6px | -0.96px | 400 |
-| `h2-phone` | 36px | 43.2px | -0.72px | 400 |
-| `h3` | 44px | 57.2px | -0.88px | 400 |
-| `h4` (stat) | 32px | 41.6px | -0.64px | 400 |
-| `h5` (card title) | 24px | 33.6px | -0.48px | 400 |
+| `display` (H1) | 68px | 81.6px | -1.36px | 450 |
+| `display-tablet` | 60px | 72px | -1.2px | 450 |
+| `display-phone` | 44px | 52.8px | -0.88px | 450 |
+| `h2` | 56px | 67.2px | -1.12px | 450 |
+| `h2-tablet` | 48px | 57.6px | -0.96px | 450 |
+| `h2-phone` | 36px | 43.2px | -0.72px | 450 |
+| `h3` | 44px | 57.2px | -0.88px | 450 |
+| `h3-tablet` | 36px | 46.8px | -0.72px | 450 |
+| `h3-phone` | 28px | 36.4px | -0.56px | 450 |
+| `h4` (stat) | 32px | 41.6px | -0.64px | 450 |
+| `h5` (card title, Testimonial quote, step title) | 24px | 33.6px | -0.48px | 450 |
+| `feature` (bento card title) | 24px | **36px** | -0.48px | **400** |
 | `body` | 16px | 25.6px | normal | 400, or **500** for a link or button label |
 | `body-sm` | 14px | 22.4px | normal | 400 |
 | `eyebrow` | 12px | 20.4px | normal | **600**, uppercase |
+
+**The 450 is a layout number, not a nicety.** It is 2% of width, which is the difference
+between a Testimonial's quote taking three lines in its 352px cell and fitting on two, so a
+page built at 400 has a different grid. The same holds wherever a heading sits near a break.
+
+**Geist's OpenType features are set too, and they are worth another 0.8% of width.**
+Measured in #11: prose runs `"blwf", "cv03", "cv04", "cv09", "cv11", "ss02"`, headings run
+`"ss02", "ss03"`, and button labels run `"ss01"`. With the weight and the features both
+right, the Clone's line boxes match the Reference's to the hundredth of a pixel; with either
+missing, quotes wrap differently.
+
+**There are two 24px steps** (#11). A step card's title and a Testimonial's quote are
+24/33.6; every feature bento title is 24/36 at weight 400 - same size, same tracking, and
+the one heading on the page that is not 450. `h3` steps down twice as well, keeping a 1.3
+line height at each step where the H1 and H2 keep 1.2.
 
 `body-sm` is the phone step of body copy, measured in #9 on the footer (6.12). Only the
 footer is measured so far - a Section wanting it elsewhere should measure its own case.
@@ -383,6 +402,37 @@ Five unequal cards, each with a video or image visual:
 4. `Easily create and manage content with a built-in CMS.`
 5. `Pro hosting included for fast and secure global sites.`
 
+Measured in #11 at 1440, 810 and 390. The five sit in **one framed block**, not as loose
+cards: a single 1px `--color-surface-3` outline at a 16px radius, with the cells dividing
+themselves by their own edges. No gap at desktop or tablet; on phone the block becomes a
+column with 16px between cards and the dividing lines stay, so a hairline sits at the top of
+each gap.
+
+| | desktop >= 1200 | tablet 810-1199 | phone <= 809 |
+| --- | --- | --- | --- |
+| row 1 | 752 + 448, 542 tall | 365 + 365, 340 tall | stacked, 346 and 332 |
+| row 2 | (576: 268 + 268) + 624, 536 tall | (341: 268 + 268) + 389, 536 tall | stacked, 285, 285, 352 |
+| card padding | 24 | 24 | 24 |
+
+Three card shapes, and which card gets which is layout rather than content:
+
+- **framed** (1): the visual on top in a 704x406 box with its own 8px radius and outline,
+  the title under it.
+- **bleed** (2, 5): the clip fills the card edge to edge and the title sits over its
+  bottom-left corner.
+- **clipped** (3, 4): the title on top, then the still at its own intrinsic aspect - taller
+  than the card, and cut off by it. The overflow is the point.
+
+Two details that read as mistakes and are not. Row heights are **set** at the two wider
+Breakpoints with the contents centred inside them, so tablet row 1 crops a few pixels off the
+framed card (183 + 16 + 108 of content in 292 of room). And two of the five titles carry a
+**measure of their own at desktop** - 427 on card 1, 314 on card 5, against the 704 and 576
+their cards give them - so both break over two lines where they would otherwise fit on one.
+
+Card 2's title has inline emphasis on the Reference: `... included by a <em>real</em> human.`
+The `<em>` is reset to upright, so it is semantic and invisible. The content file stores the
+plain sentence and the component adds the markup (ADR-0004).
+
 ### 6.6 How it works
 
 Eyebrow `HOW DOES IT WORK?`, H2 `Go live within 1 hour, not months, weeks or even days.`
@@ -393,9 +443,31 @@ Three step cards with orange `STEP 1/2/3` badges:
 2. `Make it yours.` / `Change text, customize colors, and swap images with ease.`
 3. `Go live instantly.` / `Launch your site in seconds with just one click, all in one platform.`
 
-Step 1's visual is a grid of **eight** Template thumbnails at a flat 275px, one of which is
-the Traction card's own screenshot reused. Steps 2 and 3 are videos of the Framer editor and
-its publish button.
+The badge pill is the Eyebrow's radial wash in `--color-accent-orange` - same stops, same 8px
+radius, same `4px 12px` - and the number is the card's position, not a field (ADR-0004).
+
+Measured in #11. One framed block again, and at a **20px radius** rather than the bento's 16.
+The middle card carries an outline of its own and that is where the two dividing lines come
+from; on phone the same outline becomes the two horizontal ones.
+
+| | desktop >= 1200 | tablet 810-1199 | phone <= 809 |
+| --- | --- | --- | --- |
+| block | 1200x453, 3 across | 730x500, 3 across | stacked, 362 / 439 / 461 |
+| card | 400 wide, 24 padding | 243 wide | full width |
+| visual | step 2 216 tall, step 3 238 | the same | the same |
+
+Each card is one column parted by `space-between`, and what sits at which end is the layout:
+step 1 puts the badge at the top and the text at the bottom, step 2 leads with its clip, step
+3 ends with one. The visual heights are fixed at every Breakpoint, so the clips crop rather
+than scale and the card height is what moves.
+
+**Step 1's visual is not a grid.** PRD 6.6 called it "a grid of eight Template thumbnails at a
+flat 275px" until #11 measured it: it is **two 275px columns of eight 275x199 tiles**, 16px
+apart, 28px between the columns, each column **rotated 16deg** and **travelling upwards at
+29px/s**, clipped by the card and running under the badge and the text. The Template Wall
+(6.3) is the static one; this is the only thing on the page that travels. The eight tiles are
+the Traction card's own screenshot reused plus `step/pick-02..08`, and their alt text carries
+the other Templates' names.
 
 ### 6.7 Social proof grid
 
@@ -406,6 +478,28 @@ Nine Testimonials: Nic, Renan, Emon, Widya, Dávid, Mark, Samar, Aba, Nonso. Eac
 stars, quote, avatar, name. Note `Dávid` carries an acute accent, and the Reference contains
 two genuine typos in quotes (`custmize`, and `The templates is so well designed`). **Reproduce
 them verbatim.** They are content, not defects.
+
+Measured in #11: one framed grid at a 16px radius, cells dividing themselves with a right and
+a bottom edge each, and **the case study (6.8) is its last row**, spanning every column. A
+cell is `32px 24px` of padding and three rows 28 apart - five 21px stars, the quote at the H5
+step, then a 42px avatar 12px from the name. Rows are content-sized, and at desktop every
+quote runs to three lines, which is what makes them 283.78 tall.
+
+| | desktop >= 1200 | tablet 810-1199 | phone <= 809 |
+| --- | --- | --- | --- |
+| grid | 3 across, 400 wide | 2 across, 365 | 1 across, 350 |
+| shown | all nine | eight | six |
+| name | 16/25.6 | 16/25.6 | 14/22.4 |
+
+**The Reference drops Testimonials as the grid loses a column** rather than reflowing all
+nine - Samar at tablet, and Emon, Samar and Nonso on phone - which is what keeps the grid
+rectangular. Nine is the number in the content and the number the grid shows at desktop; the
+two narrow layouts show a subset of that Placement, so the rule is layout and lives in the
+component.
+
+The `See real customer websites` button is one of the three on the page that carry an arrow
+(the others are `Take the quiz` and `Book a coaching call with me`); it is 20x20 with an 8px
+gap, and every other button is label-only.
 
 The Template Wall (6.3) carries **six more** Testimonials: Jacob, Roni and Seyed, plus Mark,
 Aba and Nic reused from this grid. **Twelve** unique people appear on the page, not nine
@@ -430,6 +524,26 @@ Two character-level details, both easy to normalise away by accident:
 H3 `Matt launched his new site in less than 1 hour.` **Video** left (not a still - measured in
 #7, `story/case-study`), copy right, four paragraphs, one with a left border rule. CTAs
 `View template Matt used` (primary) and `View other customers' sites` (secondary).
+
+**It is not a band of its own**: measured in #11, it is the last row of 6.7's grid, inside the
+same frame and rounding off the same bottom corners. Thirteen Sections in this spec are twelve
+bands on the page.
+
+| | desktop >= 1200 | tablet 810-1199 | phone <= 809 |
+| --- | --- | --- | --- |
+| layout | clip left 568, copy right 632, 604 tall | copy over a 461-tall clip | a 219-tall clip over the copy |
+| copy | 32 padding, ends parted | 32 padding, 48 between | 24 padding, 32 between |
+| H3 | 44/57.2 | 36/46.8 | 28/36.4 |
+| prose | 16/25.6 | 16/25.6 | 14/22.4 |
+| CTAs | half the measure each | half each | full width, stacked |
+
+The clip leads on phone and follows on tablet - measured, not a guess at what a stack should
+do. The paragraphs are 16px apart, the fourth is white behind a **1px white** rule 20px out
+(every other hairline on these Sections is `--color-surface-3`), and the prose contains `café`
+and a straight apostrophe in `Didn't`.
+
+The copy and the clip are prose and single-use media in a single layout, so both are markup
+rather than content, and the clip's text alternative is written in the component (ADR-0004).
 
 ### 6.9 Pricing
 
@@ -720,7 +834,11 @@ Honest gaps. Measure during the build, do not guess.
    hero, the Wall and the featured Templates are present on load. It lands with the
    parameters in item 1, and is the reason a Fidelity capture of these Sections needs no
    settling time yet.
-4. **The Testimonial slide easing is approximated.** Sampling the Reference's transform
+4. **Step 1's thumbnail speed is measured, its phase is not.** #11 timed the columns at
+   29px/s over three samples and read the 816px between them off one capture. The speed is a
+   measurement; the phase is a constant that depends on when you look, so the Clone reproduces
+   the offset it measured rather than claiming the Reference starts there.
+5. **The Testimonial slide easing is approximated.** Sampling the Reference's transform
    every 40ms gives 3.2s between advances and ~1.4s of travel that is 52% done at 130ms and
    90% at 570ms. That is a spring; the Clone runs
    `cubic-bezier(0.16, 1, 0.3, 1)` over 1400ms, which tracks it closely but is a fit rather

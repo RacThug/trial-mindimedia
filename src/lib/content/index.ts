@@ -17,7 +17,7 @@
  * index to look one up in.
  */
 
-import { isVideo, media, type MediaImage } from '../media/index.ts'
+import { isVideo, media, type MediaImage, type MediaSlug } from '../media/index.ts'
 import { ContentError, parseCollection } from './parse.ts'
 import {
   featuresSchema,
@@ -169,6 +169,24 @@ function asset(slug: string): Asset {
 
 function visual(ref: { slug: string; alt: string }): Visual {
   return { ...asset(ref.slug), alt: ref.alt }
+}
+
+/**
+ * Resolve one asset for markup that owns its own visual. The case study's clip
+ * (PRD 6.8) appears once, in one layout, so it is not content and no Collection
+ * carries it (ADR-0004) - the founder's clip in 6.11 will be the same case when
+ * that Section lands. Such a visual still needs the
+ * intrinsic size and the poster that every other visual on the page gets, and
+ * that is what this hands back - typed by slug, so a missing asset is a compile
+ * error rather than a hole in the layout.
+ *
+ * The one export here that is not `async`, deliberately: the accessors above are
+ * async because a Collection can move to a CMS, and an asset committed to this
+ * repo cannot. It reads the generated index the same way `media[...]` does at
+ * the top of `hero.tsx`, and ADR-0002's seam has nothing to hold here.
+ */
+export function resolveVisual(slug: MediaSlug, alt: string): Visual {
+  return visual({ slug, alt })
 }
 
 /** Parse once per process. Replaced wholesale by a fetch when content moves. */
