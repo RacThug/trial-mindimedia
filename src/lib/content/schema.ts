@@ -17,9 +17,11 @@
  */
 
 import { z } from 'zod'
+import { PLAN_GLYPH_NAMES } from '../../components/ui/plan-glyphs.ts'
 import { media } from '../media/index.ts'
 
 const MEDIA_SLUGS: ReadonlySet<string> = new Set(Object.keys(media))
+const GLYPH_NAMES: ReadonlySet<string> = new Set(PLAN_GLYPH_NAMES)
 
 const nonEmpty = z.string().min(1)
 
@@ -30,6 +32,25 @@ const mediaSlug = nonEmpty.superRefine((value, ctx) => {
       code: 'custom',
       input: value,
       message: `unknown media slug "${value}"`,
+    })
+  }
+})
+
+/**
+ * `lightning` - one of the Plan cards' fourteen glyphs (PRD 6.9).
+ *
+ * Cross-referenced here for the same reason a media slug is: the pairing of a
+ * line of copy with a glyph is content, the glyph itself is markup, and a name
+ * that resolves to neither should fail with a message rather than throw at
+ * render. `plan-glyphs.ts` is deliberately free of React so that this import
+ * costs the data layer nothing.
+ */
+const glyphName = nonEmpty.superRefine((value, ctx) => {
+  if (!GLYPH_NAMES.has(value)) {
+    ctx.addIssue({
+      code: 'custom',
+      input: value,
+      message: `unknown plan glyph "${value}"`,
     })
   }
 })
@@ -159,9 +180,10 @@ export const plansSchema = z
             label: nonEmpty,
             priceDelta: z.number().int().nonnegative(),
             default: z.boolean(),
+            icon: glyphName,
           }),
         ),
-        included: z.array(nonEmpty).nonempty(),
+        included: z.array(z.object({ label: nonEmpty, icon: glyphName })).nonempty(),
         cta: z.object({ label: nonEmpty, href }),
       })
       .superRefine((plan, ctx) => {

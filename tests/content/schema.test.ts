@@ -119,10 +119,10 @@ describe('a failed parse', () => {
       currency: 'USD',
       blurb: 'Pick one.',
       options: [
-        { label: 'Framer template', priceDelta: 0, default: true },
-        { label: 'Add Figma designs', priceDelta: 3900, default: true },
+        { label: 'Framer template', priceDelta: 0, default: true, icon: 'framer' },
+        { label: 'Add Figma designs', priceDelta: 3900, default: true, icon: 'figma' },
       ],
-      included: ['Instant access'],
+      included: [{ label: 'Instant access', icon: 'lightning' }],
       cta: { label: 'Browse templates', href: '/templates' },
     }
 
@@ -140,8 +140,8 @@ describe('a failed parse', () => {
       compareAt: null,
       currency: 'USD',
       blurb: 'Everything.',
-      options: [{ label: 'Only one', priceDelta: 0, default: true }],
-      included: ['All templates'],
+      options: [{ label: 'Only one', priceDelta: 0, default: true, icon: 'framer' }],
+      included: [{ label: 'All templates', icon: 'stack' }],
       cta: { label: 'Get the bundle', href: '/bundle' },
     }
 

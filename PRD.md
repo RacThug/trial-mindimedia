@@ -351,7 +351,9 @@ appears below the quote, so an at-rest capture is byte-identical and a keyboard 
 still finds it: the bargain a skip link makes. The Reference offers nothing here at all -
 its own prev/next chevrons are in the markup but `display: none` at every Breakpoint.
 
-The same 10 images, without the videos, form the Quiz CTA backdrop (6.10).
+**Eleven** of these images, and none of the six clips, form the Quiz CTA backdrop (6.10) -
+measured in #12, where they are also four columns that travel rather than a second copy of
+this static grid. See 6.10.
 
 ### 6.4 Featured templates
 
@@ -562,6 +564,48 @@ Each has an `INCLUDED:` icon list and a bottom CTA (`Browse templates`, `Get the
 `Book a discovery call`). The lists are **5, 7 and 3 items** (measured in #8); the Bundle's
 is the long one, repeating four of the Single template's items before `Priority support`.
 
+Measured in #12 at 1440, 810 and 390:
+
+| | desktop >= 1200 | tablet 810-1199 | phone <= 809 |
+| --- | --- | --- | --- |
+| band | 60 40 20 | 40 40 20 | 40 20 |
+| rail | 1200, 44 gap | 730, 44 gap | 350, 36 gap |
+| H2 | 56/67.2, 896 wide | 48/57.6 | 36/43.2 |
+| block | 3 across, 400 each | stacked | stacked, 16 apart |
+| copy | 16/25.6 | 16/25.6 | 14/22.4 |
+
+The band's padding is its own - 60 above and 20 below at desktop, against the even 60 that
+6.5 to 6.8 share - which is why `SectionBand` takes one.
+
+The three sit in one framed block, 1px `--color-surface-3` at a 16px radius, dividing
+themselves with their own edges: vertical rules while they sit across, horizontal once they
+stack. On phone they are **16px apart and keep those rules**, so a hairline lands inside each
+gap and the frame outlines all three - the same look the bento has at that width.
+
+Inside a card: 24 padding, 52 between the content and the CTA, 36 between the card's three
+blocks, 32 from the eyebrow to the heading, 12 to the blurb, 32 between the name and its
+price, 16 down the INCLUDED list. At desktop the three stretch to the tallest of them, so
+the CTAs line up; at the two narrower Breakpoints each is its own content. The first card's
+CTA is primary and the other two secondary - position, not a field.
+
+Two details a diff finds and a reading does not. The struck compare-at price is **24/26.4**,
+the one place the page's 24px H5 step and its line height part company. And the blurb is
+`text-wrap: balance`: at 352px `Pick a template best suited for you, customize` fits on one
+line and the Reference breaks after `for`.
+
+**Every row carries its own glyph**, and there is no repeated tick: fourteen distinct
+20x20 marks over the eighteen rows the three cards hold, each a 24-viewBox path at a 1.5px
+stroke, and the same line of copy takes the same glyph wherever it appears. That pairing is
+content and lives in `plans.json`; the paths are markup, in `plan-glyphs.ts`.
+
+The Option row is 58px tall at every Breakpoint - a 26px control inside 16px of padding -
+on `--color-surface-1` inside a 12px-radius block with its own outline, with a 20px glyph,
+a 12px gap, the label, an 8px gap and the orange `(+$39)`. The control is a 26px track in
+`--color-surface-3` holding an 18px white knob that appears when the row is chosen. The
+Reference draws the chosen row **at half opacity on the first card and at full on the
+third** - Framer's `Disabled` variant, which is what its inert rows are. Ours are live and
+take the third card's look on every card, which is the one pixel the Deviation costs at rest.
+
 Measured in #8, from the markup rather than the render:
 
 - The eyebrows are `One-time payemnt`, `one-time payment`, `one-time payment` - the first
@@ -579,8 +623,33 @@ and the Deviation only appears if the reviewer clicks. Document this in the READ
 
 ### 6.10 Quiz CTA
 
-H2 `Not sure which template is for you?` over a dimmed Template Wall backdrop, plus
-`Take the quiz`.
+Eyebrow `60-SECOND QUIZ`, H2 `Not sure which template is for you?`, a paragraph, and
+`Take the quiz`, over a dimmed backdrop of Template stills.
+
+**The backdrop travels.** This section first called it "a dimmed Template Wall backdrop", and
+the images are indeed eleven of the Wall's sixteen with none of its six clips - but they are
+four columns going up and down at **29.1px/s**, columns 1 and 3 rising and 2 and 4 falling.
+Measured in #12 by sampling the columns' transforms twice, two seconds apart, with the band
+in view. The Template Wall (6.3) is the static grid that looks like a marquee; this is the
+marquee that looks like the Wall, and mixing the two up is the easiest mistake on this page.
+
+| | desktop >= 1200 | tablet 810-1199 | phone <= 809 |
+| --- | --- | --- | --- |
+| band | 900 tall, 0 40 80 | 200 20 40 | 40 20 |
+| copy | row, button right and bottom | as desktop | column, button full width |
+| H2 | 56/67.2, 715 wide | 48/57.6 | 36/43.2 |
+| body | 16/25.6, 476 wide | 16/25.6, 476 | 14/22.4, balanced |
+| columns | 4 x (100vw-48)/4, 16 gap | 3 x (100vw-48)/3, 16 gap | 3 x 239, 8 gap |
+
+The desktop band's 900px is a height and not the viewport's; the copy is pinned to its bottom
+edge, and the tablet's 200px of top padding is the only room the columns get there.
+
+The dimming is a **mask** rather than an opacity: `linear-gradient(#000 53%, transparent
+100%)` intersected with `linear-gradient(transparent 0%, #000 121%)`, which peaks at about
+44% alpha a little past the middle of the band and reaches zero at both ends.
+
+This is the one Eyebrow on the page with a picture behind it, and the only one carrying a
+`backdrop-filter: blur(8px)` - measured against the hero's, which has none.
 
 ### 6.11 Founder
 
@@ -590,6 +659,36 @@ Eyebrow `WHO IS THE DESIGNER?`, H2 `Meet the creator behind the sites.`,
 Looping founder video left; orange `FOUNDER` badge and H3 `Hey, I'm Ramish / Designer & Creator`
 right, with five paragraphs. Then four stat tiles in a 2x2: `6+` Years building sites,
 `100+` Websites made, `$100k+` Revenue made in Framer, `2,000+` Templates sold.
+
+Measured in #12 at 1440, 810 and 390:
+
+| | desktop >= 1200 | tablet 810-1199 | phone <= 809 |
+| --- | --- | --- | --- |
+| band | 20 40 60 | 20 40 40 | 40 20 |
+| frame | 1120, clip left 560 | 100vw - 40, clip 461 tall above | 100vw - 24, clip 217 tall above |
+| gap | 0, the two are columns | 32 | 24 |
+| H2 | 56/67.2, 718 wide | 48/57.6, 674 wide | 36/43.2 |
+| H3 | 44/57.2 | 36/46.8 | 28/36.4 |
+| stat | 32/41.6 | **36/46.8** | 32/41.6 |
+| prose | 16/25.6 | 16/25.6 | 14/22.4 |
+
+Two of those need reading twice.
+
+**The frame is not the rail.** At desktop it is 1120 inside a 1200 rail, and at both narrower
+Breakpoints it is *wider* than the rail it sits in - 770 in a 730 at tablet, 366 in a 350 on
+phone. A `max-w-rail` here is right at none of the three.
+
+**The stat's number is larger at tablet than at desktop**, 36 against 32, which is the sort
+of step that gets tidied into a monotonic scale. Measured twice: off the computed style, and
+off a 164.39px cell that only adds up with a 46.8px line in it.
+
+The block is framed at a 16px radius like 6.5 to 6.9. Inside: 32 of padding round the copy,
+32 from the badge to the H3, 12 between paragraphs, and stat tiles of `40px 0` padding with a
+12px gap, dividing themselves with their own edges so the 2x2 has one cross in it.
+
+Character-level, and both the Reference's own: the H3 says `Hey, I'm Ramish` with a
+**straight** apostrophe and the fourth paragraph says `I’m sharing` with a **curly** one, in
+the same block. The second paragraph ends on a non-breaking space, which renders as nothing.
 
 ### 6.12 Footer
 
@@ -613,9 +712,39 @@ same reasoning as 6.14.
 
 ### 6.13 Quiz modal
 
-Fires on load. 1016x616 centred, `z-index: 10`, over a full-viewport backdrop. Eyebrow
-`60-SECOND QUIZ`, H2 `Get 30% off the perfect template for your business`, body copy,
-`Take the quiz`. Must be dismissible.
+1016x616 centred, `z-index: 10`, over a full-viewport backdrop. Eyebrow `60-SECOND QUIZ`, H2
+`Get 30% off the perfect template for your business`, body copy, `Take the quiz`. Must be
+dismissible.
+
+**It does not fire on load.** Measured in #12 by sampling once a second from
+`domcontentloaded`: nothing at five seconds, up at six. That is a deliberate delay rather
+than a slow render - the page is idle long before - and it is what keeps ten screenshots out
+of the initial load that section 8 budgets.
+
+| | desktop >= 1200 | tablet 810-1199 | phone <= 809 |
+| --- | --- | --- | --- |
+| panel | 1016 x 616 | 680 x 616 | 100vw - 84 x 660 |
+| padding | 60 32 32 | 60 32 32 | 60 20 20 |
+| H2 | 44/57.2 | 36/46.8 | 28/36.4 |
+| body | 16/25.6, 476 wide | 16/25.6, 476 | 14/22.4, balanced |
+| tiles | 476 x 369 | 476 x 369 | 319 x 247 |
+
+12px radius, a 1px `--color-surface-3` outline, and a `rgba(0, 0, 0, 0.9)` scrim. Behind the
+copy, **two columns of Template screenshots tilted 16deg and travelling in opposite
+directions at 30.4px/s**, dimmed by the same two-gradient mask 6.10 uses at a 54% stop. The
+ten are a set of their own: none of the Template Wall's tiles appears here, which is why
+`quiz/*` exists in the asset manifest and why the census in `tests/assets/manifest.test.ts`
+went from 47 stills to 57.
+
+Its Eyebrow is the page's third pill: 4px radius rather than 8, a plain white wash at a fifth
+of the Eyebrow's strength, and a `--color-text-muted` label rather than a tint of its own
+colour.
+
+The Reference's own modal *is* dismissible - Escape and an outside click both close it,
+measured - but it offers no visible control and reopens on every navigation. Three
+Deviations follow, all accessibility, all in the README: ours adds a close button, it traps
+focus and returns it (a `<dialog>` does both, which is also where the scrim and the top layer
+come from), and it stays shut for the session once dismissed.
 
 ### 6.14 Alt text is authored, not copied - a Deviation
 
@@ -661,7 +790,7 @@ Zod with the types derived from the schemas.
 | stats | 4 | slug, value, label |
 | links | 4 nav / 7 footer / 2 social | slug, label, href |
 
-Five deliberate departures from the table as first written, all covered by ADR-0004:
+Six deliberate departures from the table as first written, all covered by ADR-0004:
 
 - **No `kind` or `aspect` on wall tiles, and no `thumbnail` field.** Media is referenced by
   slug and resolved against the generated asset index, which already owns kind and intrinsic
@@ -675,6 +804,12 @@ Five deliberate departures from the table as first written, all covered by ADR-0
   price.
 - **Every entity carries a stable slug.** Array order means Placement order only for
   Collections that appear exactly once on the page.
+- **A Plan's Options and INCLUDED lines each carry an `icon` name** (added in #12). The
+  Reference pairs a different glyph with every line of copy and reuses the same glyph
+  wherever the same line appears, so the pairing is content; the paths are markup, in
+  `plan-glyphs.ts`, and the schema cross-references the name against them the way it
+  cross-references a media slug against the asset index. `included` is objects rather than
+  strings for that reason alone.
 
 Endpoints: `/api/templates`, `/api/testimonials`, `/api/plans`, all `force-static` and
 verified prerendered in the build output. `/api/testimonials` returns the twelve people flat,

@@ -26,6 +26,21 @@ for (const route of ['/', '/templates', '/blog', '/no-such-page']) {
   })
 }
 
+/*
+ * The quiz modal (PRD 6.13), which is the second state on the site that can trap
+ * a keyboard and the only one that opens by itself. It fires six seconds in
+ * (measured in #12), which is why this one waits.
+ */
+test('the quiz modal passes axe while open', async ({ page }) => {
+  await page.goto('/')
+  const modal = page.getByRole('dialog', { name: /Get 30% off/ })
+  await expect(modal).toBeVisible({ timeout: 12_000 })
+
+  const { violations } = await scan(page)
+
+  expect(violations.map((violation) => violation.id)).toEqual([])
+})
+
 test('the phone menu passes axe while open', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/')

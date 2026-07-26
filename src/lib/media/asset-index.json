@@ -365,6 +365,56 @@
         "width": 720,
         "height": 405
       }
+    },
+    "quiz/shot-a1": {
+      "src": "/media/quiz/shot-a1.webp",
+      "width": 960,
+      "height": 603
+    },
+    "quiz/shot-a2": {
+      "src": "/media/quiz/shot-a2.webp",
+      "width": 960,
+      "height": 602
+    },
+    "quiz/shot-a3": {
+      "src": "/media/quiz/shot-a3.webp",
+      "width": 960,
+      "height": 602
+    },
+    "quiz/shot-a4": {
+      "src": "/media/quiz/shot-a4.webp",
+      "width": 960,
+      "height": 601
+    },
+    "quiz/shot-a5": {
+      "src": "/media/quiz/shot-a5.webp",
+      "width": 960,
+      "height": 602
+    },
+    "quiz/shot-b1": {
+      "src": "/media/quiz/shot-b1.webp",
+      "width": 960,
+      "height": 602
+    },
+    "quiz/shot-b2": {
+      "src": "/media/quiz/shot-b2.webp",
+      "width": 960,
+      "height": 602
+    },
+    "quiz/shot-b3": {
+      "src": "/media/quiz/shot-b3.webp",
+      "width": 960,
+      "height": 602
+    },
+    "quiz/shot-b4": {
+      "src": "/media/quiz/shot-b4.webp",
+      "width": 960,
+      "height": 601
+    },
+    "quiz/shot-b5": {
+      "src": "/media/quiz/shot-b5.webp",
+      "width": 960,
+      "height": 602
     }
   }
 }

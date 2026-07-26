@@ -285,6 +285,17 @@
     rgba(51, 212, 120, 0.2) 100%
   );
 
+  /* The quiz modal's Eyebrow (PRD 6.13), measured in #12: the same wash again
+   * in plain white at a fifth of the strength, on a 4px radius rather than the
+   * Eyebrow's 8 - the only pill on the site that is neither blue nor orange, and
+   * the only one whose label is `--color-text-muted` rather than a tint of its
+   * own colour. */
+  --badge-surface-white: radial-gradient(
+    86% 150% at 47% 50%,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.2) 100%
+  );
+
   /* The step badge (PRD 6.6), measured in #11: the Eyebrow's wash and geometry
    * exactly - same stops, same 8px radius, same `4px 12px` - in
    * `--color-accent-orange`. It is the Eyebrow in another colour rather than a
@@ -470,5 +481,21 @@
   }
   to {
     transform: translateY(calc(-1 * var(--thumbnails-cycle)));
+  }
+}
+
+/*
+ * The Quiz CTA's ticker columns (PRD 6.10), and the modal's (6.13). Unlike the
+ * thumbnails above, these run tiles of differing heights, so the cycle is the
+ * strip's own half rather than a measured constant: each list is rendered twice
+ * with its gaps as margins, and half of that is exactly one copy. Run in reverse
+ * for the columns that travel the other way.
+ */
+@keyframes ticker-travel {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50%);
   }
 }

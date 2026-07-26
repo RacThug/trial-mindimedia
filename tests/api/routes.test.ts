@@ -86,6 +86,7 @@ describe('/api/plans', () => {
       label: 'Add Figma designs',
       priceDelta: 3900,
       default: false,
+      icon: 'figma',
     })
   })
 })

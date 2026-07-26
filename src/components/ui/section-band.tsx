@@ -27,12 +27,25 @@ import { Eyebrow } from './eyebrow.tsx'
  * line breaks is the visible part of this.
  */
 
+/**
+ * The band's own padding, measured per Section: `60 40` on 6.5-6.8.
+ *
+ * A prop rather than a variant name, for the reason the note above gives - what
+ * differs between these Sections is a padding and nothing else, and pricing
+ * (6.9) and the founder (6.11) each measure their own. Naming them `pricing` and
+ * `founder` here would put three Sections' measurements in one file and leave
+ * the next one to pick which it resembles.
+ */
+const DEFAULT_PADDING = 'px-5 py-10 tablet:px-10 desktop:py-15'
+
 type SectionBandProps = {
   /** Sentence case; the Eyebrow uppercases it in CSS (PRD 6.2). */
   readonly eyebrow: string
   readonly heading: string
   /** The measured `w-[...]` steps for this Section's H2. */
   readonly headingWidth?: string
+  /** This Section's measured band padding, where it is not 6.5-6.8's. */
+  readonly padding?: string
   /** The button that shares the header's row, bottom-aligned (6.7 has one). */
   readonly action?: React.ReactNode
   readonly children: React.ReactNode
@@ -42,11 +55,12 @@ export function SectionBand({
   eyebrow,
   heading,
   headingWidth = '',
+  padding = DEFAULT_PADDING,
   action,
   children,
 }: SectionBandProps) {
   return (
-    <section className="px-5 py-10 tablet:px-10 desktop:py-15">
+    <section className={padding}>
       <div className="mx-auto flex w-full max-w-rail flex-col gap-9 tablet:gap-11">
         <div
           className={
