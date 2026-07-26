@@ -43,8 +43,14 @@ export type Carousel = {
 }
 
 export function useCarousel(count: number): Carousel {
-  const [active, setActive] = useState(0)
-  const [leaving, setLeaving] = useState<number | null>(null)
+  /* One state, not two. Which slide is leaving is only ever the one that was
+   * active a moment ago, so deriving it in the same update keeps the pair from
+   * being briefly inconsistent - and keeps the advance out of an updater that
+   * React is free to call twice. */
+  const [slide, setSlide] = useState<{ active: number; leaving: number | null }>({
+    active: 0,
+    leaving: null,
+  })
   const [onScreen, setOnScreen] = useState(false)
   const [held, setHeld] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -65,18 +71,18 @@ export function useCarousel(count: number): Carousel {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
     const timer = window.setInterval(() => {
-      setActive((current) => {
-        setLeaving(current)
-        return (current + 1) % count
-      })
+      setSlide((current) => ({
+        active: (current.active + 1) % count,
+        leaving: current.active,
+      }))
     }, CAROUSEL_INTERVAL_MS)
 
     return () => window.clearInterval(timer)
   }, [onScreen, held, count])
 
   return {
-    active,
-    leaving,
+    active: slide.active,
+    leaving: slide.leaving,
     containerRef,
     pauseProps: {
       onPointerEnter: () => setHeld(true),
