@@ -15,16 +15,9 @@ Both `CONTEXT.md` and `docs/adr/` now exist. Read them.
 
 ## The current spec
 
-`PRD.md` at the repo root specifies the work in progress. It mirrors
-[issue #5](https://github.com/RacThug/trial-mindimedia/issues/5), which is canonical if the
-two ever disagree. Individual work packages are that issue's sub-issues.
-
-Every value in the PRD is measured from the live reference site, not estimated. Treat those
-numbers as facts, and do not silently substitute plausible-looking defaults for them. Two in
-particular are counter-intuitive and have already been verified against the live site:
-
-- The template wall is a **static grid**, not a marquee. Nothing in it moves.
-- Breakpoints are **1200px and 810px**, not any framework's defaults.
+See the **Current work** section of `AGENTS.md`, which is loaded into every session and is
+the single source of truth for what is being built and which measured facts must not be
+guessed at. It is deliberately not repeated here.
 
 ## File structure
 
