@@ -1,10 +1,9 @@
 'use client'
 
-import Image from 'next/image'
 import { useEffect, useState } from 'react'
 import { buttonClasses } from '@/components/ui/button.tsx'
+import { TemplateCard } from '@/components/ui/template-card.tsx'
 import type { Template } from '@/lib/content'
-import { formatMoney } from '@/lib/content/money.ts'
 
 /*
  * The one place in the build that reads content over HTTP.
@@ -84,45 +83,19 @@ export function TemplateCatalogue() {
     )
   }
 
+  /* The same card the homepage's featured Section renders (PRD 6.4), from the
+   * same values - here they have been over the wire first. */
   return (
     <ul className="grid gap-10 tablet:grid-cols-2 desktop:grid-cols-3">
       {state.templates.map((template) => (
-        <TemplateCard key={template.slug} template={template} />
+        <li key={template.slug}>
+          <TemplateCard
+            template={template}
+            headingLevel="h2"
+            sizes="(min-width: 1200px) 387px, (min-width: 810px) 45vw, calc(100vw - 40px)"
+          />
+        </li>
       ))}
     </ul>
-  )
-}
-
-function TemplateCard({ template }: { readonly template: Template }) {
-  const [screenshot] = template.screenshots
-
-  return (
-    <li className="flex flex-col gap-4">
-      {screenshot && (
-        <div className="relative overflow-hidden rounded-[12px] bg-surface-1">
-          <Image
-            src={screenshot.src}
-            alt={screenshot.alt}
-            width={screenshot.width}
-            height={screenshot.height}
-            sizes="(min-width: 1200px) 387px, (min-width: 810px) 45vw, 90vw"
-            className="h-auto w-full"
-          />
-          {template.badge && (
-            <span className="absolute top-4 left-4 rounded-button bg-surface-2 px-3 py-1 text-eyebrow uppercase text-accent-green">
-              {template.badge}
-            </span>
-          )}
-        </div>
-      )}
-
-      <div className="flex items-baseline justify-between gap-4">
-        <h2 className="text-h5 text-text">{template.name}</h2>
-        <p className="text-body text-text-muted">
-          {formatMoney(template.price, template.currency)}
-        </p>
-      </div>
-      <p className="text-eyebrow uppercase text-text-muted">{template.category}</p>
-    </li>
   )
 }

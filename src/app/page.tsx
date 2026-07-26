@@ -1,19 +1,21 @@
+import { FeaturedTemplates } from '@/components/sections/featured-templates.tsx'
+import { Hero } from '@/components/sections/hero.tsx'
+import { TemplateWall } from '@/components/sections/template-wall.tsx'
+
 /*
- * Placeholder. The thirteen Sections land in issues #10 through #12; this file
- * exists so the scaffold builds and so the token layer has something to render.
+ * The homepage: thirteen Sections, top to bottom (PRD section 6). The first
+ * three landed in #10; the rest follow in #11 and #12.
  *
- * The copy is deliberately not the Reference's. Shipping real Section copy here
- * would make it ambiguous later whether the hero had been built or merely
- * stubbed.
+ * The Sections stack with no wrapper of their own - each owns its full-width
+ * band, its own padding and its own rail - because two of them are already
+ * full-bleed and a shared container would have to be undone by both.
  */
 export default function HomePage() {
   return (
-    <main className="max-w-page mx-auto px-6 py-24">
-      <p className="text-eyebrow text-accent-blue uppercase">Scaffold</p>
-      <h1 className="text-display mt-4">Design tokens are in place.</h1>
-      <p className="text-body text-text-muted mt-6">
-        Breakpoints are the measured 810px and 1200px. Sections follow.
-      </p>
+    <main>
+      <Hero />
+      <TemplateWall />
+      <FeaturedTemplates />
     </main>
   )
 }

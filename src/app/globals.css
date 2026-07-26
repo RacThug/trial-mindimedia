@@ -30,9 +30,10 @@
    *
    * Mobile-first, so phone (<= 809px) is the unprefixed base.
    *
-   * The tablet H1 step (60px, PRD section 5) is NOT a token: its line height
-   * was never measured, and inventing one is exactly what section 1 forbids.
-   * Measure it when the hero lands in issue #10.
+   * Both boundaries were re-checked in #10 by rendering at 809, 810, 1199 and
+   * 1200 and reading the H1 back. They land exactly here, and tablet is a
+   * layout of its own rather than a stretched phone: it is the only Breakpoint
+   * that shortens the hero's secondary CTA (PRD 6.2).
    */
   --breakpoint-*: initial;
   --breakpoint-tablet: 810px;
@@ -59,6 +60,10 @@
    * is not weight 400 throughout after all - interactive text is 500. */
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
+  /* The hero's `RATED 4.92/5` label, and nothing else on the page so far
+   * (measured in #10). It is the one place the Reference goes heavier than the
+   * Eyebrow's 600. */
+  --font-weight-bold: 700;
 
   --text-*: initial;
 
@@ -66,9 +71,29 @@
   --text-display--line-height: 81.6px;
   --text-display--letter-spacing: -1.36px;
 
+  /* The H1 and H2 both step down twice, and neither step was measured before
+   * #10 - PRD section 5 recorded the tablet H1's size with no line height at
+   * all. Measured off the live Reference at 810 and 390: every step keeps the
+   * 1.2 line height and the -0.02em tracking, so only the size really moves. */
+  --text-display-tablet: 60px;
+  --text-display-tablet--line-height: 72px;
+  --text-display-tablet--letter-spacing: -1.2px;
+
+  --text-display-phone: 44px;
+  --text-display-phone--line-height: 52.8px;
+  --text-display-phone--letter-spacing: -0.88px;
+
   --text-h2: 56px;
   --text-h2--line-height: 67.2px;
   --text-h2--letter-spacing: -1.12px;
+
+  --text-h2-tablet: 48px;
+  --text-h2-tablet--line-height: 57.6px;
+  --text-h2-tablet--letter-spacing: -0.96px;
+
+  --text-h2-phone: 36px;
+  --text-h2-phone--line-height: 43.2px;
+  --text-h2-phone--letter-spacing: -0.72px;
 
   --text-h3: 44px;
   --text-h3--line-height: 57.2px;
@@ -101,6 +126,17 @@
   --text-eyebrow--letter-spacing: normal;
   --text-eyebrow--font-weight: 600;
 
+  /* The hero's `RATED 4.92/5`, and the one step that is not Geist on the
+   * Reference: it is Inter Display, 12px/18px at weight 700 with 0.07em of
+   * tracking, in `--color-text-warm`, uppercased by CSS. We render it in Geist
+   * at the same metrics rather than load a second family for twelve characters,
+   * which costs about 5px of width on one label (PRD section 4). Also uppercase,
+   * which for the reason above rides along at the call site. */
+  --text-rating: 12px;
+  --text-rating--line-height: 18px;
+  --text-rating--letter-spacing: 0.84px;
+  --text-rating--font-weight: 700;
+
   /* There is no button-label step. Re-measured in #9 on the nav's Bundle pill
    * and both hero buttons: every label is `text-body` at `font-medium`, not the
    * 12px PRD section 4 first recorded. `--text-button` is gone rather than
@@ -123,23 +159,62 @@
   --color-accent-orange: #ff8800; /* FOUNDER badge, Option prices, step badges */
   --color-accent-green: #33d478; /* NEW badge */
 
+  /* The Reference's own "Primary" token, and not the white the rest of the page
+   * uses: the hero's star and its `RATED 4.92/5` label are #fffbf7, measured in
+   * #10 off the sprite's fill and the label's colour. A warm off-white beside a
+   * pure white is the sort of difference that only shows next to the real
+   * thing, which is why it is a token rather than a rounding. */
+  --color-text-warm: #fffbf7;
+
   /* ---- Shape (PRD section 4) -------------------------------------------- */
   --radius-*: initial;
 
-  /* Container: 1360px max width, centred. `max-w-page`. */
-  --container-page: 1360px;
+  /* One rail, 1200px, centred: `max-w-rail`.
+   *
+   * PRD section 4 had the Sections on a wider 1360px container than the shell's
+   * measured 1200 and flagged it for re-measurement once a Section existed. It
+   * was measured in #10 on the hero and the featured Templates at 1440, and both
+   * are 1200 - the same rail the nav and footer run on. The second token is gone
+   * rather than corrected to an equal value, for the reason written where
+   * `--text-button` used to be. */
+  --container-rail: 1200px;
 
-  /* The shell runs on a narrower rail than the Sections do. Measured in #9:
-   * nav and footer content is 1200px wide at 1440, not 1360. `max-w-shell`. */
-  --container-shell: 1200px;
-
-  /* Button: height 46px, radius 48px, padding 10px 20px. The label is `body` at
+  /* Button: radius 48px, padding 10px 20px. The label is `body` at
    * `font-medium` - see the note where `--text-button` used to be.
-   * White on black is primary, `--color-surface-2` on white is secondary. */
+   * White on black is primary, `--color-surface-2` on white is secondary.
+   *
+   * `--nav-row-height` is the height of the row a button sits in, measured on
+   * the nav in #9, and not the button's own: #10 re-measured that unrounded at
+   * 45.59, which is exactly the padding plus the line height, so the button
+   * sets no height at all. See `ui/button.tsx`. */
   --radius-button: 48px;
-  --button-height: 46px;
+  --nav-row-height: 46px;
   --button-padding-x: 20px;
   --button-padding-y: 10px;
+
+  /* The other three radii on the page, all measured in #10: a Template card's
+   * screenshot, a Template Wall tile, and the small pills - the Eyebrow at 8 and
+   * the card's NEW badge at 4. */
+  --radius-card: 12px;
+  --radius-tile: 4px;
+  --radius-eyebrow: 8px;
+  --radius-badge: 4px;
+
+  /* Both tinted pills are radial gradients rather than flat fills, which is why
+   * neither reads as a solid colour in a screenshot. Measured in #10 from the
+   * Eyebrow (hero and featured Templates alike) and the NEW badge; the gradients
+   * are quoted verbatim, including the blue that is NOT `--color-accent-blue`
+   * - the text is #8ea9fa over a #668cff wash. */
+  --eyebrow-surface: radial-gradient(
+    86% 150% at 47% 50%,
+    rgba(102, 140, 255, 0) 0%,
+    rgba(102, 140, 255, 0.5) 100%
+  );
+  --badge-surface-green: radial-gradient(
+    50% 50%,
+    rgba(51, 212, 120, 0) 0%,
+    rgba(51, 212, 120, 0.2) 100%
+  );
 
   /* Nav: fixed, top 0, z-index 8. Verified again in #9 at scrollY 0, 400, 1200
    * and 5000, in both directions: background, blur, height, transform and
@@ -165,6 +240,46 @@
    * lighter tint under a heavier blur. Measured in #9. */
   --menu-surface: rgba(0, 0, 0, 0.2);
   --menu-blur: 20px;
+
+  /* ---- Template Wall (PRD 6.3), all measured in #10 ----------------------
+   *
+   * The wall itself is a plain column layout; what makes it read as a backdrop
+   * rather than as a gallery is these four values.
+   *
+   * The tiles fade out over the bottom half under `--wall-fade`, which is why
+   * the ragged bottom edge of a short column never shows. The Testimonial block
+   * sits 298px tall, centred on the wall's bottom edge - half over the tiles and
+   * half over the page below it - and the progressive blur is a 346px band
+   * ending 85px below that same edge, which is what softens the tiles behind
+   * the quote. */
+  --wall-fade: linear-gradient(#000000 51%, rgba(0, 0, 0, 0) 102%);
+  --wall-testimonial-mask: linear-gradient(
+    rgba(0, 0, 0, 0) 0%,
+    #000000 25%,
+    #000000 75%,
+    rgba(0, 0, 0, 0) 100%
+  );
+  --wall-testimonial-height: 298px;
+  --wall-blur-height: 346px;
+  --wall-blur-offset: 85px;
+
+  /* Phone only, and the one Breakpoint where the wall is capped rather than
+   * filling its rail: 400px, measured off Framer's own `sizes` arithmetic and
+   * confirmed on the render.
+   *
+   * The wall's height is its tallest column everywhere, and at the two wider
+   * Breakpoints that falls out of the content. On phone the Reference runs a
+   * taller column than a balanced fill produces, so the height is set and the
+   * columns fill into it. 4.91 is the sum of six tile aspect ratios and 40px is
+   * the five 8px gaps between them: at the measured 390 viewport this is the
+   * Reference's own 652px, and it stays proportional at any other phone width
+   * rather than freezing one viewport's number.
+   *
+   * `wall-tile.tsx` spells the same column arithmetic out again in its `sizes`,
+   * because a `sizes` attribute is read before any stylesheet and cannot ask a
+   * custom property what it holds. Those two have to move together. */
+  --wall-width-phone: min(100vw, 400px);
+  --wall-height-phone: calc(4.91 * (var(--wall-width-phone) - 16px) / 3 + 40px);
 }
 
 @layer base {
