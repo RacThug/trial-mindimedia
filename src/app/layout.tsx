@@ -7,9 +7,10 @@ import './globals.css'
  * `next/font/local`, so the face is served from our own origin. The Reference
  * pays a render-blocking round-trip to fonts.gstatic.com; we must not.
  *
- * Sans only. Geist Mono appears nowhere in the Reference (PRD.md section 6), and
- * importing it costs a preload of a font that never paints. Add it back the day
- * a Section actually needs it.
+ * Sans only. The Reference's type is Geist and Geist Variable throughout
+ * (PRD.md section 4); no Section calls for a monospace face. Importing Geist
+ * Mono costs a preload of a font that never paints, which the section 8 budget
+ * cannot spare. Add it back the day a Section actually needs it.
  */
 
 export const metadata: Metadata = {

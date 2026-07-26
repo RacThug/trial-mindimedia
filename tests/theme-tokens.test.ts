@@ -14,19 +14,48 @@ import { beforeAll, describe, expect, it } from 'vitest'
 
 const FIXTURE = fileURLToPath(new URL('./fixtures/theme-probe.css', import.meta.url))
 
+/*
+ * Tailwind's stock breakpoints, which PRD section 5 replaces. The fixture has
+ * to probe each one for the "no stock breakpoint" assertions to mean anything,
+ * so the two lists are checked against each other below rather than trusted to
+ * stay in step by hand.
+ */
+const STOCK_BREAKPOINTS = ['sm', 'md', 'lg', 'xl', '2xl']
+
+let fixtureSource = ''
 let css = ''
+let themeBlock = ''
 
 beforeAll(async () => {
-  const source = await readFile(FIXTURE, 'utf8')
-  const result = await postcss([tailwindcss()]).process(source, { from: FIXTURE })
+  fixtureSource = await readFile(FIXTURE, 'utf8')
+  const result = await postcss([tailwindcss()]).process(fixtureSource, { from: FIXTURE })
   css = result.css
+
+  /*
+   * Token values must be read from the `:root` block Tailwind emits for
+   * `@theme`, not from the sheet at large - a declaration inside some utility
+   * or media query would otherwise satisfy an assertion that reads as though it
+   * were about the theme. The block contains no nested braces, so it runs to
+   * the first `}`.
+   */
+  const start = css.indexOf(':root')
+  expect(start, 'compiled CSS has no :root block').toBeGreaterThan(-1)
+  themeBlock = css.slice(start, css.indexOf('}', start))
 }, 60_000)
 
-/** The `:root` block Tailwind emits for `@theme`, where token values land. */
+/** Reads one custom property from the `@theme` block, or undefined if unset. */
 function themeVariable(name: string): string | undefined {
-  const match = css.match(new RegExp(`${name}:\\s*([^;]+);`))
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  /* Anchored, so asking for `--text-sm` cannot be answered by `--x--text-sm`. */
+  const match = themeBlock.match(new RegExp(`(?:^|[;{])\\s*${escaped}:\\s*([^;}]+)`))
   return match?.[1]?.trim()
 }
+
+describe('the probe fixture', () => {
+  it.each(STOCK_BREAKPOINTS)('probes the stock `%s` breakpoint', (name) => {
+    expect(fixtureSource).toContain(`@source inline("${name}:text-h2")`)
+  })
+})
 
 describe('breakpoints (PRD section 5)', () => {
   it.each([
@@ -36,12 +65,9 @@ describe('breakpoints (PRD section 5)', () => {
     expect(themeVariable(name)).toBe(value)
   })
 
-  it.each(['sm', 'md', 'lg', 'xl', '2xl'])(
-    "drops Tailwind's stock `%s` breakpoint",
-    (name) => {
-      expect(themeVariable(`--breakpoint-${name}`)).toBeUndefined()
-    },
-  )
+  it.each(STOCK_BREAKPOINTS)("drops Tailwind's stock `%s` breakpoint", (name) => {
+    expect(themeVariable(`--breakpoint-${name}`)).toBeUndefined()
+  })
 
   it.each(['640px', '768px', '1024px', '1280px', '1536px'])(
     'emits no media query at the stock width %s',
@@ -79,12 +105,8 @@ describe('type scale (PRD section 4)', () => {
     expect(themeVariable('--text-button')).toBe('12px')
   })
 
-  it('makes the eyebrow the only heavier step', () => {
+  it('makes the Eyebrow the only heavier step', () => {
     expect(themeVariable('--text-eyebrow--font-weight')).toBe('600')
-  })
-
-  it('carries the uniform -0.02em tracking as a named token', () => {
-    expect(themeVariable('--tracking-tight')).toBe('-0.02em')
   })
 
   it.each(['xs', 'sm', 'base', 'lg', 'xl', '2xl'])(
@@ -93,6 +115,28 @@ describe('type scale (PRD section 4)', () => {
       expect(themeVariable(`--text-${name}`)).toBeUndefined()
     },
   )
+})
+
+describe('tracking and weight (PRD section 4)', () => {
+  it('carries the uniform -0.02em tracking as the only tracking value', () => {
+    expect(themeVariable('--tracking-tight')).toBe('-0.02em')
+  })
+
+  it("does not inherit Tailwind's -0.025em under the same name", () => {
+    expect(themeVariable('--tracking-tight')).not.toBe('-0.025em')
+    expect(themeVariable('--tracking-wide')).toBeUndefined()
+  })
+
+  it('offers only the two measured weights', () => {
+    expect(themeVariable('--font-weight-normal')).toBe('400')
+    expect(themeVariable('--font-weight-semibold')).toBe('600')
+    expect(themeVariable('--font-weight-bold')).toBeUndefined()
+  })
+
+  it('drops the stock leading scale, since each step carries its own', () => {
+    expect(themeVariable('--leading-loose')).toBeUndefined()
+    expect(themeVariable('--leading-tight')).toBeUndefined()
+  })
 })
 
 describe('colour (PRD section 4)', () => {
@@ -127,5 +171,10 @@ describe('shape (PRD section 4)', () => {
     ['--nav-z-index', '8'],
   ])('defines %s as %s', (name, value) => {
     expect(themeVariable(name)).toBe(value)
+  })
+
+  it('drops the stock radius scale, which is unmeasured guesswork here', () => {
+    expect(themeVariable('--radius-lg')).toBeUndefined()
+    expect(themeVariable('--radius-full')).toBeUndefined()
   })
 })
