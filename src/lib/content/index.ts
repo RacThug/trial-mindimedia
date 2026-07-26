@@ -263,14 +263,8 @@ export async function loadAllContent(): Promise<void> {
 }
 
 /**
- * Minor units to the Reference's own display form: `$129`, `$1,881`. No cents,
- * because no price on the page has any - `maximumFractionDigits: 0` rather than
- * trimming a `.00` afterwards.
+ * Re-exported rather than defined here so that a Client Component can import it
+ * without pulling the JSON, Zod and the asset index along with it. See
+ * `money.ts`; server callers keep reaching for it through this module.
  */
-export function formatMoney(minorUnits: number, currency: 'USD' = 'USD'): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency,
-    maximumFractionDigits: 0,
-  }).format(minorUnits / 100)
-}
+export { formatMoney } from './money.ts'

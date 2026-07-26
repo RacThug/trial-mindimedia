@@ -55,6 +55,9 @@
 
   --font-weight-*: initial;
   --font-weight-normal: 400;
+  /* Nav links, footer links and every button label. Measured in #9: the scale
+   * is not weight 400 throughout after all - interactive text is 500. */
+  --font-weight-medium: 500;
   --font-weight-semibold: 600;
 
   --text-*: initial;
@@ -83,6 +86,13 @@
   --text-body--line-height: 25.6px;
   --text-body--letter-spacing: normal;
 
+  /* The phone step of body copy, measured in #9 on the footer's tagline,
+   * copyright and by-line. Only the footer is measured so far; a Section that
+   * needs it elsewhere should measure its own case before reaching for it. */
+  --text-body-sm: 14px;
+  --text-body-sm--line-height: 22.4px;
+  --text-body-sm--letter-spacing: normal;
+
   /* The Eyebrow is also uppercase. Tailwind's `--text-*` namespace has no
    * text-transform modifier, so that one property cannot be a token and has to
    * ride along as `uppercase` at the call site. */
@@ -91,7 +101,11 @@
   --text-eyebrow--letter-spacing: normal;
   --text-eyebrow--font-weight: 600;
 
-  --text-button: 12px; /* button label */
+  /* There is no button-label step. Re-measured in #9 on the nav's Bundle pill
+   * and both hero buttons: every label is `text-body` at `font-medium`, not the
+   * 12px PRD section 4 first recorded. `--text-button` is gone rather than
+   * corrected, because a token whose value equals another token's is a second
+   * name for one measurement and they drift apart the moment one is edited. */
 
   /* ---- Colour (PRD section 4) ------------------------------------------- */
   --color-*: initial;
@@ -115,6 +129,10 @@
   /* Container: 1360px max width, centred. `max-w-page`. */
   --container-page: 1360px;
 
+  /* The shell runs on a narrower rail than the Sections do. Measured in #9:
+   * nav and footer content is 1200px wide at 1440, not 1360. `max-w-shell`. */
+  --container-shell: 1200px;
+
   /* Button: height 46px, radius 48px, padding 10px 20px, 12px label.
    * White on black is primary, `--color-surface-2` on white is secondary.
    * The button component itself belongs to issue #9; these are its measurements. */
@@ -123,10 +141,30 @@
   --button-padding-x: 20px;
   --button-padding-y: 10px;
 
-  /* Nav: fixed, top 0, height 86px, fully transparent, no backdrop blur.
-   * Verified never to change on scroll - do not add a scrolled state. */
+  /* Nav: fixed, top 0, z-index 8. Verified again in #9 at scrollY 0, 400, 1200
+   * and 5000, in both directions: background, blur, height, transform and
+   * opacity never change. Do not add a scrolled state.
+   *
+   * The surface is NOT transparent, which PRD section 4 had wrong until #9. The
+   * fixed wrapper is transparent; the header inside it carries the tint and the
+   * blur. Over the black hero the two are indistinguishable, which is how the
+   * measurement went astray - the difference only shows once the Template Wall
+   * scrolls underneath.
+   *
+   * Height is 86px at tablet and desktop and 76px on phone. Both fall out of
+   * `py-5` plus the row, which is the 46px button on the wide layouts and the
+   * 36px menu control on phone; the tokens exist for what has to clear the nav
+   * rather than for the nav itself. */
   --nav-height: 86px;
+  --nav-height-phone: 76px;
   --nav-z-index: 8;
+  --nav-surface: rgba(0, 0, 0, 0.7);
+  --nav-blur: 12px;
+
+  /* Mobile menu, open: the same header fills the viewport and swaps to a
+   * lighter tint under a heavier blur. Measured in #9. */
+  --menu-surface: rgba(0, 0, 0, 0.2);
+  --menu-blur: 20px;
 }
 
 @layer base {

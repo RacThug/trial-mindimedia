@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { GeistSans } from 'geist/font/sans'
+import { SiteFooter } from '@/components/shell/site-footer'
+import { SiteNav } from '@/components/shell/site-nav'
 import './globals.css'
 
 /*
@@ -14,7 +16,12 @@ import './globals.css'
  */
 
 export const metadata: Metadata = {
-  title: 'Browser.supply',
+  /* The template names the placeholder routes; the homepage keeps the bare
+   * default, which is what the Reference's own `<title>` is. */
+  title: {
+    default: 'Browser.supply',
+    template: '%s - Browser.supply',
+  },
   description: 'Launch your online business with a premium Framer website template.',
   /*
    * This is a faithful clone of a real, live commercial site, built as a trial
@@ -35,9 +42,19 @@ export const viewport: Viewport = {
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  /*
+   * The shell wraps every route, which is what makes the placeholder pages
+   * cheap: each one renders its own `<main>` and gets the nav and footer for
+   * free. Both halves read content, and both stay static - an async Server
+   * Component still prerenders when its data does not depend on the request.
+   */
   return (
     <html lang="en" className={GeistSans.variable}>
-      <body>{children}</body>
+      <body>
+        <SiteNav />
+        {children}
+        <SiteFooter />
+      </body>
     </html>
   )
 }

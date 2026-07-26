@@ -15,6 +15,7 @@
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:e2e": "playwright test",
     "assets": "node scripts/assets/build.ts",
     "assets:verify": "node scripts/assets/verify.ts"
   },
@@ -26,6 +27,8 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
+    "@playwright/test": "^1.62.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/ffprobe-static": "^2.0.3",
     "@types/node": "^26.1.1",

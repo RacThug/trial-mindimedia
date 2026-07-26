@@ -96,11 +96,29 @@ tracking. Headings are large and light, never bold.
 
 ### Shape
 
-- Container: **1360px** max width, centred
-- Button: height **46px**, radius **48px**, padding `10px 20px`, 12px label
+- Container: **1360px** max width, centred. The shell runs on a narrower rail:
+  nav and footer content measure **1200px** at 1440 (#9). The hero's own content starts at
+  the same x=120, so the 1360 figure needs re-measuring when the Sections land in #10.
+- Button: height **46px**, radius **48px**, padding `10px 20px`, label `body` at **weight 500**
   - primary: white background, black text
   - secondary: `#1c1c1c` background, white text
-- Nav: `position: fixed`, top 0, height **86px**, **fully transparent**, no backdrop blur, `z-index: 8`
+- Nav: `position: fixed`, top 0, height **86px** (**76px** on phone), `z-index: 8`.
+  Surface **`rgba(0, 0, 0, 0.7)` under `backdrop-filter: blur(12px)`**
+
+Three of those are corrections made in #9 against the live Reference, all of them from
+re-reading the element the styles are actually on:
+
+- **The nav is not transparent and is not unblurred.** The `position: fixed` wrapper is
+  transparent; the `<header>` inside it carries the tint and the blur. Over the black hero
+  the two are indistinguishable, which is how the first measurement went wrong - the
+  difference only appears once the Template Wall scrolls underneath. Sampled at scrollY 0,
+  400, 1200 and 5000 in both directions and unchanged at every one, so **"never changes on
+  scroll" still holds**.
+- **There is no 12px button label.** The nav's Bundle pill and both hero buttons measure
+  16px/25.6px at weight 500 - the `body` step, in a weight the scale did not have. The
+  `--text-button` token is gone rather than corrected.
+- **The scale is not weight 400 throughout.** Nav links, footer links and button labels are
+  all **500**; `--font-weight-medium` joins the token layer.
 
 ---
 
@@ -129,10 +147,28 @@ Thirteen sections, top to bottom. Copy is verbatim from the Reference.
 Logo `Browser.supply`, links `Templates / Live examples / Support / Blog`, X and YouTube
 icons, white `Bundle` pill.
 
-**Verified: the nav never changes on scroll.** Background, height, transform and opacity are
-identical at every scroll position, scrolling both up and down. Do not add a scrolled state.
+**Verified twice, in #5 and again in #9: the nav never changes on scroll.** Background,
+blur, height, transform and opacity are identical at every scroll position, scrolling both
+up and down. Do not add a scrolled state.
 
-Phone: logo left, hamburger right.
+Measured in #9, all three Breakpoints:
+
+| | desktop (>= 1200) | tablet (810-1199) | phone (<= 809) |
+| --- | --- | --- | --- |
+| Height | 86px | 86px | **76px** |
+| Gutter | 40px | 20px | 12px |
+| Rail | 1200px | full | full |
+| Row | 46px (the button) | 46px | 36px (the control) |
+
+Logo 18px + 12px gap + wordmark; links centred **on the viewport** rather than spaced
+between logo and actions, 16px gaps; actions 12px gap, social pair 8px.
+
+Phone: logo left, menu control right - **two bars, not three**. Open, the same header fills
+the viewport at `rgba(0, 0, 0, 0.2)` under `blur(20px)`, holding a 36px-gap column of
+[row, links (28px gaps, social last), full-width `Bundle` pill].
+
+The Reference's control is a `div` with no accessible name, no `aria-expanded` and no focus
+trap, and its open menu lets the page behind it scroll. We deviate on all four (#9).
 
 ### 6.2 Hero
 
@@ -306,10 +342,21 @@ right, with five paragraphs. Then four stat tiles in a 2x2: `6+` Years building 
 
 ### 6.12 Footer
 
-Logo, tagline `Launch your online business with a premium Framer website template.`, X and
-YouTube icons, two link columns (`Templates / Live examples / Bundle / Blog` and
-`Quiz / Support / Privacy`), `© 2026 browser.supply. Framer website templates`, and
-`Created by Ramish Aziz`.
+Wordmark - text, not the nav's logo image - tagline `Launch your online business with a
+premium Framer website template.`, X and YouTube icons, two link columns
+(`Templates / Live examples / Bundle / Blog` and `Quiz / Support / Privacy`),
+`© 2026 browser.supply. Framer website templates`, and `Created by Ramish Aziz`.
+
+Measured in #9: 40px gutters at every width over the same 1200px rail as the nav, then two
+rows - a 254px block (`40px 0` padding) above a 72px by-line bar (`20px 0`), no divider
+rule. Left column 16px gaps, tagline fixed at 292px; link columns 56px apart with 24px
+between links. Wordmark is `h5`; tagline, copyright and by-line are `text-muted`, dropping
+to **14px/22.4px on phone**, where everything centres and the two columns become one.
+The 38px portrait overflows its 32px row rather than growing it.
+
+Both prose links (`Framer`, `Ramish Aziz`) are white inside grey text with no other
+distinction, which is colour alone at 1.4:1 and fails the axe scan. We underline them - the
+same reasoning as 6.14.
 
 ### 6.13 Quiz modal
 
@@ -475,6 +522,12 @@ of our own output.
   recalculating, placeholder routing
 - **axe**: accessibility scan inside the E2E run
 
+The Playwright side arrived in #9 (`npm run test:e2e`, `playwright.config.ts`, specs in
+`tests/e2e/`). It runs against a production build rather than `next dev`, because half of
+what it asserts is about the build: that `/api/templates` is a prerendered file a browser
+can fetch, and that the placeholder routes are static pages. Sections #12 and #13 add the
+quiz modal and Option specs to it.
+
 Model rules live in the schema, so a broken reference cannot reach a page. Measured Reference
 facts live in `tests/content/reference-facts.test.ts` instead, so growing the content fails a
 named test rather than the build - see ADR-0004.
@@ -482,7 +535,8 @@ named test rather than the build - see ADR-0004.
 ### Checks
 
 Five commands gate a PR, run before pushing: `typecheck`, `lint`, `format:check`, `test`,
-`build`. `build` is last and is not redundant - content that no test happens to read still
+`build`. `test:e2e` runs beside them and builds the app itself, so it is a sixth check
+rather than a sixth gate. `build` is last and is not redundant - content that no test happens to read still
 fails there, because the data layer validates lazily (ADR-0004).
 
 `format:check` could not pass on a Windows clone until #8. Prettier writes and checks LF while
