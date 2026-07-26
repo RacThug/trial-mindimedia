@@ -28,6 +28,7 @@ export const MEDIA_GROUPS = [
   'step',
   'avatar',
   'story',
+  'quiz',
 ] as const
 
 export type MediaGroup = (typeof MEDIA_GROUPS)[number]
@@ -162,6 +163,24 @@ const LOGO: ImagePreset = {
 const OG_CARD: ImagePreset = { maxWidth: 1200, format: 'jpeg', quality: 85 }
 
 /*
+ * The quiz modal's backdrop (PRD 6.13), measured in #12: two tilted columns of
+ * template screenshots, 476x369 at desktop and tablet and 319x247 on phone.
+ * Nothing else on the page uses them, and none of the Template Wall's tiles
+ * appears here - the Reference ships a set of its own.
+ *
+ * The cap is 960 rather than the usual 2x, because these are the only assets on
+ * the page that never load with it: the modal mounts on a timer, so its images
+ * are fetched after everything PRD section 8 budgets for. They are still lazy
+ * `next/image`, so the browser picks a smaller step at every real width.
+ */
+const QUIZ_SHOT: ImagePreset = {
+  maxWidth: 960,
+  format: 'webp',
+  quality: 90,
+  rendered: { desktop: 476, tablet: 476, phone: 319 },
+}
+
+/*
  * A poster is rejected as blank below this standard deviation of luma, which
  * asks "is anything visible" rather than "is this bright" - a dark but detailed
  * UI screenshot has to pass. The gap is wide: `feature/hosting` fades up from
@@ -287,4 +306,19 @@ export const SOURCE_ASSETS: readonly SourceAsset[] = [
    */
   video('story/case-study', 'assets/AaTTiVz5ijj8cnTBnwbSPydb0.mp4', STORY_CLIP),
   video('story/founder', 'assets/UhHrKhcrhV3BqnKIX98HSwfDds.mp4', STORY_CLIP),
+
+  /* --- quiz modal (PRD 6.13) ---------------------------------------------
+   * Ten screenshots in two tilted columns behind the modal's copy, in the DOM
+   * order each column runs them - `a` is the left column, `b` the right.
+   */
+  image('quiz/shot-a1', 'images/DvSRHhkjWsh5jpXucEWWk5b6Qvs.png', QUIZ_SHOT),
+  image('quiz/shot-a2', 'images/DUlF2K2Uw9TEBNJEXl872DkeOs.png', QUIZ_SHOT),
+  image('quiz/shot-a3', 'images/fUQEGcE8mHItmliwyV59BT7zhzc.png', QUIZ_SHOT),
+  image('quiz/shot-a4', 'images/Jt7wvThe19HhcaP2K93HRpWc1Vg.png', QUIZ_SHOT),
+  image('quiz/shot-a5', 'images/2E1iI62EzA4DWQydQbA07V4ypXY.png', QUIZ_SHOT),
+  image('quiz/shot-b1', 'images/1NC2TMtH0wowAIyc7hrQrUOio.png', QUIZ_SHOT),
+  image('quiz/shot-b2', 'images/BT91EEYZ34Q8360oijAPTHIp0.png', QUIZ_SHOT),
+  image('quiz/shot-b3', 'images/gMRKj7MnQ7vklFNpBD1HhZKo0.png', QUIZ_SHOT),
+  image('quiz/shot-b4', 'images/o70yZ4ZRs3SxWE77tucZizBApUw.png', QUIZ_SHOT),
+  image('quiz/shot-b5', 'images/Y9ZYEi2THOla615UUlLTalnAqIQ.png', QUIZ_SHOT),
 ]

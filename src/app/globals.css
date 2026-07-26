@@ -285,6 +285,17 @@
     rgba(51, 212, 120, 0.2) 100%
   );
 
+  /* The quiz modal's Eyebrow (PRD 6.13), measured in #12: the same wash again
+   * in plain white at a fifth of the strength, on a 4px radius rather than the
+   * Eyebrow's 8 - the only pill on the site that is neither blue nor orange, and
+   * the only one whose label is `--color-text-muted` rather than a tint of its
+   * own colour. */
+  --badge-surface-white: radial-gradient(
+    86% 150% at 47% 50%,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.2) 100%
+  );
+
   /* The step badge (PRD 6.6), measured in #11: the Eyebrow's wash and geometry
    * exactly - same stops, same 8px radius, same `4px 12px` - in
    * `--color-accent-orange`. It is the Eyebrow in another colour rather than a
@@ -319,6 +330,28 @@
    * lighter tint under a heavier blur. Measured in #9. */
   --menu-surface: rgba(0, 0, 0, 0.2);
   --menu-blur: 20px;
+
+  /* The quiz modal (PRD 6.13), measured in #12. The scrim is the same shape as
+   * the two above - a black at a measured alpha, not a palette colour, which is
+   * why it lives here rather than under `--color-*`. */
+  --modal-scrim: rgba(0, 0, 0, 0.9);
+
+  /* What dims the two travelling backdrops (PRD 6.10, 6.13), both measured in
+   * #12 and both the same trick: an opaque band that fades out by the bottom,
+   * intersected with a ramp up from nothing at the top. The intersection peaks
+   * at about 44% alpha on the Quiz CTA and 54% in the modal, which is what lets
+   * white copy sit over a wall of bright screenshots without a scrim.
+   *
+   * The stops differ by a Section and so do not share one token: 53% against
+   * 54%, and a 121% ramp against a 100% one. Two measurements, two names. See
+   * the `ticker-mask` utilities below for the compositing, which cannot be a
+   * custom property because `mask-composite` is a list keyed to the layers. */
+  --quiz-ticker-mask:
+    linear-gradient(#000000 53%, rgba(0, 0, 0, 0) 100%),
+    linear-gradient(rgba(0, 0, 0, 0) 0%, #000000 121%);
+  --modal-ticker-mask:
+    linear-gradient(#000000 54%, rgba(0, 0, 0, 0) 100%),
+    linear-gradient(rgba(0, 0, 0, 0) 0%, #000000 100%);
 
   /* ---- Template Wall (PRD 6.3), all measured in #10 ----------------------
    *
@@ -436,6 +469,9 @@
 @utility rule-r {
   box-shadow: inset -1px 0 0 var(--color-surface-3);
 }
+@utility rule-t {
+  box-shadow: inset 0 1px 0 var(--color-surface-3);
+}
 @utility rule-b {
   box-shadow: inset 0 -1px 0 var(--color-surface-3);
 }
@@ -459,6 +495,27 @@
 }
 
 /*
+ * The two travelling backdrops' dimming, in one place each because a
+ * `mask-image` of two layers needs a `mask-composite` of two keywords beside it,
+ * and that pair cannot live in a custom property. The `-webkit-` spellings are
+ * aliases in every engine that ships `mask-composite`; they are here so the
+ * property never arrives without its compositing on an older Safari, where an
+ * uncomposited pair would read as a union and dim nothing at all.
+ */
+@utility quiz-ticker-mask {
+  mask-image: var(--quiz-ticker-mask);
+  mask-composite: intersect, add;
+  -webkit-mask-image: var(--quiz-ticker-mask);
+  -webkit-mask-composite: intersect, add;
+}
+@utility modal-ticker-mask {
+  mask-image: var(--modal-ticker-mask);
+  mask-composite: intersect, add;
+  -webkit-mask-image: var(--modal-ticker-mask);
+  -webkit-mask-composite: intersect, add;
+}
+
+/*
  * Step 1's thumbnail column travels; the Template Wall does not (PRD 6.3, 6.6).
  * The list is rendered twice and shifted by exactly one copy, so the wrap is
  * invisible. Under `prefers-reduced-motion` the animation is dropped and the
@@ -470,5 +527,21 @@
   }
   to {
     transform: translateY(calc(-1 * var(--thumbnails-cycle)));
+  }
+}
+
+/*
+ * The Quiz CTA's ticker columns (PRD 6.10), and the modal's (6.13). Unlike the
+ * thumbnails above, these run tiles of differing heights, so the cycle is the
+ * strip's own half rather than a measured constant: each list is rendered twice
+ * with its gaps as margins, and half of that is exactly one copy. Run in reverse
+ * for the columns that travel the other way.
+ */
+@keyframes ticker-travel {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-50%);
   }
 }

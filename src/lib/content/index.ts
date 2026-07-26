@@ -17,6 +17,7 @@
  * index to look one up in.
  */
 
+import type { PlanGlyphName } from '../glyphs/plans.ts'
 import { isVideo, media, type MediaImage, type MediaSlug } from '../media/index.ts'
 import { ContentError, parseCollection } from './parse.ts'
 import {
@@ -114,6 +115,14 @@ export type PlanOption = {
   /** Minor units added to the Plan price when selected. */
   readonly priceDelta: number
   readonly default: boolean
+  /** The Reference draws a different glyph on every row (PRD 6.9). */
+  readonly icon: PlanGlyphName
+}
+
+/** One `INCLUDED:` line, with the glyph the Reference pairs it with. */
+export type PlanInclusion = {
+  readonly label: string
+  readonly icon: PlanGlyphName
 }
 
 export type Plan = {
@@ -125,7 +134,7 @@ export type Plan = {
   readonly currency: 'USD'
   readonly blurb: string
   readonly options: readonly PlanOption[]
-  readonly included: readonly string[]
+  readonly included: readonly PlanInclusion[]
   readonly cta: { readonly label: string; readonly href: string }
 }
 

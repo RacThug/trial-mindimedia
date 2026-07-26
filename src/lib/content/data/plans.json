@@ -8,16 +8,26 @@
     "currency": "USD",
     "blurb": "Pick a template best suited for you, customize it, and launch.",
     "options": [
-      { "label": "Framer template", "priceDelta": 0, "default": true },
-      { "label": "Add Figma designs", "priceDelta": 3900, "default": false },
-      { "label": "Add Done-for you", "priceDelta": 37000, "default": false }
+      { "label": "Framer template", "priceDelta": 0, "default": true, "icon": "framer" },
+      {
+        "label": "Add Figma designs",
+        "priceDelta": 3900,
+        "default": false,
+        "icon": "figma"
+      },
+      {
+        "label": "Add Done-for you",
+        "priceDelta": 37000,
+        "default": false,
+        "icon": "check-circle"
+      }
     ],
     "included": [
-      "Instant access to chosen template",
-      "Lifetime template updates",
-      "3 months Framer Pro",
-      "Step-by-step video tutorials",
-      "Use on unlimited sites"
+      { "label": "Instant access to chosen template", "icon": "lightning" },
+      { "label": "Lifetime template updates", "icon": "arrows-clockwise" },
+      { "label": "3 months Framer Pro", "icon": "framer" },
+      { "label": "Step-by-step video tutorials", "icon": "play-circle" },
+      { "label": "Use on unlimited sites", "icon": "infinity" }
     ],
     "cta": { "label": "Browse templates", "href": "/templates" }
   },
@@ -31,13 +41,13 @@
     "blurb": "Every template, unlimited sites. Build however you want.",
     "options": [],
     "included": [
-      "All current templates",
-      "Early access to all future templates",
-      "Lifetime template updates",
-      "Use on unlimited sites",
-      "3 months Framer Pro",
-      "Step-by-step video tutorials",
-      "Priority support"
+      { "label": "All current templates", "icon": "stack" },
+      { "label": "Early access to all future templates", "icon": "sparkle" },
+      { "label": "Lifetime template updates", "icon": "arrows-clockwise" },
+      { "label": "Use on unlimited sites", "icon": "infinity" },
+      { "label": "3 months Framer Pro", "icon": "framer" },
+      { "label": "Step-by-step video tutorials", "icon": "play-circle" },
+      { "label": "Priority support", "icon": "headset" }
     ],
     "cta": { "label": "Get the bundle", "href": "/bundle" }
   },
@@ -50,13 +60,18 @@
     "currency": "USD",
     "blurb": "Designed from scratch for your brand, built in Framer.",
     "options": [
-      { "label": "Landing page", "priceDelta": 0, "default": true },
-      { "label": "Multi-page site", "priceDelta": 0, "default": false }
+      { "label": "Landing page", "priceDelta": 0, "default": true, "icon": "browser" },
+      {
+        "label": "Multi-page site",
+        "priceDelta": 0,
+        "default": false,
+        "icon": "browsers"
+      }
     ],
     "included": [
-      "Custom design, no template",
-      "CMS, SEO and launch included",
-      "Two revision rounds"
+      { "label": "Custom design, no template", "icon": "leaf" },
+      { "label": "CMS, SEO and launch included", "icon": "rocket" },
+      { "label": "Two revision rounds", "icon": "arrows-clockwise" }
     ],
     "cta": {
       "label": "Book a discovery call",

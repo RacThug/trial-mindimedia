@@ -15,11 +15,25 @@ type EyebrowProps = {
   readonly children: React.ReactNode
   /** The hero's Eyebrow carries a mark; the Section Eyebrows are text alone. */
   readonly icon?: React.ReactNode
+  /**
+   * The 8px backdrop blur the Quiz CTA's Eyebrow carries and no other does.
+   *
+   * Measured in #12 on both, side by side: it is not a property of the pill, it
+   * is what the one pill with a picture behind it needs. Turning it on
+   * everywhere would blur nothing at all on the black bands and would say the
+   * two are the same when the Reference says they are not.
+   */
+  readonly blurred?: boolean
 }
 
-export function Eyebrow({ children, icon }: EyebrowProps) {
+export function Eyebrow({ children, icon, blurred = false }: EyebrowProps) {
   return (
-    <p className="inline-flex items-center gap-2 rounded-eyebrow bg-[image:var(--eyebrow-surface)] px-3 py-1 text-eyebrow text-accent-blue uppercase">
+    <p
+      className={
+        'inline-flex items-center gap-2 rounded-eyebrow bg-[image:var(--eyebrow-surface)] px-3 py-1 text-eyebrow text-accent-blue uppercase ' +
+        (blurred ? 'backdrop-blur-[8px]' : '')
+      }
+    >
       {icon}
       {children}
     </p>

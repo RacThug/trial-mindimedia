@@ -211,6 +211,34 @@ describe('Plans (PRD 6.9)', () => {
     const plans = await getPlans()
     expect(plans.map((plan) => plan.included.length)).toEqual([5, 7, 3])
   })
+
+  /*
+   * The Reference draws a different glyph on every row rather than one tick down
+   * the list, and pairs the same line of copy with the same glyph wherever it
+   * appears - `3 months Framer Pro` is the Framer mark on both cards that carry
+   * it (measured in #12). The schema already refuses a name that is not one of
+   * the fourteen; what it cannot see is a line of copy that quietly loses the
+   * partner the Reference gave it.
+   */
+  it('pair one glyph per line of copy, and the same glyph wherever it repeats', async () => {
+    const plans = await getPlans()
+    const byLabel = new Map<string, string>()
+
+    for (const plan of plans) {
+      for (const item of [...plan.options, ...plan.included]) {
+        const seen = byLabel.get(item.label)
+        if (seen !== undefined)
+          expect([item.label, item.icon]).toEqual([item.label, seen])
+        byLabel.set(item.label, item.icon)
+      }
+    }
+
+    expect(byLabel.get('3 months Framer Pro')).toBe('framer')
+    expect(byLabel.get('Framer template')).toBe('framer')
+    expect(byLabel.get('Priority support')).toBe('headset')
+    /* Fourteen distinct glyphs over the eighteen rows the three cards carry. */
+    expect(new Set(byLabel.values()).size).toBe(14)
+  })
 })
 
 describe('the rest of the page', () => {

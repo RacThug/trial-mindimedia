@@ -428,9 +428,10 @@ test.describe('the feature bento (PRD 6.5)', () => {
     )
 
     /* Six over the Wall, three in the bento, two in the steps, one in the case
-     * study. None of them is above the fold, and the Reference autoplays every
-     * one at `preload="auto"` (PRD section 8). */
-    expect(preloads.length).toBe(12)
+     * study, and the founder's from #12. None of them is above the fold, and the
+     * Reference autoplays every one at `preload="auto"` (PRD section 8). The
+     * Quiz CTA's backdrop adds none: it is stills only. */
+    expect(preloads.length).toBe(13)
     expect(preloads.every((preload) => preload === 'none')).toBe(true)
   })
 
