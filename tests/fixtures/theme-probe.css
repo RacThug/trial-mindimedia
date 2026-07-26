@@ -1,0 +1,14 @@
+/*
+ * Test fixture. Compiles the real token layer and forces the breakpoint
+ * variants under test to be generated, so the assertions do not depend on
+ * which classes the app happens to use on any given day.
+ */
+@import '../../src/app/globals.css';
+
+@source inline("tablet:text-h2");
+@source inline("desktop:text-h2");
+@source inline("sm:text-h2");
+@source inline("md:text-h2");
+@source inline("lg:text-h2");
+@source inline("xl:text-h2");
+@source inline("2xl:text-h2");
