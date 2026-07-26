@@ -1,4 +1,5 @@
 import { ButtonLink } from '@/components/ui/button.tsx'
+import { ScrollAppear } from '@/components/motion/scroll-appear.tsx'
 import { Eyebrow } from '@/components/ui/eyebrow.tsx'
 import { TemplateCard } from '@/components/ui/template-card.tsx'
 import { getTemplates } from '@/lib/content'
@@ -28,7 +29,7 @@ export async function FeaturedTemplates() {
   const templates = await getTemplates()
 
   return (
-    <section className="px-5 pt-35 pb-10 tablet:px-10 tablet:pt-40 desktop:pb-15">
+    <ScrollAppear className="px-5 pt-35 pb-10 tablet:px-10 tablet:pt-40 desktop:pb-15">
       <div className="mx-auto flex w-full max-w-rail flex-col gap-11">
         {/* No gap between the heading block and the button: the Reference lets
          * the block run right up to it, 40..672 against a button at 672 on the
@@ -58,6 +59,6 @@ export async function FeaturedTemplates() {
           ))}
         </ul>
       </div>
-    </section>
+    </ScrollAppear>
   )
 }

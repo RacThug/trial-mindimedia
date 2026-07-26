@@ -1,4 +1,5 @@
 import { WallTile } from '@/components/media/wall-tile.tsx'
+import { ScrollAppear } from '@/components/motion/scroll-appear.tsx'
 import { getTestimonials, getWallTiles } from '@/lib/content'
 import { WallTestimonials } from './wall-testimonials.tsx'
 
@@ -37,7 +38,7 @@ export async function TemplateWall() {
   const [tiles, testimonials] = await Promise.all([getWallTiles(), getTestimonials()])
 
   return (
-    <section className="relative">
+    <ScrollAppear className="relative">
       {/* Decorative in full: sixteen backdrop tiles carrying no alt text by
        * design (PRD 6.14), so the whole wall is one thing to skip. */}
       <div
@@ -51,7 +52,7 @@ export async function TemplateWall() {
 
       <ProgressiveBlur />
       <WallTestimonials items={testimonials.wall} />
-    </section>
+    </ScrollAppear>
   )
 }
 

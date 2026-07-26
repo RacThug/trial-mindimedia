@@ -1,4 +1,5 @@
 import { CardVisual } from '@/components/media/card-visual.tsx'
+import { ScrollAppear } from '@/components/motion/scroll-appear.tsx'
 import { ButtonLink } from '@/components/ui/button.tsx'
 import { resolveVisual } from '@/lib/content'
 
@@ -39,7 +40,10 @@ const CLIP = resolveVisual(
 
 export function CaseStudy() {
   return (
-    <section className="grid gap-6 tablet:gap-8 desktop:h-[604px] desktop:grid-cols-[568fr_632fr] desktop:gap-0">
+    <ScrollAppear
+      variant="fade"
+      className="grid gap-6 tablet:gap-8 desktop:h-[604px] desktop:grid-cols-[568fr_632fr] desktop:gap-0"
+    >
       <CardVisual
         visual={CLIP}
         sizes={VIDEO_SIZES}
@@ -83,6 +87,6 @@ export function CaseStudy() {
           </ButtonLink>
         </div>
       </div>
-    </section>
+    </ScrollAppear>
   )
 }

@@ -767,6 +767,69 @@ not that the image must carry the identification. The Reference's own alt on the
 and it is where the names of the other templates come from: Cora, Funnelz, Editr, Partnr,
 Meraas, Reformr, Influence, plus Traction reused.
 
+### 6.15 Scroll-Appear - measured
+
+Every band rises and fades in once as it enters the viewport. Measured in #13, which closed
+known unknowns 1 and 2; the numbers below are captures of the Reference, not choices.
+
+Section 10 recorded these as unmeasurable because Motion drives them from its own rAF loop
+where they do not surface in `getAnimations()` or computed styles. That is true of those two
+APIs and not of the DOM: Motion writes an inline `style` attribute every frame, so a
+`MutationObserver` on `style` records the entire curve. `docs/measure/probe-13-dense.mjs`
+captures it, `docs/measure/fit-13-spring.mjs` fits it against Motion's own `spring()` solver.
+
+| | travel | opacity | spring (mass 1) | settles |
+| --- | --- | --- | --- | --- |
+| Section | 30px | 0 -> 1 | stiffness 200, damping 30 | travel ~570ms, opacity ~755ms |
+| nested block | 10px | 0 -> 1 | stiffness 86, damping 40 | ~2.3s |
+| nested fade | none | 0 -> 1 | stiffness 86, damping 40 | ~2.5s |
+
+**A spring, not a tween, and not a close call.** The best-fitting duration tween misses by
+20x the RMS the spring achieves (0.0255 against 0.0012), and the two animated values stop at
+different times - the 30px travel at ~570ms, the opacity at ~755ms - which only a per-value
+rest threshold produces. Two independent dense captures put the least-squares argmin at
+(204, 30.5) and (198, 29.75), which straddle the (200, 30) that ships.
+
+**Ten of the thirteen Sections animate, and not all in the same way.** Eight take the Section
+row above: the hero (6.2), the Template Wall (6.3), the featured Templates (6.4), the feature
+bento (6.5), how it works (6.6), the social proof grid (6.7), pricing (6.9) and the founder
+(6.11). The hero and the Wall are on that list despite #10 recording them as having no appear
+at all - they are simply in the viewport on load, where it runs immediately, and a probe that
+attaches after the page settles has already missed it.
+
+The other two animate as blocks *inside* their band: the quiz CTA's card (6.10) at 10px and
+the case study's card (6.8) as a fade. Their bands do not move. That distinction is the
+Reference's, not a simplification - putting Scroll-Appear on the quiz CTA's band would carry
+its ticker backdrop up with it, which the Reference never does.
+
+The remaining three never animate: the nav (6.1) is fixed, the footer (6.12) stays put, and
+the quiz modal (6.13) has an entrance of its own.
+
+**The trigger is half the element, or half the viewport, whichever is smaller.** Sections of
+619, 692, 1008, 1317 and 1694px all fired at half of whichever was smaller, themselves or the
+900px viewport. That clamp is the measurement and it is also what keeps the page safe: Motion
+hands `viewport.amount` straight to `IntersectionObserver`, which reports a ratio against the
+element's *own* height, so a literal `amount: 0.5` on a band more than twice the viewport
+tall - ordinary at phone widths - can never reach that ratio and the band stays at
+`opacity: 0` for good. The Clone therefore drives the trigger itself rather than through
+`whileInView`.
+
+**Hover, known unknown 2.** Also a spring, also nothing that `transition` reports - every
+hoverable element computes `transition-duration: 0s`. Links and buttons fade
+`opacity: 1 -> 0.7` on a spring of stiffness ~535, damping ~37.5 (zeta ~0.80), settling in
+~400ms through a ~1.3% undershoot. A Template card has no hover treatment on the card itself,
+which is what #10 found; what moves is one of the two stacked screenshots, the top one fading
+`opacity: 1 -> 0` over ~600ms on a spring of stiffness ~248, damping ~32. That confirms #10's
+crossfade reading. Measuring any of it needs the quiz modal stripped repeatedly rather than
+once - it reopens six seconds in, sits over the page, and makes every element report
+`:hover=false`.
+
+**Two Deviations.** `prefers-reduced-motion: reduce` removes the movement, arriving at the
+same end state with no travel and no fade; the Reference honours no such thing. And the
+resting state - `opacity: 0`, 30px down - is server-rendered, so without JavaScript nothing
+would ever ask a Section to appear and the page would be blank below the nav. The Reference
+has exactly that hole. A `<noscript>` rule in `layout.tsx` closes it.
+
 ---
 
 ## 7. Data layer
@@ -966,18 +1029,24 @@ would pass anywhere else; `.gitattributes` now pins LF in the working tree on ev
 
 Honest gaps. Measure during the build, do not guess.
 
-1. **Scroll-Appear parameters.** The animation is verified to exist: a Section is absent on
-   entering the viewport and present 1.6s later. But its exact duration, easing and travel
-   distance are unmeasured. Motion drives it via its own rAF loop, so it does not surface in
-   `getAnimations()` or computed styles. Needs frame-by-frame capture.
-2. **Hover states.** Probing the Selene card found no transform on the card element itself,
-   so whatever hover treatment exists sits on inner elements not yet isolated. #10 narrowed
-   it without closing it: both screenshots are stacked in the same box, so a crossfade is
-   what they are for, but its duration and easing are still ours.
-3. **Scroll-Appear is not yet built.** #10 shipped the first three Sections without it; the
-   hero, the Wall and the featured Templates are present on load. It lands with the
-   parameters in item 1, and is the reason a Fidelity capture of these Sections needs no
-   settling time yet.
+1. ~~**Scroll-Appear parameters.**~~ **Closed in #13**, and built. Measured and specified in
+   6.15: 30px of travel, opacity 0 to 1, on a spring of stiffness 200 and damping 30. The
+   premise that it could not be measured was wrong in one specific way worth keeping - it is
+   `getAnimations()` and computed styles that miss a Motion animation, not the DOM, because
+   Motion writes an inline `style` attribute on every frame.
+2. ~~**Hover states.**~~ **Closed in #13**, measured but *not* built, because the Reference's
+   hover treatment is not part of any Section this build has shipped as animated. See 6.15:
+   links and buttons fade to `opacity: 0.7` on a spring, and a Template card crossfades the
+   top of its two stacked screenshots over ~600ms - which is what #10 suspected they were
+   for. Nothing here is guesswork any more; it is a decision waiting to be taken.
+3. ~~**Scroll-Appear is not yet built.**~~ **Closed in #13.** Ten of the thirteen Sections
+   now carry it, which is every Section that carries it on the Reference - the nav, the
+   footer and the quiz modal do not, and 6.15 lists which band gets which treatment. The
+   hero and the Wall are among the ten: they were never missing it, they were simply in the
+   viewport on load, where it runs immediately. A Fidelity capture
+   now needs settling time on every Section: see `tests/e2e/settle.ts`, which triggers each
+   island rather than waiting for one, because an island one pixel into view is below the
+   trigger and will never settle on its own.
 4. **Step 1's thumbnail speed is measured, its phase is not.** #11 timed the columns at
    29px/s over three samples and read the 816px between them off one capture. The speed is a
    measurement; the phase is a constant that depends on when you look, so the Clone reproduces
@@ -1035,7 +1104,7 @@ Each child issue lands on its own `feature/*` branch and opens a PR into `develo
 - [ ] #10 Sections: hero, template wall, featured templates
 - [ ] #11 Sections: feature bento, how it works, social proof, case study
 - [ ] #12 Sections: pricing, quiz CTA, founder, quiz modal
-- [ ] #13 Motion: scroll-appear across all sections
+- [x] #13 Motion: scroll-appear across all sections
 - [ ] #14 Fidelity harness and performance budget
 - [ ] #15 Docs: README and ANSWERS.md
 

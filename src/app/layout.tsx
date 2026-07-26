@@ -51,6 +51,17 @@ export default function RootLayout({
   return (
     <html lang="en" className={GeistSans.variable}>
       <body>
+        {/*
+         * Scroll-Appear renders its resting state - `opacity: 0` and a 30px
+         * offset - into the server markup, so that a Section cannot paint before
+         * it is asked to appear. Without JavaScript nothing ever asks, and the
+         * page would be blank below the nav. The Reference has exactly that
+         * hole; a Deviation this cheap is worth taking (CONTEXT.md).
+         */}
+        <noscript>
+          <style>{'[data-appear]{opacity:1!important;transform:none!important}'}</style>
+        </noscript>
+
         <SiteNav />
         {children}
         <SiteFooter />
