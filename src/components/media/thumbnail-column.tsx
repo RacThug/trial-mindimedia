@@ -30,8 +30,11 @@ const TILE =
   'h-[var(--thumbnails-tile-height)] w-[275px] shrink-0 overflow-hidden rounded-visual'
 
 export function ThumbnailColumns({ media }: { readonly media: readonly Visual[] }) {
+  /* The whole strip fades downwards (#15). Its first stop is 15% *above* the
+   * box, so the tiles never reach full opacity at all and the bottom of the
+   * card is bare black behind the step's own text. */
   return (
-    <div className="pointer-events-none absolute inset-0 flex items-center justify-center gap-7 overflow-hidden">
+    <div className="pointer-events-none absolute inset-0 flex items-center justify-center gap-7 overflow-hidden visual-fade-thumbnails">
       <Column media={media} />
       {/* The second column runs the same tiles, 816px further along - measured,
        * and a constant, since both travel at one speed. */}
