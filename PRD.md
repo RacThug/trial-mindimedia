@@ -1245,7 +1245,7 @@ something already known.** The Sections in the nineties are the ones made of typ
 in the sixties and seventies are the ones made of video, where the diff masks show the tile
 edges landing on the right pixel and the re-encode filling the inside - which is the encode
 `npm run assets:verify` already gates at SSIM 0.98, measured from the other direction. The
-Template Wall's **16.7% at 390** is the phone column-fill Deviation the README records: the
+Template Wall's **15.9% at 390** is the phone column-fill Deviation the README records: the
 Reference hand-arranges its three phone columns, the Clone fills into the measured height, so
 a different tile lands in each slot and every one of them differs.
 
@@ -1363,11 +1363,11 @@ Honest gaps. Measure during the build, do not guess.
 
 ## 11. Deliverables
 
-- [ ] GitHub repository, work landed through `feature/*` to `develop` per `AGENTS.md`
-- [ ] Deployed on Vercel, URL in the README
-- [ ] `README.md`: live URL, setup, measured fidelity table, measured performance table vs
+- [x] GitHub repository, work landed through `feature/*` to `develop` per `AGENTS.md`
+- [x] Deployed on Vercel: **https://trial-mindimedia.vercel.app**, in the README
+- [x] `README.md`: live URL, setup, measured fidelity table, measured performance table vs
       the Reference, and every Deviation stated
-- [ ] `ANSWERS.md`: the seven brief questions. Four are answered by this build (JSON
+- [x] `ANSWERS.md`: the seven brief questions. Four are answered by this build (JSON
       structure, own API, slow connections, image optimization) and should cite files and
       measured numbers rather than describe intentions. Three are hypothetical (custom
       domain, admin panel, secure forms) and get concise design proposals.
@@ -1386,16 +1386,16 @@ Honest gaps. Measure during the build, do not guess.
 Each child issue lands on its own `feature/*` branch and opens a PR into `develop`, per
 `AGENTS.md`. Roughly in dependency order.
 
-- [ ] #6 Scaffold: Next.js, TypeScript, Tailwind theme tokens
-- [ ] #7 Asset pipeline: download and re-encode images and video
-- [ ] #8 Data layer: JSON store, typed access module, `/api` routes
-- [ ] #9 Shell: nav, footer, mobile menu, placeholder routes
-- [ ] #10 Sections: hero, template wall, featured templates
-- [ ] #11 Sections: feature bento, how it works, social proof, case study
-- [ ] #12 Sections: pricing, quiz CTA, founder, quiz modal
+- [x] #6 Scaffold: Next.js, TypeScript, Tailwind theme tokens
+- [x] #7 Asset pipeline: download and re-encode images and video
+- [x] #8 Data layer: JSON store, typed access module, `/api` routes
+- [x] #9 Shell: nav, footer, mobile menu, placeholder routes
+- [x] #10 Sections: hero, template wall, featured templates
+- [x] #11 Sections: feature bento, how it works, social proof, case study
+- [x] #12 Sections: pricing, quiz CTA, founder, quiz modal
 - [x] #13 Motion: scroll-appear across all sections
 - [x] #14 Fidelity harness and performance budget
-- [ ] #15 Docs: README and ANSWERS.md
+- [x] #15 Docs: README and ANSWERS.md
 - [x] #30 Fidelity: the visual fades, smooth scrolling, and the by-line
 
 #6 and #7 unblock everything. #8 unblocks #9 through #12. #13 needs the sections in place.
