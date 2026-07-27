@@ -769,7 +769,7 @@ Meraas, Reformr, Influence, plus Traction reused.
 
 ### 6.15 Scroll-Appear - measured
 
-Every band rises and fades in once as it enters the viewport. Measured in #13, which closed
+Every Section that animates rises and fades in once as it enters the viewport. Measured in #13, which closed
 known unknowns 1 and 2; the numbers below are captures of the Reference, not choices.
 
 Section 10 recorded these as unmeasurable because Motion drives them from its own rAF loop
@@ -797,10 +797,16 @@ bento (6.5), how it works (6.6), the social proof grid (6.7), pricing (6.9) and 
 at all - they are simply in the viewport on load, where it runs immediately, and a probe that
 attaches after the page settles has already missed it.
 
-The other two animate as blocks *inside* their band: the quiz CTA's card (6.10) at 10px and
-the case study's card (6.8) as a fade. Their bands do not move. That distinction is the
-Reference's, not a simplification - putting Scroll-Appear on the quiz CTA's band would carry
-its ticker backdrop up with it, which the Reference never does.
+The other two animate as cards *inside* a Section rather than as Sections: the quiz CTA's
+card (6.10) at 10px, and the case study's card (6.8) with no travel at all. The two nest
+differently, and both follow the Reference:
+
+- The **quiz CTA's** Section does not animate. Scroll-Appear sits on the card alone, because
+  putting it on the Section would carry the ticker backdrop up with it - which the Reference
+  never does.
+- The **case study** sits inside the social proof grid (6.7), which is a Section that *does*
+  travel its 30px. So its card runs its own fade inside a Section already on the move,
+  exactly as `framer-1nawwrh-container` does inside `framer-1wuub0m` on the Reference.
 
 The remaining three never animate: the nav (6.1) is fixed, the footer (6.12) stays put, and
 the quiz modal (6.13) has an entrance of its own.
@@ -809,8 +815,8 @@ the quiz modal (6.13) has an entrance of its own.
 619, 692, 1008, 1317 and 1694px all fired at half of whichever was smaller, themselves or the
 900px viewport. That clamp is the measurement and it is also what keeps the page safe: Motion
 hands `viewport.amount` straight to `IntersectionObserver`, which reports a ratio against the
-element's *own* height, so a literal `amount: 0.5` on a band more than twice the viewport
-tall - ordinary at phone widths - can never reach that ratio and the band stays at
+element's *own* height, so a literal `amount: 0.5` on a Section more than twice the viewport
+tall - ordinary at phone widths - can never reach that ratio and the Section stays at
 `opacity: 0` for good. The Clone therefore drives the trigger itself rather than through
 `whileInView`.
 
@@ -1041,7 +1047,7 @@ Honest gaps. Measure during the build, do not guess.
    for. Nothing here is guesswork any more; it is a decision waiting to be taken.
 3. ~~**Scroll-Appear is not yet built.**~~ **Closed in #13.** Ten of the thirteen Sections
    now carry it, which is every Section that carries it on the Reference - the nav, the
-   footer and the quiz modal do not, and 6.15 lists which band gets which treatment. The
+   footer and the quiz modal do not, and 6.15 lists which Section gets which treatment. The
    hero and the Wall are among the ten: they were never missing it, they were simply in the
    viewport on load, where it runs immediately. A Fidelity capture
    now needs settling time on every Section: see `tests/e2e/settle.ts`, which triggers each

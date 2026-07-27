@@ -39,14 +39,14 @@ describe('Scroll-Appear parameters', () => {
 
   it('gives nested blocks their own shorter, slower appear', () => {
     /*
-     * The Reference does not give every band the Section treatment: the quiz CTA
-     * card and the case study card animate as blocks inside their band, at 10px
+     * The Reference does not give every Section the Section treatment: the quiz
+     * CTA card and the case study card animate as cards inside one, at 10px
      * and 0px, on a heavily overdamped spring (zeta ~ 2.16). One spring fitted
      * jointly across five captures, worst-case RMS 0.013.
      */
     expect(APPEAR.block.travel).toBe(10)
-    expect(APPEAR.fade.travel).toBe(0)
-    expect(APPEAR.block.spring).toEqual(APPEAR.fade.spring)
+    expect(APPEAR.inPlace.travel).toBe(0)
+    expect(APPEAR.block.spring).toEqual(APPEAR.inPlace.spring)
     expect(APPEAR.block.spring.stiffness).toBe(86)
     expect(APPEAR.block.spring.damping).toBe(40)
   })
@@ -67,7 +67,12 @@ describe('appearThreshold', () => {
   })
 
   it('falls back to half the viewport once the element is taller', () => {
-    /* 1317px Section in a 900px viewport fires at 475px visible: 475/1317. */
+    /*
+     * A 1317px Section in a 900px viewport fires at half the viewport, 450px.
+     * The capture read 475px because the probe crept up on the trigger 25px at
+     * a time and stopped at the first step past it, so the measurement is one
+     * step high; 450 is the value that measurement is of.
+     */
     expect(appearThreshold(1317, 900)).toBeCloseTo(450 / 1317, 4)
     expect(appearThreshold(1694, 900)).toBeCloseTo(450 / 1694, 4)
   })

@@ -3,27 +3,39 @@
  *
  * PRD section 10 recorded the parameters as unmeasurable because Motion drives
  * the animation from its own rAF loop, where it does not surface in
- * `getAnimations()` or computed styles. It does surface in the DOM: Motion
- * writes an inline `style` attribute every frame, so a MutationObserver on
- * `style` records the whole curve. `docs/measure/probe-13-dense.mjs` captures it
- * and `docs/measure/fit-13-spring.mjs` fits it against Motion's own `spring()`.
+ * `getAnimations()` or computed styles. On the Reference it surfaces in the DOM:
+ * Framer's build of Motion writes an inline `style` attribute every frame, so a
+ * MutationObserver on `style` records the whole curve.
+ *
+ * That is a fact about the Reference and **not** about this build. Motion has
+ * two animation paths, and ours takes the other one: for plain opacity and
+ * transform it hands the work to the Web Animations API, converting the spring
+ * to a generated `linear()` easing, and WAAPI does not touch inline styles until
+ * the animation ends. Anything measuring the Clone has to read
+ * `getComputedStyle`; a probe reading `element.style.opacity` sees 0 for the
+ * whole animation and then 1, and reports a spring as an instant cut.
+ *
+ * The full method, the fitted curves and the Clone-against-Reference comparison
+ * are recorded in issue #13. The probe and fit scripts are in `docs/measure/`,
+ * which is gitignored by `AGENTS.md` and therefore local to whoever ran them -
+ * the issue is the durable record, not those paths.
  *
  * What the Reference does, measured at 1440x900:
  *
  * | | travel | opacity | spring (mass 1) | settles |
  * | Section        | 30px | 0 -> 1 | k 200, c 30 | y at ~570ms, opacity at ~755ms |
  * | nested block   | 10px | 0 -> 1 | k 86,  c 40 | ~2.3s |
- * | nested fade    | none | 0 -> 1 | k 86,  c 40 | ~2.5s |
+ * | nested in place| none | 0 -> 1 | k 86,  c 40 | ~2.5s |
  *
  * A spring rather than a tween, and not a close call: the best-fitting duration
  * tween misses by 20x the RMS the spring achieves, and the two animated values
  * stop at different times (the 30px travel at ~570ms, the opacity at ~755ms),
  * which only a per-value rest threshold produces.
  *
- * The nested rows are the second finding. The Reference does not give every band
- * the Section treatment - the quiz CTA's card and the case study's card animate
- * as blocks inside their band, shorter and much slower. The footer does not
- * animate at all.
+ * The nested rows are the second finding. The Reference does not give every
+ * Section the Section treatment - the quiz CTA's card and the case study's card
+ * animate as blocks inside their Section, shorter and much slower. The nav, the
+ * footer and the quiz modal do not animate at all.
  */
 
 /** A spring in Motion's `stiffness`/`damping`/`mass` parameterisation. */
@@ -56,7 +68,7 @@ const SECTION_SPRING: AppearSpring = {
 }
 
 /**
- * Nested blocks: zeta ~ 2.16, heavily overdamped, ~3x the Section's settle.
+ * Nested cards: zeta ~ 2.16, heavily overdamped, ~3x the Section's settle.
  *
  * Fitted jointly across five captures rather than per element. Fitting each on
  * its own gives stiffness 70 to 111 and damping 35 to 48, which is more spread
@@ -71,12 +83,12 @@ const NESTED_SPRING: AppearSpring = {
 }
 
 export const APPEAR = {
-  /** A full band. Every Section on the Reference uses this, including the hero. */
+  /** A whole Section. Eight of the thirteen use this, the hero included. */
   section: { travel: 30, spring: SECTION_SPRING },
-  /** A card inside a band: the quiz CTA's. */
+  /** A card inside a Section, rising a third as far: the quiz CTA's. */
   block: { travel: 10, spring: NESTED_SPRING },
-  /** A card inside a band that fades without travelling: the case study's. */
-  fade: { travel: 0, spring: NESTED_SPRING },
+  /** A card inside a Section that arrives without travelling: the case study's. */
+  inPlace: { travel: 0, spring: NESTED_SPRING },
 } as const satisfies Record<string, AppearPreset>
 
 export type AppearVariant = keyof typeof APPEAR

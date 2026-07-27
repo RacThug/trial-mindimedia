@@ -19,6 +19,11 @@ import { expect, test, type Page } from '@playwright/test'
 const DESKTOP = { width: 1440, height: 900 }
 const PHONE = { width: 390, height: 844 }
 
+/** Sections taking the 30px Section treatment, per PRD 6.15. */
+const SECTION_ISLANDS = 8
+/** Those, plus the quiz CTA's card and the case study's card. */
+const ALL_ISLANDS = 10
+
 /** Opacity and vertical offset of every appear island, as rendered right now. */
 const appearState = (page: Page) =>
   page.evaluate(() =>
@@ -56,12 +61,20 @@ test.describe('Scroll-Appear', () => {
     const response = await page.goto('/')
     const html = (await response?.text()) ?? ''
     const resting = html.match(/opacity:0;transform:translateY\(30px\)/g) ?? []
-    expect(resting.length).toBeGreaterThanOrEqual(7)
+    /*
+     * Exactly the eight Sections that take the 30px treatment on the Reference
+     * (PRD 6.15): hero, Template Wall, featured Templates, feature bento, how it
+     * works, social proof, pricing, founder. Exact rather than "at least",
+     * because the claim this issue makes is that Scroll-Appear is applied
+     * consistently - and a `>=` lets a Section quietly lose it and still pass.
+     */
+    expect(resting.length).toBe(SECTION_ISLANDS)
 
     await scrollThrough(page)
 
     const state = await appearState(page)
-    expect(state.length).toBeGreaterThanOrEqual(10)
+    /* Those eight plus the quiz CTA's card and the case study's card. */
+    expect(state.length).toBe(ALL_ISLANDS)
     for (const island of state) {
       expect(island.opacity).toBe(1)
       expect(island.y).toBe(0)
@@ -162,8 +175,8 @@ test.describe('Scroll-Appear', () => {
   test('fires on a Section far taller than the viewport', async ({ page }) => {
     /*
      * The regression this exists for: Motion hands `viewport.amount` straight to
-     * IntersectionObserver, so a literal `amount: 0.5` on a band more than twice
-     * the viewport tall can never reach that ratio and the band stays invisible
+     * IntersectionObserver, so a literal `amount: 0.5` on a Section more than twice
+     * the viewport tall can never reach that ratio and it stays invisible
      * for good. At 390x844 several bands are exactly that.
      */
     await page.setViewportSize(PHONE)

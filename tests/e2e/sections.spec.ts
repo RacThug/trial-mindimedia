@@ -64,7 +64,7 @@ test.describe('the Template Wall (PRD 6.3)', () => {
   }) => {
     await page.goto('/')
     /*
-     * The claim is that the grid itself never travels, not that the band never
+     * The claim is that the grid itself never travels, not that the Section never
      * arrives: Scroll-Appear raises the whole wall 30px once, on entry (#13),
      * and sampling across that reads as sixteen tiles moving together.
      */
@@ -229,6 +229,8 @@ test.describe('the hero (PRD 6.2)', () => {
   }) => {
     await page.setViewportSize(PHONE)
     await page.goto('/')
+    /* Three boxes, read against each other: let the hero arrive first (#13). */
+    await settleAppear(page)
 
     const rating = page.getByText('Rated 4.92/5')
     const primary = page.getByRole('link', { name: 'Pick your template' })

@@ -41,7 +41,7 @@ const CLIP = resolveVisual(
 export function CaseStudy() {
   return (
     <ScrollAppear
-      variant="fade"
+      variant="inPlace"
       className="grid gap-6 tablet:gap-8 desktop:h-[604px] desktop:grid-cols-[568fr_632fr] desktop:gap-0"
     >
       <CardVisual

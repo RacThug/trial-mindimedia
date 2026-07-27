@@ -1,6 +1,6 @@
 import { ArrowRightIcon } from '@/components/icons.tsx'
-import { ScrollAppear } from '@/components/motion/scroll-appear.tsx'
 import { TickerColumns, type TickerColumn } from '@/components/media/ticker-columns.tsx'
+import { ScrollAppear } from '@/components/motion/scroll-appear.tsx'
 import { ButtonLink } from '@/components/ui/button.tsx'
 import { Eyebrow } from '@/components/ui/eyebrow.tsx'
 import { getWallTiles, type WallTile } from '@/lib/content'
