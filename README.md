@@ -14,6 +14,18 @@ document, is the authority (see [ADR-0003](docs/adr/0003-fidelity-measured-not-a
 
 Places where the Clone deliberately differs. Each is a decision, and each says why.
 
+### `noindex, nofollow`, which costs 37 points of Lighthouse SEO (PRD section 3)
+
+`src/app/layout.tsx` serves `<meta name="robots" content="noindex, nofollow">`, so Lighthouse
+reports **SEO 63** against the Reference's 100. That is one audit and not a symptom of
+anything: seven of the eight SEO audits pass - title, meta description, status code, link
+text, crawlable anchors, image alt, hreflang - and `is-crawlable` carries 4.04 of the
+category's 11.04 points on its own.
+
+It stays. This page reproduces a live commercial site's copy verbatim as a trial exercise, and
+an indexed lookalike would compete with the original in the results its owner depends on.
+Deleting those two lines is the whole SEO fix the day this becomes a site of its own.
+
 ### Alt text is authored, not copied (PRD 6.14)
 
 The Reference ships 106 `<img>` of which **72 carry no `alt` attribute at all**, and three of
