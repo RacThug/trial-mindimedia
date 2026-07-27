@@ -23,15 +23,6 @@ export const metadata: Metadata = {
     template: '%s - Browser.supply',
   },
   description: 'Launch your online business with a premium Framer website template.',
-  /*
-   * This is a faithful clone of a real, live commercial site, built as a trial
-   * exercise. Keeping it out of search results is not optional - see PRD.md
-   * section 3, "Content".
-   */
-  robots: {
-    index: false,
-    follow: false,
-  },
 }
 
 export const viewport: Viewport = {

@@ -10,21 +10,15 @@ document, is the authority (see [ADR-0003](docs/adr/0003-fidelity-measured-not-a
 > the Deviations register, which several work packages are told to write into the README as
 > they land, and which is easier to keep honest if it is never empty.
 
+> **The page is indexable, and its copy is the Reference's.** `noindex, nofollow` was set in
+> #6 so a verbatim lookalike could not compete with a live commercial site in its owner's own
+> search results; it was removed at the owner's direction, which took Lighthouse SEO from 63
+> to 100. If this is ever deployed somewhere a crawler can reach, that is the line to put
+> back - `robots: { index: false, follow: false }` in `src/app/layout.tsx`.
+
 ## Deviations from the Reference
 
 Places where the Clone deliberately differs. Each is a decision, and each says why.
-
-### `noindex, nofollow`, which costs 37 points of Lighthouse SEO (PRD section 3)
-
-`src/app/layout.tsx` serves `<meta name="robots" content="noindex, nofollow">`, so Lighthouse
-reports **SEO 63** against the Reference's 100. That is one audit and not a symptom of
-anything: seven of the eight SEO audits pass - title, meta description, status code, link
-text, crawlable anchors, image alt, hreflang - and `is-crawlable` carries 4.04 of the
-category's 11.04 points on its own.
-
-It stays. This page reproduces a live commercial site's copy verbatim as a trial exercise, and
-an indexed lookalike would compete with the original in the results its owner depends on.
-Deleting those two lines is the whole SEO fix the day this becomes a site of its own.
 
 ### Alt text is authored, not copied (PRD 6.14)
 
