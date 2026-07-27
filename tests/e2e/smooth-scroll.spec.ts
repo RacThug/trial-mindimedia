@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 /*
- * Smooth scrolling (PRD 6.16), measured off the Reference in #15: the wheel does
+ * Smooth scrolling (PRD 6.16), measured off the Reference in #30: the wheel does
  * not move the page, it moves a target the page then follows over about a third
  * of a second, one page pixel per wheel pixel.
  *

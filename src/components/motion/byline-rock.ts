@@ -2,7 +2,7 @@ import type { AppearSpring } from './appear.ts'
 import { linearEasing } from './spring-easing.ts'
 
 /*
- * The footer by-line portrait rocks, for ever, and #15 measured it.
+ * The footer by-line portrait rocks, for ever, and #30 measured it.
  *
  * It is the one thing on the page that never comes to rest. Framer drives it
  * from Motion's rAF loop, writing `transform: rotate(-10.3286deg)` into the

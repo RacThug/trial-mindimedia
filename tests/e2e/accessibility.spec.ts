@@ -23,7 +23,7 @@ const scan = (page: import('@playwright/test').Page) =>
  * `link-in-text-block` fires on the footer by-line's two prose links, which are
  * white inside `--color-text-muted` prose with nothing else to mark them - 1.7:1,
  * against the 3:1 the rule wants. That is the Reference's own drawing, restored
- * in #15 at the owner's direction (see the README's Deviations register and
+ * in #30 at the owner's direction (see the README's Deviations register and
  * `site-footer.tsx`).
  *
  * The rule stays **on**. What is accepted is those two links by name, so a third

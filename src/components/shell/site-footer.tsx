@@ -22,9 +22,9 @@ import { TextLink } from './text-link.tsx'
 /*
  * The two prose links, drawn the Reference's way: white inside
  * `--color-text-muted` prose, no underline and no weight change, fading to 60%
- * white over 200ms on hover. All four values measured in #15.
+ * white over 200ms on hover. All four values measured in #30.
  *
- * **This was underlined until #15 and the underline was a Deviation**, taken
+ * **This was underlined until #30 and the underline was a Deviation**, taken
  * because white against `--color-text-muted` is colour alone at 1.4:1 and a
  * reader who cannot tell those two greys apart cannot find the link. That
  * reasoning has not changed; the owner asked for the Reference's look here, and

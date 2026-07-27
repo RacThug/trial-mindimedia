@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 /*
- * The footer by-line (PRD 6.12), re-measured in #15: two prose links drawn the
+ * The footer by-line (PRD 6.12), re-measured in #30: two prose links drawn the
  * Reference's way, and a portrait that rocks and never stops.
  *
  * The underline these two links carried from #9 to #14 was ours, not the

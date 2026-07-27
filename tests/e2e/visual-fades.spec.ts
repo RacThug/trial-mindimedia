@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test'
 
 /*
- * The visual fades (PRD 6.17), measured in #15.
+ * The visual fades (PRD 6.17), measured in #30.
  *
  * A census of the Reference found eighteen masked boxes; this build had twelve
  * of them and the six that were missing are the bento's five visuals and step
@@ -86,7 +86,7 @@ for (const breakpoint of BREAKPOINTS) {
 
 test('the tutorials card really is dark where its title sits', async ({ page }) => {
   /*
-   * The reading that started #15, and the one a stop percentage cannot make:
+   * The reading that started #30, and the one a stop percentage cannot make:
    * the fade exists to be read *through*, so this measures the pixels rather
    * than the declaration.
    *

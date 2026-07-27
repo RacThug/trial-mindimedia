@@ -723,12 +723,12 @@ The 38px portrait overflows its 32px row rather than growing it.
 
 Both prose links (`Framer`, `Ramish Aziz`) are white inside grey text with no other
 distinction, fading to 60% white over 200ms `cubic-bezier(0.44, 0, 0.56, 1)` on hover
-(measured in #15). That is colour alone at 1.7:1 and fails the axe scan; it was underlined
-from #9 to #14 as a Deviation and #15 restored the Reference's drawing at the owner's
+(measured in #30). That is colour alone at 1.7:1 and fails the axe scan; it was underlined
+from #9 to #14 as a Deviation and #30 restored the Reference's drawing at the owner's
 direction. The README's register carries the reasoning and the scan still runs the rule
 against those two links by name.
 
-**The 38px portrait rocks and never stops** (#15). It swings between `+8deg` and `-12deg` on
+**The 38px portrait rocks and never stops** (#30). It swings between `+8deg` and `-12deg` on
 a spring - mass 1, stiffness 110, damping 16.5 - taking 800ms to travel and holding 617ms at
 each end, so the cycle is 2834ms. Framer drives it from Motion's rAF loop, writing the angle
 into the inline style every frame, so nothing surfaces in `getAnimations()`; it was read by
@@ -892,7 +892,7 @@ has exactly that hole. A `<noscript>` rule in `layout.tsx` closes it.
 
 **The Reference does not scroll natively.** `<html>` carries a `lenis` class: Framer's
 smooth-scrolling page setting ships Lenis, which cancels the wheel event and moves the page
-from its own rAF loop. Measured in #15 at 1440x900, sampling `scrollY` every frame:
+from its own rAF loop. Measured in #30 at 1440x900, sampling `scrollY` every frame:
 
 | input | travelled | fit |
 | --- | --- | --- |
@@ -928,7 +928,7 @@ a scrim over anything. The page behind them is black, so a clip that stops being
 as a black gradient - and a title set across the bottom of a bright clip gets its contrast
 from the clip disappearing under it.
 
-A census in #15 found all eighteen and the Clone had twelve. The six that were missing, with
+A census in #30 found all eighteen and the Clone had twelve. The six that were missing, with
 the stops measured off each box and identical at 1440, 810 and 390:
 
 | box | mask |
@@ -1018,7 +1018,7 @@ hero-wall video is 839 KB.
 | Initial requests | 141 | **< 40** | 39 | pass |
 | CLS | not measured | **< 0.02** | 0.000 | pass |
 
-**Re-measured after #15**, which added a client component and a non-passive wheel listener
+**Re-measured after #30**, which added a client component and a non-passive wheel listener
 (6.16): initial transfer 0.50 -> **0.51 MB** over the same **39** requests, FCP and LCP
 132ms, CLS 0.000, and Lighthouse medians of 93 and 95 on two consecutive runs of five. The
 Lighthouse row is where it was; the kilobyte is the smooth scroll.
@@ -1205,7 +1205,7 @@ inventing a boundary the Reference does not draw. 6.13 goes the other way and ge
 pass of its own, because the main pass dismisses it.
 
 Measured against the Reference on 2026-07-27, pixel match / SSIM, and re-measured the same day
-after #15 added the six missing visual fades (6.17). The **after** column is the current
+after #30 added the six missing visual fades (6.17). The **after** column is the current
 reading; the **before** is kept for the two Sections the fades moved, because a
 seventeen-point jump on a band nobody had touched otherwise is the clearest evidence in this
 document that the harness measures something real:
@@ -1217,9 +1217,9 @@ document that the harness measures something real:
 | Template Wall | 6.3 | 48.2% / 0.796 | 39.0% / 0.777 | 15.9% / 0.212 |
 | Featured templates | 6.4 | 84.9% / 0.957 | 80.9% / 0.906 | 78.5% / 0.946 |
 | Feature bento | 6.5 | **80.7% / 0.882** | **82.4% / 0.873** | **76.2% / 0.829** |
-| Feature bento, before #15 | 6.5 | 63.3% / 0.784 | 65.3% / 0.763 | 60.0% / 0.712 |
+| Feature bento, before #30 | 6.5 | 63.3% / 0.784 | 65.3% / 0.763 | 60.0% / 0.712 |
 | How it works | 6.6 | **95.1% / 0.981** | **92.6% / 0.939** | **90.0% / 0.919** |
-| How it works, before #15 | 6.6 | 83.4% / 0.757 | 81.3% / 0.695 | 90.0% / 0.919 |
+| How it works, before #30 | 6.6 | 83.4% / 0.757 | 81.3% / 0.695 | 90.0% / 0.919 |
 | Social proof + case study | 6.7, 6.8 | 82.9% / 0.920 | 81.8% / 0.948 | 91.9% / 0.939 |
 | Pricing | 6.9 | 98.3% / 0.979 | 97.8% / 0.970 | 95.5% / 0.931 |
 | Quiz CTA | 6.10 | 98.9% / 0.986 | 96.2% / 0.947 | 93.4% / 0.923 |
@@ -1396,6 +1396,13 @@ Each child issue lands on its own `feature/*` branch and opens a PR into `develo
 - [x] #13 Motion: scroll-appear across all sections
 - [x] #14 Fidelity harness and performance budget
 - [ ] #15 Docs: README and ANSWERS.md
+- [x] #30 Fidelity: the visual fades, smooth scrolling, and the by-line
 
 #6 and #7 unblock everything. #8 unblocks #9 through #12. #13 needs the sections in place.
 #14 needs a complete page. #15 needs #14's numbers, which are in section 8's two tables.
+
+**#30 is not one of the planned packages, and was filed after its own work had landed.** Three
+defects were reported against the live Reference once #14's tables existed to check them
+against; the issue is the durable record of what was measured rather than a brief anyone
+worked from. Sections 6.16 and 6.17 exist because of it. Expect more of these than of the
+numbered packages from here.

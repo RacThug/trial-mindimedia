@@ -4,7 +4,7 @@ import { useEffect } from 'react'
 import { SCROLL_EPSILON_PX, scrollDelta, scrollStep } from './smooth-scroll.ts'
 
 /*
- * Smooth scrolling, to the curve #15 measured off the Reference. The numbers and
+ * Smooth scrolling, to the curve #30 measured off the Reference. The numbers and
  * the method are in `smooth-scroll.ts`; this file is the loop that plays them.
  *
  * It renders nothing and it hijacks exactly one thing: the wheel. Everything
@@ -94,7 +94,7 @@ export function SmoothScroll() {
        * the Reference stops Lenis while its own modal is up, and Lenis's stop
        * puts `overflow: hidden` on `<html>` with it. Handing the wheel back
        * instead would scroll the page behind an open `<dialog>`, which is what
-       * this build did before #15 and is nobody's intention. A scrollable box
+       * this build did before #30 and is nobody's intention. A scrollable box
        * *inside* the dialog is checked above and still wins.
        */
       if (document.querySelector('dialog[open]')) {
