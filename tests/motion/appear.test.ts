@@ -37,6 +37,16 @@ describe('Scroll-Appear parameters', () => {
     })
   })
 
+  /*
+   * Read by the hero's CSS animation (#14), where a duration has to be stated
+   * rather than reached. Pinned here beside the spring they were measured with,
+   * for the reason ADR-0003 gives: a measured value that lives only where it is
+   * consumed is one refactor from being replaced by a plausible default.
+   */
+  it('records the measured settle of each value, which are not the same', () => {
+    expect(APPEAR.section.settle).toEqual({ travel: 0.57, opacity: 0.755 })
+  })
+
   it('gives nested blocks their own shorter, slower appear', () => {
     /*
      * The Reference does not give every Section the Section treatment: the quiz

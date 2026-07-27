@@ -812,8 +812,8 @@ resting state into the server markup, so the hero shipped at `opacity: 0` and st
 until 270 kB of JavaScript had arrived: LCP 3.9s against FCP 0.9s on a throttled mobile
 profile. `src/components/motion/spring-easing.ts` converts the spring above into the same
 `linear()` easing Motion hands the Web Animations API for opacity and transform, so the
-animation is unchanged and both settle times survive - and the hero now paints at 144ms with
-no JavaScript involved. Everything below the fold stays on Motion, because those Sections
+animation is unchanged and both settle times survive - and the hero now paints in the low
+hundreds of milliseconds with no JavaScript involved. Everything below the fold stays on Motion, because those Sections
 genuinely wait for a scroll and a CSS animation has no way to know about one.
 
 The other two animate as cards *inside* a Section rather than as Sections: the quiz CTA's
@@ -922,17 +922,29 @@ hero-wall video is 839 KB.
 | Metric | Reference | Target | Clone (#14) | |
 | --- | --- | --- | --- | --- |
 | Lighthouse Performance (mobile) | not measured | **>= 95** | 91 | MISS |
-| FCP | 3040 ms | **< 1200 ms** | 144 ms | pass |
-| LCP | not measured | **< 1500 ms** | 144 ms | pass |
+| FCP | 3040 ms | **< 1200 ms** | 216 ms | pass |
+| LCP | not measured | **< 1500 ms** | 216 ms | pass |
 | Initial transfer | 4.0 MB | **< 1.0 MB** | 0.58 MB | pass |
 | Initial requests | 141 | **< 40** | 39 | pass |
 | CLS | not measured | **< 0.02** | 0.000 | pass |
 
 Measured by `npm run perf`, which runs both sides the same way and exits non-zero on a miss.
 The Reference column above is the reading section 1 took; the same script re-measures it at
-412x823 as **2.38 MB over 114 requests, FCP and LCP 284ms, CLS 0.334** - lower than section
-1's numbers because it is a narrower viewport with no scrolling, which is the point of
-defining "initial load" in one place and applying it to both.
+412x823 as **3.20 MB over 111 requests, FCP and LCP 3160ms, CLS 0.340**, which corroborates
+section 1's 3040ms and 141 requests at a narrower viewport.
+
+**The Reference's own numbers move between runs and ours barely do**, which is worth knowing
+before anyone re-measures and finds different figures: three runs read it at 2.38, 2.37 and
+3.20 MB with an FCP between 284ms and 3160ms, because it is a live site over the open
+internet with a CDN cache that may or may not be warm. Ours is a local production build and
+reads 0.58 MB and 39 requests every time. Take the Reference column as an order of magnitude
+and the Clone column as a measurement.
+
+Every row above except the Lighthouse one is **unthrottled**, on the connection and CPU
+section 1's Reference numbers were taken on. Under Lighthouse's simulated slow 4G and 4x CPU
+the same page reports FCP 909ms, LCP 3474ms, TBT 20ms and CLS 0 - both regimes are printed by
+`npm run perf` for the reason this paragraph exists, which is that a budget table quoting one
+regime and scoring in the other reads better than the page is.
 
 **Initial load is everything fetched from navigation until the network has been quiet for two
 seconds, with no scrolling.** That is deliberately generous to our own trick: a clip that a

@@ -552,8 +552,9 @@
  * The hero is the one Section that is on screen at load at every Breakpoint, so
  * its appear never waited for a scroll - only for the JavaScript that would tell
  * it there had not been one. Rendered at `opacity: 0` in the server markup, that
- * cost **LCP 3.9s against FCP 0.9s** on a throttled mobile profile, which was
- * the whole distance between this build and PRD section 8's Performance target.
+ * cost **LCP 3.9s against FCP 0.9s** on a throttled mobile profile - most of the
+ * distance between this build and PRD section 8's Performance target, which the
+ * PRD records as still short by the 68 kB font swap behind it.
  *
  * The two curves and both durations come in as custom properties from
  * `appear-on-load.tsx`, derived from the measured spring rather than retyped, so

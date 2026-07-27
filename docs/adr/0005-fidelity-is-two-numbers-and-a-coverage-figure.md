@@ -5,7 +5,7 @@ harness in #14 showed that holds for the Sections that are type - the nav reads 
 1440, within a tenth of what #9 measured by hand - and does not hold anywhere else. Seven of
 the thirteen Sections carry video or screenshots, and there a strict pixel comparison reports
 the re-encode rather than the layout: the Template Wall's tiles land on exactly the right
-pixel and score in the seventies, because H.264 at a quarter of the Reference's bitrate puts
+pixel and score in the sixties, because H.264 at a quarter of the Reference's bitrate puts
 three levels of difference inside every one of them.
 
 So each cell of the emitted table carries two numbers. The **pixel match** is the strict one

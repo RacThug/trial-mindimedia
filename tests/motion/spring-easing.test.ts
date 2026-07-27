@@ -41,6 +41,26 @@ describe('springProgress', () => {
     expect(springProgress(SECTION, 0.285)).toBeGreaterThan(0.5)
   })
 
+  /*
+   * Neither shipped spring is underdamped, and this is here so that branch is
+   * not dead code nobody has run. A spring parameter is a measurement, and #13's
+   * two captures straddled the fitted pair - a future refit that lands at
+   * zeta < 1 must produce a curve, not `NaN`.
+   */
+  it('overshoots and comes back when a refit lands under critical damping', () => {
+    const bouncy = { type: 'spring', stiffness: 200, damping: 8, mass: 1 } as const
+    const samples = Array.from({ length: 60 }, (_, i) => springProgress(bouncy, i / 100))
+    expect(samples.every(Number.isFinite)).toBe(true)
+    expect(Math.max(...samples)).toBeGreaterThan(1)
+    expect(samples.at(-1)).toBeCloseTo(1, 1)
+  })
+
+  it('is critically damped without dividing by zero', () => {
+    const critical = { type: 'spring', stiffness: 100, damping: 20, mass: 1 } as const
+    expect(springProgress(critical, 0.3)).toBeGreaterThan(0.7)
+    expect(springProgress(critical, 0.3)).toBeLessThanOrEqual(1)
+  })
+
   it('is slower to arrive on the nested cards, which are heavily overdamped', () => {
     expect(springProgress(APPEAR.block.spring, 0.57)).toBeLessThan(
       springProgress(SECTION, 0.57),

@@ -124,7 +124,7 @@ The hero is the one Section on screen at load at every Breakpoint, so its appear
 for a scroll. It now runs the same measured spring as a CSS animation, converted to the same
 `linear()` easing Motion itself hands the Web Animations API, and both measured settle times
 survive. It is a Deviation only in mechanism: the motion is identical, and the hero paints at
-144ms with no JavaScript involved.
+a couple of hundred milliseconds with no JavaScript involved.
 
 ### The encode (PRD section 8)
 

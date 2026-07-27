@@ -14,9 +14,13 @@ import { linearEasing } from './spring-easing.ts'
  * shipped at `opacity: 0` and stayed there until 270 kB of JavaScript had
  * arrived and hydrated: measured on Lighthouse's throttled mobile profile as
  * **LCP 3.9s against FCP 0.9s**, three seconds of blank page on a page whose
- * HTML was finished in one, and the only thing between this build and PRD
- * section 8's Performance target. Rendered this way it is 1.0s, and the score
- * goes from 88 to 100.
+ * HTML was finished in one. Rendered this way the hero paints with the first
+ * frame and the Performance score goes from 88 to 91.
+ *
+ * 91 and not 95, which is the target: the remaining gap is a different LCP and
+ * PRD section 8 records it. The element Lighthouse then settles on is the nav
+ * wordmark, waiting on the 68 kB Geist swap - a floor the shell has with or
+ * without this page's content, since `/blog` scores 98 on the same shell.
  *
  * The animation is the same animation. `spring-easing.ts` converts the spring
  * #13 fitted into the `linear()` easing Motion itself hands to the Web
@@ -33,10 +37,7 @@ import { linearEasing } from './spring-easing.ts'
  * genuinely wait for a scroll, and a CSS animation has no way to know about one.
  */
 
-const TRAVEL_SECONDS = 0.57
-const OPACITY_SECONDS = 0.755
-
-const { travel, spring } = APPEAR.section
+const { travel, spring, settle } = APPEAR.section
 
 /**
  * Both curves and both durations, as custom properties `globals.css` reads.
@@ -44,14 +45,16 @@ const { travel, spring } = APPEAR.section
  * Inline rather than in the stylesheet because they are **derived from the
  * measurement**, and a `linear()` with 33 stops hand-copied into CSS is a
  * measurement that has been retyped - the next session to change a spring
- * parameter would change `appear.ts` and leave this behind.
+ * parameter would change `appear.ts` and leave this behind. The two durations
+ * come from the same place for the same reason: `APPEAR.section.settle`, beside
+ * the spring they were measured with.
  */
 const STYLE = {
   '--appear-travel': `${travel}px`,
-  '--appear-travel-duration': `${TRAVEL_SECONDS}s`,
-  '--appear-travel-ease': linearEasing(spring, TRAVEL_SECONDS),
-  '--appear-opacity-duration': `${OPACITY_SECONDS}s`,
-  '--appear-opacity-ease': linearEasing(spring, OPACITY_SECONDS),
+  '--appear-travel-duration': `${settle.travel}s`,
+  '--appear-travel-ease': linearEasing(spring, settle.travel),
+  '--appear-opacity-duration': `${settle.opacity}s`,
+  '--appear-opacity-ease': linearEasing(spring, settle.opacity),
 } as React.CSSProperties
 
 export function AppearOnLoad({

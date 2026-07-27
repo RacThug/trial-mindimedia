@@ -40,6 +40,28 @@ export type RegionComparison = {
 export const DEFAULT_TOLERANCE = 2
 
 /**
+ * Whether one pixel of `clone` matches the same pixel of `reference`.
+ *
+ * Exported because the diff mask has to answer exactly this question about
+ * exactly these pixels. Written twice, the mask and the percentage it is meant
+ * to explain could drift apart - and a picture that disagrees with its own
+ * number is worse than no picture.
+ */
+export function pixelMatches(
+  clone: Raster,
+  reference: Raster,
+  index: number,
+  tolerance: number = DEFAULT_TOLERANCE,
+): boolean {
+  const at = index * 3
+  return (
+    Math.abs((clone.raw[at] ?? 0) - (reference.raw[at] ?? 0)) <= tolerance &&
+    Math.abs((clone.raw[at + 1] ?? 0) - (reference.raw[at + 1] ?? 0)) <= tolerance &&
+    Math.abs((clone.raw[at + 2] ?? 0) - (reference.raw[at + 2] ?? 0)) <= tolerance
+  )
+}
+
+/**
  * Compare two regions of equal width.
  *
  * Rows past the shorter region's height count as misses rather than being
@@ -64,14 +86,7 @@ export function compareRegions(
 
   let matched = 0
   for (let i = 0; i < width * overlap; i += 1) {
-    const at = i * 3
-    if (
-      Math.abs((clone.raw[at] ?? 0) - (reference.raw[at] ?? 0)) <= tolerance &&
-      Math.abs((clone.raw[at + 1] ?? 0) - (reference.raw[at + 1] ?? 0)) <= tolerance &&
-      Math.abs((clone.raw[at + 2] ?? 0) - (reference.raw[at + 2] ?? 0)) <= tolerance
-    ) {
-      matched += 1
-    }
+    if (pixelMatches(clone, reference, i, tolerance)) matched += 1
   }
 
   return {

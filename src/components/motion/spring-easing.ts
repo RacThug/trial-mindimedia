@@ -11,7 +11,9 @@ import type { AppearSpring } from './appear.ts'
  * hydrated. On Lighthouse's throttled mobile profile that put **LCP at 3.9s
  * against an FCP of 0.9s** - three seconds of a visitor looking at a blank page
  * on a page whose HTML was complete in one. Everything else in PRD section 8's
- * budget passed; this alone held the Performance score at 88.
+ * budget passed, and fixing this took the Performance score from 88 to 91. The
+ * remaining gap is a second LCP - the nav wordmark waiting on the 68 kB Geist
+ * swap - which PRD section 8 records rather than this file.
  *
  * Converting rather than approximating. Motion does the same thing internally -
  * for plain opacity and transform it hands the animation to the Web Animations

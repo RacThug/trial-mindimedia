@@ -17,8 +17,8 @@
  * residual. It is, on the Sections that are type - but seven of the thirteen
  * carry video or screenshots, and there a strict pixel comparison measures the
  * re-encode instead of the layout: the Template Wall's tiles land on exactly the
- * right pixel and score 75%, because H.264 at a quarter of the Reference's
- * bitrate puts three levels of difference inside every one of them. So each cell
+ * right pixel and score in the sixties, because H.264 at a quarter of the
+ * Reference's bitrate puts three levels of difference inside every one of them. So each cell
  * carries the strict pixel match **and** the luma SSIM that `assets:verify`
  * already gates the encode with (#7). Read together they separate the two
  * questions - is it in the right place, and does it look the same - and neither
@@ -35,7 +35,13 @@ import path from 'node:path'
 import sharp from 'sharp'
 import { meanSsim } from '../lib/ssim.ts'
 import { capturePage, captureModal, launch, type Capture } from './capture.ts'
-import { compareRegions, DEFAULT_TOLERANCE, formatPercent, type Raster } from './diff.ts'
+import {
+  compareRegions,
+  DEFAULT_TOLERANCE,
+  formatPercent,
+  pixelMatches,
+  type Raster,
+} from './diff.ts'
 import type { Box } from './page-script.ts'
 import { CAPTURE_WIDTHS, MODAL, SECTIONS } from './sections.ts'
 
@@ -83,8 +89,8 @@ async function main(): Promise<void> {
       const [clone, reference, cloneModal, referenceModal] = await Promise.all([
         capturePage(browser, CLONE_URL, width, height),
         capturePage(browser, REFERENCE_URL, width, height),
-        captureModal(browser, CLONE_URL, width, height),
-        captureModal(browser, REFERENCE_URL, width, height),
+        captureModal(browser, 'clone', CLONE_URL, width, height),
+        captureModal(browser, 'reference', REFERENCE_URL, width, height),
       ])
       for (const [side, pass] of [
         ['clone', cloneModal],
@@ -353,14 +359,7 @@ async function diffImage(clone: Raster, reference: Raster): Promise<Buffer | nul
 
   const mask = Buffer.alloc(clone.width * height, 255)
   for (let i = 0; i < clone.width * height; i += 1) {
-    const at = i * 3
-    const differs =
-      Math.abs((clone.raw[at] ?? 0) - (reference.raw[at] ?? 0)) > DEFAULT_TOLERANCE ||
-      Math.abs((clone.raw[at + 1] ?? 0) - (reference.raw[at + 1] ?? 0)) >
-        DEFAULT_TOLERANCE ||
-      Math.abs((clone.raw[at + 2] ?? 0) - (reference.raw[at + 2] ?? 0)) >
-        DEFAULT_TOLERANCE
-    if (differs) mask[i] = 0
+    if (!pixelMatches(clone, reference, i)) mask[i] = 0
   }
 
   return sharp(mask, { raw: { width: clone.width, height, channels: 1 } })

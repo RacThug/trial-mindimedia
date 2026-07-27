@@ -186,7 +186,15 @@ export function dismissQuizModal(): number {
     removed += 1
   }
 
-  /* Framer's: a fixed overlay at a raised z-index, plus its scrim. */
+  /*
+   * Framer's: a fixed overlay at a raised z-index, plus its scrim, both measured
+   * at `z-index: 10` in #12.
+   *
+   * **9 is a floor with something real just under it.** The Clone's own fixed nav
+   * sits at `--nav-z-index: 8` (`globals.css`), and it is the only reason this
+   * does not delete the Nav band on our side. Raise that token past 8 without
+   * raising this and the harness will silently report a Nav of 0x0.
+   */
   for (const element of document.querySelectorAll('body div')) {
     const style = getComputedStyle(element)
     if (style.position !== 'fixed') continue

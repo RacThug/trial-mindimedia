@@ -61,6 +61,17 @@ export type Capture = {
   readonly warnings: readonly string[]
 }
 
+/**
+ * Which page is being captured.
+ *
+ * Passed rather than sniffed out of the URL. The modal is the one place the
+ * harness needs a side-specific selector - ours is a native `<dialog>` where the
+ * Reference draws a fixed `div`, which is the Deviation the README records - and
+ * a `url.includes('browser.supply')` test would quietly pick the Clone's
+ * selector for anyone who pointed `REFERENCE_URL` at a mirror.
+ */
+export type Side = 'clone' | 'reference'
+
 const BAND_REQUESTS: readonly BandRequest[] = SECTIONS.map((section) => ({
   id: section.id,
   anchor: section.anchor,
@@ -170,6 +181,7 @@ export async function capturePage(
  */
 export async function captureModal(
   browser: Browser,
+  side: Side,
   url: string,
   width: number,
   height: number,
@@ -185,7 +197,7 @@ export async function captureModal(
     await page.goto(url, { waitUntil: 'load', timeout: 180_000 })
     await page.waitForTimeout(MODAL_WAIT_MS)
 
-    const selector = url.includes('browser.supply') ? MODAL.reference : MODAL.clone
+    const selector = MODAL[side]
     const element = page.locator(selector).first()
     if ((await element.count()) === 0) {
       warnings.push('the quiz modal never opened')

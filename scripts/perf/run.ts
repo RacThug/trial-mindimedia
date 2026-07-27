@@ -30,8 +30,9 @@ const LIGHTHOUSE_RUNS = 3
 
 type Target = {
   readonly label: string
-  /** Lower is better for every one of these, so one comparison covers them all. */
   readonly limit: number
+  /** `atMost` for a ceiling, `atLeast` for a floor. Five of six are ceilings. */
+  readonly direction: 'atMost' | 'atLeast'
   readonly format: (value: number) => string
 }
 
@@ -39,18 +40,35 @@ type Target = {
 const TARGETS = {
   lighthouse: {
     label: 'Lighthouse Performance (mobile)',
-    limit: -95,
+    limit: 95,
+    direction: 'atLeast',
     format: (v) => `${v}`,
   },
-  fcp: { label: 'FCP', limit: 1200, format: (v) => `${Math.round(v)} ms` },
-  lcp: { label: 'LCP', limit: 1500, format: (v) => `${Math.round(v)} ms` },
+  fcp: {
+    label: 'FCP',
+    limit: 1200,
+    direction: 'atMost',
+    format: (v) => `${Math.round(v)} ms`,
+  },
+  lcp: {
+    label: 'LCP',
+    limit: 1500,
+    direction: 'atMost',
+    format: (v) => `${Math.round(v)} ms`,
+  },
   bytes: {
     label: 'Initial transfer',
     limit: 1024 * 1024,
+    direction: 'atMost',
     format: (v) => `${(v / 1024 / 1024).toFixed(2)} MB`,
   },
-  requests: { label: 'Initial requests', limit: 40, format: (v) => `${v}` },
-  cls: { label: 'CLS', limit: 0.02, format: (v) => v.toFixed(4) },
+  requests: {
+    label: 'Initial requests',
+    limit: 40,
+    direction: 'atMost',
+    format: (v) => `${v}`,
+  },
+  cls: { label: 'CLS', limit: 0.02, direction: 'atMost', format: (v) => v.toFixed(4) },
 } as const satisfies Record<string, Target>
 
 type Metric = keyof typeof TARGETS
@@ -58,15 +76,14 @@ type Metric = keyof typeof TARGETS
 /**
  * Whether a measurement is inside its target.
  *
- * A negative limit means "at least this much", which is how the one
- * higher-is-better row in PRD section 8 - the Lighthouse score - lives in the
- * same table as five lower-is-better ones without a second comparison to keep in
- * step with the first.
+ * Strictly under a ceiling, because PRD section 8 writes them `< 40` and
+ * `< 1.0 MB`: a fortieth request is a missed target, not a met one. At or above
+ * a floor, because the one floor there is written `>= 95`.
  */
 const meets = (metric: Metric, value: number | null): boolean => {
   if (value === null) return false
-  const { limit } = TARGETS[metric]
-  return limit < 0 ? value >= -limit : value <= limit
+  const { limit, direction } = TARGETS[metric]
+  return direction === 'atLeast' ? value >= limit : value < limit
 }
 
 async function main(): Promise<void> {
@@ -90,12 +107,17 @@ async function main(): Promise<void> {
 
   process.stderr.write(`running Lighthouse ${LIGHTHOUSE_RUNS} times...\n`)
   const scores: number[] = []
+  const throttled: Readonly<Record<string, number>>[] = []
   for (let run = 0; run < LIGHTHOUSE_RUNS; run += 1) {
     const result = await runLighthouse(CLONE_URL)
     scores.push(result.performance)
+    throttled.push(result.metrics)
     process.stderr.write(`  run ${run + 1}: ${result.performance}\n`)
   }
   const lighthouseScore = median(scores)
+  /* The metrics from the run whose score is the median, not an average of three
+   * runs' metrics - an average of metrics is not the run anybody scored. */
+  const medianRun = throttled[scores.indexOf(lighthouseScore)] ?? {}
 
   const values: Record<Metric, { clone: number | null; reference: number | null }> = {
     lighthouse: { clone: lighthouseScore, reference: null },
@@ -106,7 +128,7 @@ async function main(): Promise<void> {
     cls: { clone: clone.vitals.cls, reference: reference?.vitals.cls ?? null },
   }
 
-  process.stdout.write(render(values, clone, reference, scores))
+  process.stdout.write(render(values, clone, reference, scores, medianRun))
 
   const missed = (Object.keys(TARGETS) as Metric[]).filter(
     (metric) => !meets(metric, values[metric].clone),
@@ -129,6 +151,7 @@ function render(
   clone: LoadMeasurement,
   reference: LoadMeasurement | null,
   scores: readonly number[],
+  throttled: Readonly<Record<string, number>>,
 ): string {
   const lines: string[] = []
   lines.push('| Metric | Reference | Target | Clone | |')
@@ -138,7 +161,9 @@ function render(
     const target = TARGETS[metric]
     const { clone: measured, reference: theirs } = values[metric]
     const limit =
-      target.limit < 0 ? `>= ${-target.limit}` : `< ${target.format(target.limit)}`
+      target.direction === 'atLeast'
+        ? `>= ${target.format(target.limit)}`
+        : `< ${target.format(target.limit)}`
     lines.push(
       `| ${target.label} | ${theirs === null ? 'not measured' : target.format(theirs)} | **${limit}** |` +
         ` ${measured === null ? 'not measured' : target.format(measured)} |` +
@@ -161,6 +186,23 @@ function render(
   lines.push(
     `Lighthouse Performance is the median of ${scores.length}: ${scores.join(', ')}.`,
   )
+  lines.push('')
+  /*
+   * The table above and the Lighthouse row are two throttling regimes, and
+   * printing only the first would put the flattering number in the pass column.
+   * Every row but the Lighthouse one is measured on an unthrottled connection
+   * and CPU, which is what the Reference's own numbers in PRD section 1 were
+   * taken on; Lighthouse simulates slow 4G and a CPU four times slower. Both
+   * belong here, side by side, or the budget reads better than the page is.
+   */
+  lines.push('**Every row above except the Lighthouse one is unthrottled**, on the same')
+  lines.push("connection and CPU the Reference's own numbers were taken on. Under")
+  lines.push("Lighthouse's simulated slow 4G and 4x CPU, the same page reports:")
+  lines.push('')
+  for (const [id, value] of Object.entries(throttled)) {
+    const unit = id === 'cumulative-layout-shift' ? '' : ' ms'
+    lines.push(`- ${id}: ${Math.round(value * 1000) / 1000}${unit}`)
+  }
   lines.push('')
   lines.push('Where the bytes go:')
   lines.push('')

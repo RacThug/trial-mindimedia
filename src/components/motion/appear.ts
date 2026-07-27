@@ -50,6 +50,16 @@ export type AppearPreset = {
   /** Pixels the element rises through, `translateY(travel) -> 0`. */
   readonly travel: number
   readonly spring: AppearSpring
+  /**
+   * Seconds each value takes to come to rest, measured per value.
+   *
+   * Two numbers rather than one because the Reference's two stop at different
+   * times, which is the detail that says spring rather than tween. Motion reads
+   * neither - it settles on its own rest thresholds - so this exists for the one
+   * Section that runs the same spring from CSS (#14), where a duration has to be
+   * stated rather than reached.
+   */
+  readonly settle: { readonly travel: number; readonly opacity: number }
 }
 
 /**
@@ -84,11 +94,15 @@ const NESTED_SPRING: AppearSpring = {
 
 export const APPEAR = {
   /** A whole Section. Eight of the thirteen use this, the hero included. */
-  section: { travel: 30, spring: SECTION_SPRING },
+  section: {
+    travel: 30,
+    spring: SECTION_SPRING,
+    settle: { travel: 0.57, opacity: 0.755 },
+  },
   /** A card inside a Section, rising a third as far: the quiz CTA's. */
-  block: { travel: 10, spring: NESTED_SPRING },
+  block: { travel: 10, spring: NESTED_SPRING, settle: { travel: 2.3, opacity: 2.3 } },
   /** A card inside a Section that arrives without travelling: the case study's. */
-  inPlace: { travel: 0, spring: NESTED_SPRING },
+  inPlace: { travel: 0, spring: NESTED_SPRING, settle: { travel: 2.5, opacity: 2.5 } },
 } as const satisfies Record<string, AppearPreset>
 
 export type AppearVariant = keyof typeof APPEAR
