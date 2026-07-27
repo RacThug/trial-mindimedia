@@ -281,10 +281,12 @@ nobody reviewing this page will perform feel instant.
 
 **5. Subset the font.** Geist ships latin, latin-ext and cyrillic in one 68 kB file; this page
 uses three characters past ASCII and all three are in latin. Asking `next/font` for that
-subset gives **29 kB**, and it took **LCP from 3.9s to 2.9s** under Lighthouse's throttled
-mobile profile. 39 kB does not look like the biggest lever on the list, and it was the most
-valuable one left, because of *what* waits for it: every largest-contentful-paint candidate
-above the fold is text, and `font-display: swap` repaints each one when the face lands.
+subset gives **29 kB**, and those 39 kB off the font took **LCP from 3.9s to 2.9s** under
+Lighthouse's throttled mobile profile. It does not look like the biggest lever on the list,
+and it was the most valuable one left, because of *what* waits for it: every
+largest-contentful-paint candidate above the fold is text, and `font-display: swap` repaints
+each one when the face lands. (Technique 7 below saves the same 39 kB and buys nothing, which
+is the point of measuring rather than reasoning about payload size.)
 
 **6. Keep the render path off JavaScript.** One real defect was found here and it is the most
 instructive thing in this section. Scroll-Appear originally ran in Motion, which writes its
@@ -312,16 +314,10 @@ interaction it has no way to perform.
 
 ### Methodology, and one honest miss
 
-`npm run perf` measures the Clone and the Reference the same way and exits non-zero on a miss.
-"Initial load" is **everything fetched from navigation until the network has been quiet for
-two seconds, with no scrolling** - deliberately generous to our own deferral trick, since a
-clip an above-the-fold observer starts falls inside that window and is counted. Bytes are
-`encodedDataLength` off the wire, not decoded sizes. Viewport is 412x823 at DPR 2.625, the
-device Lighthouse's mobile preset emulates.
-
-Both regimes are printed, because a table quoting unthrottled numbers and scoring a throttled
-one reads better than the page is. Under Lighthouse's simulated slow 4G and 4x CPU the same
-page reports FCP 909ms, LCP 3474ms, TBT 20ms, CLS 0.
+Every number above comes from `npm run perf`, which measures both sides the same way and
+exits non-zero on a miss. How "initial load" is defined, why both a throttled and an
+unthrottled regime are printed, and why the Lighthouse score is a median of five are in
+[the README](README.md#performance) rather than restated here.
 
 **The Lighthouse Performance target was `>= 95` and the median of five runs is 93. That is a
 miss.** Every other audit is perfect - FCP 0.9s, TBT 10-30ms, CLS 0, Speed Index 1.3s - and
@@ -341,9 +337,9 @@ matters most, it ships the most. See question 7.
 ## 6. If you implement a form, how would you securely send the data to the backend server?
 
 *Proposal - and the honest version first: **this build has no form that submits anywhere.***
-The only `<input>` on the site is the pricing Options radio group
-([`plan-card.tsx`](src/components/sections/plan-card.tsx)), which recalculates a price in the
-browser and posts nothing. The Reference's quiz is a link to a page that does not exist. So
+The only `<input>` on the site is the one each pricing Option is drawn as
+([`plan-card.tsx`](src/components/sections/plan-card.tsx)), and selecting one recalculates a
+price in the browser and posts nothing. The Reference's quiz is a link to a page that does not exist. So
 this is a design answer, not a citation, and it is labelled that way rather than dressed up.
 
 **The transport is the least interesting part of this question**, and it is where most answers

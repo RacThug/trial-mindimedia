@@ -89,8 +89,8 @@ src/app/          routes. page.tsx is the homepage's thirteen Sections; api/* ar
                   content over HTTP rather than importing it; the other six are
                   placeholder routes, so most off-page links land somewhere real
 src/components/   sections/ one file per Section, ui/ the shared primitives, media/ the
-                  deferred-video and ticker machinery, shell/ nav and footer, motion/
-                  scroll-appear and smooth scroll
+                  deferred-video and Travelling backdrop machinery, shell/ nav and footer,
+                  motion/ scroll-appear and smooth scroll
 src/lib/content/  the eight JSON Collections, their Zod schemas, and the one typed module
                   every consumer imports (ADR-0004)
 src/lib/media/    the generated asset index: every committed asset by slug, with its
@@ -297,8 +297,9 @@ hover and on focus, and it has a keyboard-reachable pause control that is invisi
 focused - which is what WCAG 2.2.2 actually asks for, where the Reference's own prev/next
 chevrons are `display: none` at every Breakpoint.
 
-The page's three **decorative** travelling backdrops - Step 1's thumbnail columns (6.6) and
-the two ticker backdrops (6.10, 6.13) - stop under `prefers-reduced-motion` and have **no
+The page's three **decorative** Travelling backdrops - Step 1's thumbnail columns (6.6) and
+the Quiz CTA's and quiz modal's columns (6.10, 6.13) - stop under `prefers-reduced-motion`
+and have **no
 pause control**. That is a known gap rather than a decision: 2.2.2 covers them too. It is one
 mechanism across three Sections in two work packages, so it is recorded in PRD section 10
 rather than fitted to one of them.
