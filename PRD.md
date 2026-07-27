@@ -1152,8 +1152,10 @@ Four Deviations, all in the encode:
   `scripts/assets/build.ts`.
 
 Image fidelity is gated by `npm run assets:verify`: luma SSIM against the Framer original,
-budget >= 0.98, worst graded asset 0.9840. Two dark, film-grained screenshots sit on a
-recorded lower floor with the reasoning in `scripts/assets/verify.ts`. It needs the download
+budget >= 0.98, worst graded asset 0.9840. Four dark, film-grained screenshots sit on
+recorded lower floors with the reasoning in `scripts/assets/verify.ts` - two from #7 and the
+two `quiz/*` that joined them in #12, which is why this line read "two" until #15. It needs
+the download
 cache, so it runs beside `npm run assets` and is not a CI gate.
 
 Each asset's measured render width per Breakpoint is recorded as `rendered` in the manifest,
