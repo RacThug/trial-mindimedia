@@ -1,3 +1,9 @@
+# LF in the working tree on every platform. Prettier writes LF and checks for it,
+# so on a Windows clone with `core.autocrlf=true` every committed file failed
+# `npm run format:check` while being byte-identical to what git stores - a check
+# that could never pass locally and had nothing to report.
+* text=auto eol=lf
+
 # Git hooks and shell scripts must keep LF endings or sh cannot run them
 .githooks/** text eol=lf
 *.sh text eol=lf

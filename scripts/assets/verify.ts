@@ -45,10 +45,10 @@ import { CACHE, PUBLIC_MEDIA } from './paths.ts'
 const MIN_SSIM = 0.98
 
 /*
- * Two assets are held to a lower line, with the reason recorded rather than the
+ * Four assets are held to a lower line, with the reason recorded rather than the
  * global budget quietly loosened.
  *
- * Both are dark UI screenshots carrying heavy film grain over a near-black
+ * All four are dark UI screenshots carrying heavy film grain over a near-black
  * gradient. WebP smooths that grain, and SSIM - which compares local variance -
  * reads the missing noise as missing structure. The text, numbers, chart lines
  * and gradients all survive intact: checked by eye at 4x magnification of the
@@ -57,12 +57,21 @@ const MIN_SSIM = 0.98
  * file size; `wall/tile-07` reaches just 0.9825 at quality 98, for 129 kB
  * against 61 kB.
  *
+ * The two `quiz/*` entries joined them in #12 and are the near miss: at the
+ * manifest's 90 they score 0.9625 and 0.9635, and at 98 they would clear 0.98.
+ * They stay at 90 anyway. 98 is outside the 85-95 band `tests/assets/manifest`
+ * pins - `next/image` re-encodes on top of this, so quality past 95 buys bytes
+ * and nothing else - and it costs 587 kB across the ten for a backdrop that
+ * never renders above 54% alpha behind the modal's copy.
+ *
  * These floors still gate. They sit a little under each asset's measured score,
- * so a genuine regression in either one fails the run.
+ * so a genuine regression in any of them fails the run.
  */
 const GRAIN_FLOORS: Readonly<Record<string, number>> = {
   'wall/tile-07': 0.95,
   'step/pick-02': 0.97,
+  'quiz/shot-a3': 0.96,
+  'quiz/shot-a4': 0.96,
 }
 
 const floorFor = (slug: string) => GRAIN_FLOORS[slug] ?? MIN_SSIM

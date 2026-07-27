@@ -15,16 +15,21 @@
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:e2e": "playwright test",
     "assets": "node scripts/assets/build.ts",
     "assets:verify": "node scripts/assets/verify.ts"
   },
   "dependencies": {
     "geist": "^1.7.2",
+    "motion": "^12.42.2",
     "next": "^16.2.12",
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
+    "@playwright/test": "^1.62.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/ffprobe-static": "^2.0.3",
     "@types/node": "^26.1.1",

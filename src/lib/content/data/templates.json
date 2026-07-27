@@ -1,0 +1,50 @@
+[
+  {
+    "slug": "selene",
+    "name": "Selene",
+    "category": "AI SAAS",
+    "price": 12900,
+    "currency": "USD",
+    "badge": "New",
+    "href": "/templates/selene",
+    "screenshots": [
+      {
+        "slug": "template/selene-a",
+        "alt": "The Selene template's home page, designed for AI SaaS companies"
+      },
+      { "slug": "template/selene-b", "alt": "A second page from the Selene template" }
+    ]
+  },
+  {
+    "slug": "zenna",
+    "name": "Zenna",
+    "category": "Yoga Studio",
+    "price": 12900,
+    "currency": "USD",
+    "badge": null,
+    "href": "/templates/zenna",
+    "screenshots": [
+      {
+        "slug": "template/zenna-a",
+        "alt": "The Zenna template's home page, designed for yoga studios"
+      },
+      { "slug": "template/zenna-b", "alt": "A second page from the Zenna template" }
+    ]
+  },
+  {
+    "slug": "traction",
+    "name": "Traction",
+    "category": "SMMA",
+    "price": 12900,
+    "currency": "USD",
+    "badge": null,
+    "href": "/templates/traction",
+    "screenshots": [
+      {
+        "slug": "template/traction-a",
+        "alt": "The Traction template's home page, designed for social media marketing agencies"
+      },
+      { "slug": "template/traction-b", "alt": "A second page from the Traction template" }
+    ]
+  }
+]

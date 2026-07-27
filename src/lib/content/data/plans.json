@@ -1,0 +1,81 @@
+[
+  {
+    "slug": "single-template",
+    "eyebrow": "One-time payemnt",
+    "name": "Single template",
+    "price": 12900,
+    "compareAt": null,
+    "currency": "USD",
+    "blurb": "Pick a template best suited for you, customize it, and launch.",
+    "options": [
+      { "label": "Framer template", "priceDelta": 0, "default": true, "icon": "framer" },
+      {
+        "label": "Add Figma designs",
+        "priceDelta": 3900,
+        "default": false,
+        "icon": "figma"
+      },
+      {
+        "label": "Add Done-for you",
+        "priceDelta": 37000,
+        "default": false,
+        "icon": "check-circle"
+      }
+    ],
+    "included": [
+      { "label": "Instant access to chosen template", "icon": "lightning" },
+      { "label": "Lifetime template updates", "icon": "arrows-clockwise" },
+      { "label": "3 months Framer Pro", "icon": "framer" },
+      { "label": "Step-by-step video tutorials", "icon": "play-circle" },
+      { "label": "Use on unlimited sites", "icon": "infinity" }
+    ],
+    "cta": { "label": "Browse templates", "href": "/templates" }
+  },
+  {
+    "slug": "bundle",
+    "eyebrow": "one-time payment",
+    "name": "Bundle",
+    "price": 39900,
+    "compareAt": 188100,
+    "currency": "USD",
+    "blurb": "Every template, unlimited sites. Build however you want.",
+    "options": [],
+    "included": [
+      { "label": "All current templates", "icon": "stack" },
+      { "label": "Early access to all future templates", "icon": "sparkle" },
+      { "label": "Lifetime template updates", "icon": "arrows-clockwise" },
+      { "label": "Use on unlimited sites", "icon": "infinity" },
+      { "label": "3 months Framer Pro", "icon": "framer" },
+      { "label": "Step-by-step video tutorials", "icon": "play-circle" },
+      { "label": "Priority support", "icon": "headset" }
+    ],
+    "cta": { "label": "Get the bundle", "href": "/bundle" }
+  },
+  {
+    "slug": "custom-project",
+    "eyebrow": "one-time payment",
+    "name": "Custom project",
+    "price": 249500,
+    "compareAt": null,
+    "currency": "USD",
+    "blurb": "Designed from scratch for your brand, built in Framer.",
+    "options": [
+      { "label": "Landing page", "priceDelta": 0, "default": true, "icon": "browser" },
+      {
+        "label": "Multi-page site",
+        "priceDelta": 0,
+        "default": false,
+        "icon": "browsers"
+      }
+    ],
+    "included": [
+      { "label": "Custom design, no template", "icon": "leaf" },
+      { "label": "CMS, SEO and launch included", "icon": "rocket" },
+      { "label": "Two revision rounds", "icon": "arrows-clockwise" }
+    ],
+    "cta": {
+      "label": "Book a discovery call",
+      "href": "https://cal.com/ramish-design/landing-page"
+    }
+  }
+]

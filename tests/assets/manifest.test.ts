@@ -13,11 +13,17 @@ import { MEDIA_GROUPS, SOURCE_ASSETS } from '../../scripts/assets/manifest.ts'
  * Most of the gap is the Template Wall, whose 16 tiles are each placed three
  * times and then repeated wholesale behind the Quiz CTA, and the Testimonial
  * avatars shared between the Wall and the social proof grid.
+ *
+ * The census missed ten. The quiz modal (PRD 6.13) does not render until six
+ * seconds after `domcontentloaded` - measured in #12 - so a count taken from the
+ * loaded page finds none of the ten screenshots behind it. They are `quiz/*`,
+ * they appear nowhere else on the page, and they are why the stills went from 47
+ * to 57. Anything else that only exists after a delay is still uncounted.
  */
 
 describe('the source manifest', () => {
-  it('covers all 60 unique media files on the Reference', () => {
-    expect(SOURCE_ASSETS).toHaveLength(60)
+  it('covers all 70 unique media files on the Reference', () => {
+    expect(SOURCE_ASSETS).toHaveLength(70)
   })
 
   it('covers all 13 unique videos, one more than issue #7 estimated', () => {
@@ -25,8 +31,8 @@ describe('the source manifest', () => {
     expect(SOURCE_ASSETS.filter((a) => a.kind === 'video')).toHaveLength(13)
   })
 
-  it('covers the 47 unique stills behind 106 img elements', () => {
-    expect(SOURCE_ASSETS.filter((a) => a.kind !== 'video')).toHaveLength(47)
+  it('covers the 57 unique stills behind 106 img elements and the modal', () => {
+    expect(SOURCE_ASSETS.filter((a) => a.kind !== 'video')).toHaveLength(57)
   })
 
   it('gives every asset a unique slug', () => {

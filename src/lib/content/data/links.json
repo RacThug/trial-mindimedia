@@ -1,0 +1,29 @@
+{
+  "nav": [
+    { "slug": "templates", "label": "Templates", "href": "/templates" },
+    { "slug": "live-examples", "label": "Live examples", "href": "/live-examples" },
+    { "slug": "support", "label": "Support", "href": "/support" },
+    { "slug": "blog", "label": "Blog", "href": "/blog" }
+  ],
+  "footer": [
+    { "slug": "templates", "label": "Templates", "href": "/templates" },
+    { "slug": "live-examples", "label": "Live examples", "href": "/live-examples" },
+    { "slug": "bundle", "label": "Bundle", "href": "/bundle" },
+    { "slug": "blog", "label": "Blog", "href": "/blog" },
+    {
+      "slug": "quiz",
+      "label": "Quiz",
+      "href": "https://browsersupply.typeform.com/template-quiz"
+    },
+    { "slug": "support", "label": "Support", "href": "/support" },
+    { "slug": "privacy", "label": "Privacy", "href": "/privacy" }
+  ],
+  "social": [
+    { "slug": "x", "label": "X", "href": "https://x.com/ramishdotdesign" },
+    {
+      "slug": "youtube",
+      "label": "YouTube",
+      "href": "https://www.youtube.com/@ramish.design"
+    }
+  ]
+}
