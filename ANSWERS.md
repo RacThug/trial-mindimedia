@@ -117,7 +117,7 @@ Lighthouse performance on the deployed site reads a **median 98** across five ru
 Lighthouse's mobile preset with its simulated slow 4G and 4x CPU. The same build served from a
 local machine reads 93, and the gap is Vercel's CDN rather than a change of throttling.
 
-Method and the full table are in [`README.md`](README.md#performance).
+Method and the full table are in [PRD section 8](PRD.md#8-budgets-and-verification).
 
 ---
 
@@ -172,5 +172,5 @@ against the original at the same width and fails below **0.98 luma SSIM**; the w
 
 Same approach for video, which was 61% of the original's weight: capped at display size, three
 decorative 60fps loops re-encoded at 30, and one clip several browsers cannot decode converted
-to H.264. Listed as deliberate differences in the
-[README](README.md#deviations-from-the-reference).
+to H.264. All four are recorded as deliberate differences in
+[PRD section 8](PRD.md#8-budgets-and-verification).

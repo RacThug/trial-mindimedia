@@ -75,5 +75,5 @@ reason nobody can see is worse than no number.
 The table is wider and takes more explaining than ADR-0003 imagined, and it is still not a CI
 gate for the reason given there. What it buys is a number a reviewer can act on. Every low
 reading in it now points at something real: the Template Wall's 16.7% at 390 is the phone
-column-fill Deviation already recorded in the README, drawn plainly in the diff mask the
+column-fill Deviation already recorded in PRD 6.3, drawn plainly in the diff mask the
 harness writes beside the table.
