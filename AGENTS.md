@@ -31,6 +31,28 @@ feature/*  --PR-->  develop  --PR-->  main
   `docs/adr/` are tracked agent configuration and belong in git. Everything else
   under `docs/` is gitignored on purpose and is local reference material only.
 
+## Closing keywords go in the `develop` -> `main` PR
+
+`Closes #n` only fires when the PR carrying it merges into the **default
+branch**, which here is `main`. A `feature/*` PR merges into `develop`, so a
+keyword in its body is **inert** - GitHub does not go looking through the
+ancestry for keywords written in other PRs.
+
+So:
+
+- A `feature/*` PR body says which issue it implements, in prose. Write
+  `Implements #n`, not `Closes #n`, so nobody reads it as wired up when it is
+  not.
+- The `develop --PR--> main` PR body carries `Closes #n` for **every** issue in
+  the batch it is shipping.
+
+This is not hypothetical. #7's PR said `Closes #7.` and merged into `develop` in
+the ordinary way; the keyword never fired, the `develop` -> `main` PR that
+followed did not repeat it, and the issue sat open through four more work
+packages while its work was live on `main`. #8 to #10 and #12 were then closed
+by hand, which is why nobody noticed. #11 and #13 are the first two to close on
+their own, and only because the keywords were written into the release PR.
+
 ## Backstop
 
 `.githooks/pre-push` mechanically refuses direct pushes to `main` and
@@ -79,7 +101,9 @@ already verified against the live site:
 1. **Branch first**, before running any implement-style skill. Those commit to
    whatever branch is checked out, and `develop` does not accept commits, so
    getting this wrong means unpicking commits rather than just retrying a push.
-2. Implement, open a PR into `develop`, hand over the link. Do not merge.
+2. Implement, open a PR into `develop`, hand over the link. Do not merge. Say
+   `Implements #n` in that PR body rather than `Closes #n` - see
+   [Closing keywords](#closing-keywords-go-in-the-develop---main-pr).
 3. **Write back what you learned**, before you finish. Sessions share no memory.
    A measurement, a surprise, or a judgement call that is not recorded in the
    issue, the PRD, or an ADR is lost the moment the session ends, and the next
