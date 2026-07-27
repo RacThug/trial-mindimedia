@@ -231,8 +231,8 @@ asset 0.9840.
 | | Framer originals | Committed |
 | --- | --- | --- |
 | Video, 13 clips | 49.50 MB | 3.42 MB |
-| Stills, 57 files | 22.94 MB | 1.50 MB, plus 13 generated poster frames |
-| **Total** | **73.63 MB over 70 files** | **5.19 MB over 83 files**, 93.0% saved |
+| Stills, 57 files | 22.94 MB | 1.47 MB, plus 0.17 MB of generated poster frames |
+| **Total** | **73.63 MB over 70 files** | **5.07 MB over 83 files**, 93.1% saved |
 
 ---
 
@@ -396,7 +396,7 @@ where there were two.
 
 Every committed asset is re-encoded rather than copied: WebP for stills, H.264 for clips,
 capped at twice the largest measured render width. The Reference serves 73.6 MB of originals;
-the Clone commits 5.2 MB. Clips carry `preload="none"` and start only once on screen, where
+the Clone commits 5.07 MB. Clips carry `preload="none"` and start only once on screen, where
 the Reference autoplays all thirteen at `preload="auto"`.
 
 Four of those choices are Deviations in their own right, all in the encode: video is capped at

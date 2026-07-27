@@ -1,8 +1,8 @@
 # Answers to the seven questions
 
 Short answers with the file or the number attached, so anything here can be checked in the
-repo. Questions 1, 2, 5 and 7 describe what this build actually does; 3, 4 and 6 are about
-things it does not have, and say so.
+repo. Questions 1, 2, 5 and 7 describe what this build actually does; 3, 4 and 6 are the
+hypothetical ones, answered as what I would choose.
 
 The reasoning behind each decision is in [`PRD.md`](PRD.md) and the five ADRs under
 [`docs/adr/`](docs/adr/), and I am happy to walk through any of it.
@@ -50,8 +50,6 @@ Full reasoning in [ADR-0002](docs/adr/0002-data-access-shape.md).
 
 ## 3. How would you configure a custom domain to point to your deployed project on Vercel?
 
-This project has no custom domain. What I would do:
-
 - Add the apex and `www` in the project's domain settings, and pick one as canonical so the
   other redirects.
 - `www` takes a CNAME. The apex cannot, since DNS does not allow one at the top of a zone, so
@@ -63,21 +61,28 @@ This project has no custom domain. What I would do:
   `includeSubDomains` with a two-year lifetime, which breaks any subdomain that cannot serve
   HTTPS.
 
+The site currently runs on the `trial-mindimedia.vercel.app` address, so none of this is set
+up yet.
+
 ---
 
 ## 4. If your project requires an admin panel to manage the website content, what technologies and approaches would you choose?
 
-There is no admin panel, but the seam it would attach to is already there: the eight `async`
-accessors from question 1.
+A headless CMS rather than a hand-built panel. Payload to keep the content model in this repo
+and this TypeScript, Sanity if hosting it is not worth owning. Either way, logins, roles,
+media uploads, drafts and revision history are already solved problems, and that is the half
+that takes the weeks.
 
-- A headless CMS rather than a hand-built panel. Payload to keep the content model in this
-  repo, Sanity if hosting it is not worth owning. Logins, roles, media, drafts and revision
-  history are already solved problems.
 - Keep the Zod schemas as the contract, so a bad CMS document fails like a bad file does now.
-- Keep pages static and regenerate on publish via webhook, and serve the last good version if
-  the CMS is unreachable.
+  A CMS generates types for what it can store, which is not the same as what this site can
+  render.
+- Keep pages static and regenerate on publish via webhook, so editors see changes in seconds
+  without giving up prerendering. Serve the last good version if the CMS is unreachable.
 - Move single-use copy out of the components first. An editor cannot change a heading that
   only exists as JSX.
+
+This build is already shaped for it: every Section reads through the eight `async` accessors
+from question 1, so the CMS changes those eight functions and no Section at all.
 
 ---
 
@@ -118,7 +123,8 @@ Method and the full table are in [`README.md`](README.md#performance).
 
 ## 6. If you implement a form, how would you securely send the data to the backend server?
 
-There is no form in this build that submits anywhere. What I would do:
+Over HTTPS, which Vercel gives you without configuration. That is the least interesting part
+though; what actually protects a submission happens at each end of it.
 
 - Submit to a Server Action rather than a hand-written endpoint. Its body never reaches the
   browser, so keys cannot leak into the bundle, and Next checks the request origin, which is
@@ -134,6 +140,10 @@ There is no form in this build that submits anywhere. What I would do:
 - Add a CSP with a nonce, which is the strongest single control against an injected script
   reading what someone types.
 
+Nothing on this site submits today. The only `<input>` is the pricing option selector in
+[`plan-card.tsx`](src/components/sections/plan-card.tsx), which recalculates a price in the
+browser and posts nothing.
+
 ---
 
 ## 7. What strategies do you use to optimize images for performance without sacrificing quality?
@@ -145,8 +155,8 @@ against the original at the same width and fails below **0.98 luma SSIM**; the w
 | | Originals | Committed |
 | --- | --- | --- |
 | Video, 13 clips | 49.50 MB | 3.42 MB |
-| Images, 57 files | 22.94 MB | 1.50 MB, plus 13 posters |
-| **Total** | **73.63 MB over 70 files** | **5.19 MB over 83 files**, 93.0% saved |
+| Images, 57 files | 22.94 MB | 1.47 MB, plus 0.17 MB of posters |
+| **Total** | **73.63 MB over 70 files** | **5.07 MB over 83 files**, 93.1% saved |
 
 - **Encoded twice**: WebP at build time, then AVIF per request by `next/image`. A wall tile is
   43 kB in the repo, 18 kB on desktop, 4.6 kB on a phone.

@@ -50,10 +50,10 @@ Recorded here so nothing is re-litigated mid-build. Two have ADRs.
 
 | Decision | Choice | Rationale |
 | --- | --- | --- |
-| Framework | Next.js App Router, TypeScript | [ADR-0001](../blob/develop/docs/adr/0001-nextjs-over-nuxt.md). Motion for React shares its lineage with Framer's own animation engine. |
+| Framework | Next.js App Router, TypeScript | [ADR-0001](docs/adr/0001-nextjs-over-nuxt.md). Motion for React shares its lineage with Framer's own animation engine. |
 | Animation | CSS keyframes, from the measured spring | Motion for React until #14, chosen in #13 for sharing the Reference's engine family. Removed for 39 kB gzipped; `spring-easing.ts` emits the same `linear()` easing Motion generated, so the animation is unchanged. |
 | Styling | Tailwind v4, `@theme` tokens | Reference's design system is small and regular; tokens beat scattered magic numbers. |
-| Data | JSON + typed data layer + Route Handlers | [ADR-0002](../blob/develop/docs/adr/0002-data-access-shape.md). Homepage imports directly to stay static; `/templates` proves the API over HTTP. |
+| Data | JSON + typed data layer + Route Handlers | [ADR-0002](docs/adr/0002-data-access-shape.md). Homepage imports directly to stay static; `/templates` proves the API over HTTP. |
 | Assets | Downloaded, re-encoded, committed | Needed to beat the Reference on performance and to remove a third-party dependency mid-review. |
 | Content | Verbatim, indexable | Maximum fidelity. `noindex, nofollow` was set for the reason below and removed in #14 at the owner's direction; it cost 37 points of Lighthouse SEO. |
 | Off-page links | Real placeholder routes | Demonstrates the App Router layout model. **Six of the eleven internal destinations are covered; the four `/templates/<slug>` detail links and nothing else still 404** - see section 10. |
@@ -955,8 +955,8 @@ as a `::after` inside the masked box and the Clone as an inset shadow on it.
 
 JSON in the repo, read by one typed data-access module that validates on read. Server
 Components import that module directly. Route Handlers at `/api/*` wrap the same module. See
-[ADR-0002](../blob/develop/docs/adr/0002-data-access-shape.md) for that asymmetry and
-[ADR-0004](../blob/develop/docs/adr/0004-content-is-entities-and-references.md) for what
+[ADR-0002](docs/adr/0002-data-access-shape.md) for that asymmetry and
+[ADR-0004](docs/adr/0004-content-is-entities-and-references.md) for what
 counts as content.
 
 Built in #8 as eight files under `src/lib/content/data/`, one per Collection, validated by
@@ -1131,8 +1131,12 @@ Measured in #7, and again in #12 with those ten:
 | | Framer originals | Committed |
 | --- | --- | --- |
 | Video, 13 clips | 49.50 MB | 3.42 MB |
-| Stills, 57 files | 22.94 MB | 1.50 MB, plus 13 generated poster frames |
-| **Total** | **73.63 MB over 70 files** | **5.19 MB over 83 files**, 93.0% saved |
+| Stills, 57 files | 22.94 MB | 1.47 MB, plus 0.17 MB of generated poster frames |
+| **Total** | **73.63 MB over 70 files** | **5.07 MB over 83 files**, 93.1% saved |
+
+The committed column is re-measured from `public/media` in #15. It read 5.19 MB over 83 files
+until then, which did not add up to its own rows - 3.42 and 1.50 leave no room for thirteen
+posters inside 5.19 - and the total was the figure that was wrong.
 
 The modal's ten are the one group whose weight is not in the initial load at all: it mounts
 on a timer, so they are fetched after everything the budget above covers.
