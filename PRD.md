@@ -830,6 +830,10 @@ crossfade reading. Measuring any of it needs the quiz modal stripped repeatedly 
 once - it reopens six seconds in, sits over the page, and makes every element report
 `:hover=false`.
 
+**It costs 39 KB gzipped.** Homepage JavaScript measured at 390px goes from 232 KB to
+271 KB transferred. That is the whole of Motion, for the page's dominant animation; the
+transfer budget in section 8 is dominated by video, and #14 owns it.
+
 **Two Deviations.** `prefers-reduced-motion: reduce` removes the movement, arriving at the
 same end state with no travel and no fade; the Reference honours no such thing. And the
 resting state - `opacity: 0`, 30px down - is server-rendered, so without JavaScript nothing
