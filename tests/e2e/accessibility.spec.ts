@@ -17,12 +17,41 @@ const scan = (page: import('@playwright/test').Page) =>
     .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
     .analyze()
 
+/*
+ * One violation is knowingly carried, and it is carried narrowly.
+ *
+ * `link-in-text-block` fires on the footer by-line's two prose links, which are
+ * white inside `--color-text-muted` prose with nothing else to mark them - 1.7:1,
+ * against the 3:1 the rule wants. That is the Reference's own drawing, restored
+ * in #15 at the owner's direction (see the README's Deviations register and
+ * `site-footer.tsx`).
+ *
+ * The rule stays **on**. What is accepted is those two links by name, so a third
+ * prose link drawn the same way anywhere on the site fails this scan rather than
+ * inheriting the exception - which is the difference between a decision and a
+ * disabled rule.
+ */
+const ACCEPTED_RULE = 'link-in-text-block'
+const ACCEPTED_LINKS = ['>Framer<', '>Ramish Aziz<']
+
+/** Violation ids, with the accepted by-line links removed by name. */
+function unaccepted(violations: Awaited<ReturnType<typeof scan>>['violations']) {
+  return violations
+    .filter((violation) => {
+      if (violation.id !== ACCEPTED_RULE) return true
+      return !violation.nodes.every((node) =>
+        ACCEPTED_LINKS.some((label) => node.html.includes(label)),
+      )
+    })
+    .map((violation) => violation.id)
+}
+
 for (const route of ['/', '/templates', '/blog', '/no-such-page']) {
   test(`${route} passes axe`, async ({ page }) => {
     await page.goto(route)
     const { violations } = await scan(page)
 
-    expect(violations.map((violation) => violation.id)).toEqual([])
+    expect(unaccepted(violations)).toEqual([])
   })
 }
 
@@ -38,7 +67,7 @@ test('the quiz modal passes axe while open', async ({ page }) => {
 
   const { violations } = await scan(page)
 
-  expect(violations.map((violation) => violation.id)).toEqual([])
+  expect(unaccepted(violations)).toEqual([])
 })
 
 test('the phone menu passes axe while open', async ({ page }) => {
@@ -49,5 +78,5 @@ test('the phone menu passes axe while open', async ({ page }) => {
 
   const { violations } = await scan(page)
 
-  expect(violations.map((violation) => violation.id)).toEqual([])
+  expect(unaccepted(violations)).toEqual([])
 })

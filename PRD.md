@@ -425,6 +425,11 @@ Three card shapes, and which card gets which is layout rather than content:
 - **clipped** (3, 4): the title on top, then the still at its own intrinsic aspect - taller
   than the card, and cut off by it. The overflow is the point.
 
+**All five visuals fade out downwards**, each on its own measured mask - see 6.17, which has
+the stops. It is not decoration on the bleed cards: their titles sit over lit clips and are
+unreadable without it, and the fade is the whole of the contrast, since the Reference lays
+nothing over the media at all.
+
 Two details that read as mistakes and are not. Row heights are **set** at the two wider
 Breakpoints with the contents centred inside them, so tablet row 1 crops a few pixels off the
 framed card (183 + 16 + 108 of content in 292 of room). And two of the five titles carry a
@@ -466,7 +471,8 @@ than scale and the card height is what moves.
 **Step 1's visual is not a grid.** PRD 6.6 called it "a grid of eight Template thumbnails at a
 flat 275px" until #11 measured it: it is **two 275px columns of eight 275x199 tiles**, 16px
 apart, 28px between the columns, each column **rotated 16deg** and **travelling upwards at
-29px/s**, clipped by the card and running under the badge and the text. The Template Wall
+29px/s**, clipped by the card, fading out downwards (6.17) and running under the badge and
+the text. The Template Wall
 (6.3) is the static one; this is the only thing on the page that travels. The eight tiles are
 the Traction card's own screenshot reused plus `step/pick-02..08`, and their alt text carries
 the other Templates' names.
@@ -716,8 +722,19 @@ to **14px/22.4px on phone**, where everything centres and the two columns become
 The 38px portrait overflows its 32px row rather than growing it.
 
 Both prose links (`Framer`, `Ramish Aziz`) are white inside grey text with no other
-distinction, which is colour alone at 1.4:1 and fails the axe scan. We underline them - the
-same reasoning as 6.14.
+distinction, fading to 60% white over 200ms `cubic-bezier(0.44, 0, 0.56, 1)` on hover
+(measured in #15). That is colour alone at 1.7:1 and fails the axe scan; it was underlined
+from #9 to #14 as a Deviation and #15 restored the Reference's drawing at the owner's
+direction. The README's register carries the reasoning and the scan still runs the rule
+against those two links by name.
+
+**The 38px portrait rocks and never stops** (#15). It swings between `+8deg` and `-12deg` on
+a spring - mass 1, stiffness 110, damping 16.5 - taking 800ms to travel and holding 617ms at
+each end, so the cycle is 2834ms. Framer drives it from Motion's rAF loop, writing the angle
+into the inline style every frame, so nothing surfaces in `getAnimations()`; it was read by
+sampling `getComputedStyle` at 60fps for 9s with the page held still. Six swings and five
+holds agreed to within 4ms, and the spring fits the swing to an RMS of 0.19deg over a 20deg
+travel.
 
 ### 6.13 Quiz modal
 
@@ -871,6 +888,67 @@ resting state - `opacity: 0`, 30px down - is server-rendered, so without JavaScr
 would ever ask a Section to appear and the page would be blank below the nav. The Reference
 has exactly that hole. A `<noscript>` rule in `layout.tsx` closes it.
 
+### 6.16 Smooth scrolling - measured
+
+**The Reference does not scroll natively.** `<html>` carries a `lenis` class: Framer's
+smooth-scrolling page setting ships Lenis, which cancels the wheel event and moves the page
+from its own rAF loop. Measured in #15 at 1440x900, sampling `scrollY` every frame:
+
+| input | travelled | fit |
+| --- | --- | --- |
+| 1 notch of 120 | 120px | exponential, tau 287ms, rms 0.34px over 96 frames |
+| 1 notch of 600 | 600px | exponential, tau 290ms, rms 1.20px |
+
+So **one wheel pixel is one page pixel** - there is no multiplier, which is the first thing to
+check and the easiest to get wrong by feel - and the page takes about a third of a second to
+arrive where the wheel has already put it. A duration-and-easing curve fits the same data
+equally well (expo-out over ~2.0s, to the same 0.34px) and Lenis can be configured either
+way; the Clone implements the exponential, because that is what a damped follow *is* - an
+interrupted swing has no duration to restart, and real scrolling is a stream of interruptions.
+
+The Clone hijacks the wheel and nothing else: a drag on the bar, a swipe, Page Down, an anchor
+and `scrollIntoView` all move the page natively and the follow re-aims at wherever they left
+it. Lenis leaves touch native by default too, and a swipe is the one gesture where a follow
+this long reads as lag. It stands down for a pinch-zoom, for a box that scrolls itself, and
+while a `<dialog>` is open - the Reference stops Lenis for its own modal, which is why a wheel
+event on a Reference capture taken six seconds in moves nothing at all.
+
+**A Deviation.** `prefers-reduced-motion: reduce` hands the wheel straight back rather than
+shortening the curve; the Reference honours no such thing. Smoothing is motion the visitor did
+not ask for.
+
+Three traps cost a reading each, all worth knowing before re-measuring: the quiz modal stops
+Lenis outright, headless Chromium throttles rAF to ~9fps unless backgrounding is disabled, and
+a wheel event goes nowhere until the pointer has been moved over the page.
+
+### 6.17 Visual fades - measured
+
+Eighteen boxes on the Reference fade their own edge out with a `mask-image` rather than laying
+a scrim over anything. The page behind them is black, so a clip that stops being drawn reads
+as a black gradient - and a title set across the bottom of a bright clip gets its contrast
+from the clip disappearing under it.
+
+A census in #15 found all eighteen and the Clone had twelve. The six that were missing, with
+the stops measured off each box and identical at 1440, 810 and 390:
+
+| box | mask |
+| --- | --- |
+| 6.5 framed card visual (704x406) | `#000 38%, transparent 100%` **and** `90deg, transparent -7%, #000 35%`, composited `intersect, add` |
+| 6.5 tutorials card clip (448x542) | `#000 35%, transparent 86%` |
+| 6.5 hosting card clip (624x536) | `#000 35%, transparent 91%` |
+| 6.5 SEO card still (528x510) | `#000 6%, transparent 29%` |
+| 6.5 CMS card still (528x374) | `#000 9%, transparent 52%` |
+| 6.6 step 1 thumbnail strip (400x453) | `#000 -15%, transparent 100%` |
+
+The percentages are of each box, not of the card that crops it, which is why the two clipped
+cards fade so early: the mask is measured against the whole screenshot and the card only ever
+shows its top. What reads as the card cutting the picture off is the picture going out.
+
+`-15%` is not a typo - the strip starts already fading and never reaches full opacity.
+
+The fade takes each box's own 1px edge with it, on both sides: the Reference draws that edge
+as a `::after` inside the masked box and the Clone as an inset shadow on it.
+
 ---
 
 ## 7. Data layer
@@ -939,6 +1017,11 @@ hero-wall video is 839 KB.
 | Initial transfer | 4.0 MB | **< 1.0 MB** | 0.50 MB | pass |
 | Initial requests | 141 | **< 40** | 39 | pass |
 | CLS | not measured | **< 0.02** | 0.000 | pass |
+
+**Re-measured after #15**, which added a client component and a non-passive wheel listener
+(6.16): initial transfer 0.50 -> **0.51 MB** over the same **39** requests, FCP and LCP
+132ms, CLS 0.000, and Lighthouse medians of 93 and 95 on two consecutive runs of five. The
+Lighthouse row is where it was; the kilobyte is the smooth scroll.
 
 Measured by `npm run perf`, which runs both sides the same way and exits non-zero on a miss.
 The Reference column above is the reading section 1 took; the same script re-measures it at
@@ -1121,22 +1204,41 @@ sides - the case study is that grid's last row, not a band - so splitting them w
 inventing a boundary the Reference does not draw. 6.13 goes the other way and gets a capture
 pass of its own, because the main pass dismisses it.
 
-Measured against the Reference on 2026-07-27, pixel match / SSIM:
+Measured against the Reference on 2026-07-27, pixel match / SSIM, and re-measured the same day
+after #15 added the six missing visual fades (6.17). The **after** column is the current
+reading; the **before** is kept for the two Sections the fades moved, because a
+seventeen-point jump on a band nobody had touched otherwise is the clearest evidence in this
+document that the harness measures something real:
 
 | Section | PRD | 1440 | 810 | 390 |
 | --- | --- | --- | --- | --- |
 | Nav | 6.1 | 97.8% / 0.971 | 96.1% / 0.948 | 99.2% / 0.995 |
 | Hero | 6.2 | 97.0% / 0.958 | 95.3% / 0.934 | 96.4% / 0.979 |
-| Template Wall | 6.3 | 48.2% / 0.796 | 39.0% / 0.779 | 15.9% / 0.212 |
-| Featured templates | 6.4 | 84.9% / 0.957 | 67.4% / 0.638 | 78.5% / 0.946 |
-| Feature bento | 6.5 | 63.3% / 0.784 | 65.3% / 0.763 | 60.0% / 0.712 |
-| How it works | 6.6 | 83.4% / 0.757 | 81.3% / 0.695 | 90.0% / 0.919 |
-| Social proof + case study | 6.7, 6.8 | 83.0% / 0.921 | 82.4% / 0.948 | 92.0% / 0.940 |
+| Template Wall | 6.3 | 48.2% / 0.796 | 39.0% / 0.777 | 15.9% / 0.212 |
+| Featured templates | 6.4 | 84.9% / 0.957 | 80.9% / 0.906 | 78.5% / 0.946 |
+| Feature bento | 6.5 | **80.7% / 0.882** | **82.4% / 0.873** | **76.2% / 0.829** |
+| Feature bento, before #15 | 6.5 | 63.3% / 0.784 | 65.3% / 0.763 | 60.0% / 0.712 |
+| How it works | 6.6 | **95.1% / 0.981** | **92.6% / 0.939** | **90.0% / 0.919** |
+| How it works, before #15 | 6.6 | 83.4% / 0.757 | 81.3% / 0.695 | 90.0% / 0.919 |
+| Social proof + case study | 6.7, 6.8 | 82.9% / 0.920 | 81.8% / 0.948 | 91.9% / 0.939 |
 | Pricing | 6.9 | 98.3% / 0.979 | 97.8% / 0.970 | 95.5% / 0.931 |
 | Quiz CTA | 6.10 | 98.9% / 0.986 | 96.2% / 0.947 | 93.4% / 0.923 |
-| Founder | 6.11 | 80.2% / 0.914 | 69.4% / 0.740 | 77.5% / 0.680 |
-| Footer | 6.12 | 96.7% / 0.943 | 94.1% / 0.943 | 95.4% / 0.970 |
-| Quiz modal | 6.13 | 99.0% / 0.990 | 98.6% / 0.985 | 95.5% / 0.940 |
+| Founder | 6.11 | 80.6% / 0.917 | 69.4% / 0.740 | 77.5% / 0.680 |
+| Footer | 6.12 | 96.7% / 0.944 | 94.1% / 0.946 | 95.5% / 0.972 |
+| Quiz modal | 6.13 | 99.0% / 0.990 | 98.6% / 0.985 | 95.6% / 0.940 |
+
+**One row did not move, and saying why is the point of keeping this table honest.** How it
+works at **390 reads 90.0 either way**, because the travel detector excludes 21% of that band
+- which is exactly the strip the fade is on. The number that moved at the other two widths is
+the same fade measured where it is not excluded.
+
+**The after column is the median of three consecutive runs on one build**, because two cells
+wobble. The bento at 810 read 82.4, 81.6 and once 66.3, the last with 84% of the band
+excluded as travelling; featured Templates read 84.9 at 1440 on all three runs of this build
+and 66.3 on a run taken against an earlier one. Both are the travelling-backdrop
+non-determinism the paragraphs below describe, and both are worth more than a footnote: a
+single run of this harness can move a cell by seventeen points without a line of the build
+changing.
 
 **It is not 99%, exactly as ADR-0003 said it would not be, and every low reading points at
 something already known.** The Sections in the nineties are the ones made of type; the ones

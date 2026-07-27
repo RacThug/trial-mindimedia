@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Geist } from 'next/font/google'
+import { SmoothScroll } from '@/components/motion/smooth-scroll.tsx'
 import { SiteFooter } from '@/components/shell/site-footer.tsx'
 import { SiteNav } from '@/components/shell/site-nav.tsx'
 import './globals.css'
@@ -78,6 +79,14 @@ export default function RootLayout({
         <noscript>
           <style>{'[data-appear]{opacity:1!important;transform:none!important}'}</style>
         </noscript>
+
+        {/*
+         * The Reference's wheel does not scroll the page directly; it aims at a
+         * position the page then takes about a third of a second to reach
+         * (#15). Renders nothing, and hands the wheel straight back under
+         * `prefers-reduced-motion`.
+         */}
+        <SmoothScroll />
 
         <SiteNav />
         {children}

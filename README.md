@@ -81,10 +81,22 @@ pause control**. That is a known gap rather than a decision: 2.2.2 covers them t
 mechanism across three Sections in two work packages, so it is recorded in PRD section 10
 rather than fitted to one of them.
 
-### Two prose links are underlined (PRD 6.12, 6.14)
+### Two prose links are **not** underlined, and that is knowingly a defect (PRD 6.12, 6.14)
 
 `Framer` and `Ramish Aziz` in the footer are white inside grey text with no other
-distinction, which is colour alone at 1.4:1 and fails the axe scan. We underline them.
+distinction, which is colour alone at 1.7:1 against the prose around them - short of the 3:1
+that would let colour carry it - so a reader who cannot tell those two greys apart cannot
+find either link.
+
+They were underlined from #9 to #14, as a Deviation of ours. #15 took the underline back out
+at the owner's direction: this is a fidelity clone, the Reference draws them plain, and which
+side of that trade to take is the owner's call rather than the implementer's.
+
+What is kept is everything that costs nothing at rest - the Reference's own hover fade to 60%
+white, and a focus-visible ring the Reference has no equivalent of. And the axe scan still
+runs the rule: `tests/e2e/accessibility.spec.ts` accepts `link-in-text-block` **for these two
+links by name**, so a third prose link drawn this way anywhere on the site fails the scan
+rather than inheriting the exception. Putting it back is one line in `site-footer.tsx`.
 
 ### Geist is served as its latin subset (PRD section 3, section 8)
 
