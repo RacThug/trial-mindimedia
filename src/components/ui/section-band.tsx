@@ -1,3 +1,4 @@
+import { ScrollAppear } from '@/components/motion/scroll-appear.tsx'
 import { Eyebrow } from './eyebrow.tsx'
 
 /*
@@ -60,7 +61,7 @@ export function SectionBand({
   children,
 }: SectionBandProps) {
   return (
-    <section className={padding}>
+    <ScrollAppear className={padding}>
       <div className="mx-auto flex w-full max-w-rail flex-col gap-9 tablet:gap-11">
         <div
           className={
@@ -84,6 +85,6 @@ export function SectionBand({
 
         {children}
       </div>
-    </section>
+    </ScrollAppear>
   )
 }

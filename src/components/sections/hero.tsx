@@ -1,5 +1,6 @@
 import Image from 'next/image'
 import { FramerIcon, StarIcon } from '@/components/icons.tsx'
+import { ScrollAppear } from '@/components/motion/scroll-appear.tsx'
 import { ButtonLink } from '@/components/ui/button.tsx'
 import { Eyebrow } from '@/components/ui/eyebrow.tsx'
 import { media } from '@/lib/media'
@@ -34,7 +35,7 @@ const AVATARS = [media['avatar/hero-1'], media['avatar/hero-2'], media['avatar/h
 
 export function Hero() {
   return (
-    <section className="px-5 pt-30 pb-10 tablet:px-10 tablet:pt-40 tablet:pb-15">
+    <ScrollAppear className="px-5 pt-30 pb-10 tablet:px-10 tablet:pt-40 tablet:pb-15">
       <div className="mx-auto flex w-full max-w-rail flex-col items-start gap-11">
         <Eyebrow icon={<FramerIcon />}>Framer templates</Eyebrow>
 
@@ -71,7 +72,7 @@ export function Hero() {
           </div>
         </div>
       </div>
-    </section>
+    </ScrollAppear>
   )
 }
 

@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
+import { settleAppear } from './settle.ts'
 
 /*
  * The claims issue #10 makes about the hero, the Template Wall and the featured
@@ -62,6 +63,12 @@ test.describe('the Template Wall (PRD 6.3)', () => {
     page,
   }) => {
     await page.goto('/')
+    /*
+     * The claim is that the grid itself never travels, not that the Section never
+     * arrives: Scroll-Appear raises the whole wall 30px once, on entry (#13),
+     * and sampling across that reads as sixteen tiles moving together.
+     */
+    await settleAppear(page)
     await page.evaluate(() => window.scrollTo(0, 700))
     await page.waitForTimeout(500)
 
@@ -222,6 +229,8 @@ test.describe('the hero (PRD 6.2)', () => {
   }) => {
     await page.setViewportSize(PHONE)
     await page.goto('/')
+    /* Three boxes, read against each other: let the hero arrive first (#13). */
+    await settleAppear(page)
 
     const rating = page.getByText('Rated 4.92/5')
     const primary = page.getByRole('link', { name: 'Pick your template' })
@@ -243,6 +252,12 @@ test.describe('the hero (PRD 6.2)', () => {
   test('keeps the rating beside the buttons above phone', async ({ page }) => {
     await page.setViewportSize(DESKTOP)
     await page.goto('/')
+    /*
+     * The two boxes below are read one after the other, and the hero rises 30px
+     * on load (#13) - measured mid-flight they are tens of pixels apart on an
+     * axis this test allows 20 on, against a layout that has not moved at all.
+     */
+    await settleAppear(page)
 
     const rating = await page.getByText('Rated 4.92/5').boundingBox()
     const primary = await page

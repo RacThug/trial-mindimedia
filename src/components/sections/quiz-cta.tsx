@@ -1,5 +1,6 @@
 import { ArrowRightIcon } from '@/components/icons.tsx'
 import { TickerColumns, type TickerColumn } from '@/components/media/ticker-columns.tsx'
+import { ScrollAppear } from '@/components/motion/scroll-appear.tsx'
 import { ButtonLink } from '@/components/ui/button.tsx'
 import { Eyebrow } from '@/components/ui/eyebrow.tsx'
 import { getWallTiles, type WallTile } from '@/lib/content'
@@ -73,8 +74,19 @@ export async function QuizCta() {
     <section className="relative flex items-end px-5 py-10 tablet:px-5 tablet:pt-50 tablet:pb-10 desktop:h-[900px] desktop:px-10 desktop:py-0 desktop:pb-20">
       <TickerColumns columns={columnsOf(tiles)} />
 
-      {/* Above the tickers, which follow it in the DOM and are absolute. */}
-      <div className="relative z-1 mx-auto flex w-full max-w-rail flex-col items-start gap-8 tablet:flex-row tablet:items-end tablet:gap-8">
+      {/*
+       * Above the tickers, which follow it in the DOM and are absolute.
+       *
+       * Scroll-Appear sits on the card and not on the band, which is where the
+       * Reference puts it: the band itself never animates, and the card rises
+       * 10px rather than a Section's 30 (#13). Putting it on the band would
+       * carry the ticker backdrop up with it, which the Reference does not do.
+       */}
+      <ScrollAppear
+        as="div"
+        variant="block"
+        className="relative z-1 mx-auto flex w-full max-w-rail flex-col items-start gap-8 tablet:flex-row tablet:items-end tablet:gap-8"
+      >
         <div className="flex flex-col items-start gap-8">
           <Eyebrow blurred>60-second quiz</Eyebrow>
 
@@ -98,7 +110,7 @@ export async function QuizCta() {
           Take the quiz
           <ArrowRightIcon />
         </ButtonLink>
-      </div>
+      </ScrollAppear>
     </section>
   )
 }
