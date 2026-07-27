@@ -13,15 +13,23 @@ import { QUIZ_BLURB, QUIZ_HREF } from './quiz-copy.ts'
  * the bottom of a tall well of travelling Template stills.
  *
  * | | desktop >= 1200 | tablet 810-1199 | phone <= 809 |
- * | band    | 900 tall, 0 40 80 | 200 20 40 | 40 20 |
+ * | band    | 90vh, 0 40 80 | 200 20 40 | 40 20 |
  * | copy    | row, button right and bottom | as desktop | column, button full width |
  * | H2      | 56/67.2, 715 wide | 48/57.6 | 36/43.2 |
  * | body    | 16/25.6, 476 wide | 16/25.6, 476 | 14/22.4 |
  *
- * The desktop band's 900px is a height, not the viewport's: it stays 900 at any
- * window size, and the copy is pinned to its bottom edge. The two narrower
- * Breakpoints are their content plus the padding, which is where the tablet's
- * 200px of top padding comes from - it is the only room the tickers get there.
+ * **The desktop band is `90vh`, and PRD 6.10 said 900px until #14 caught it.**
+ * The fidelity harness put the Clone's band at 900 and the Reference's at 810,
+ * with every band below shifted by the same 90px and no other Section out by a
+ * pixel; measured again at three window heights, the Reference reads 648 at 720,
+ * 810 at 900 and 1080 at 1200. 900px was a true measurement taken at one window
+ * height that happened to be 1000, which is the failure mode a single reading of
+ * a viewport-relative length always has.
+ *
+ * The copy is pinned to the band's bottom edge, so the whole well grows upwards.
+ * The two narrower Breakpoints are their content plus the padding, which is
+ * where the tablet's 200px of top padding comes from - it is the only room the
+ * tickers get there.
  *
  * The Eyebrow here carries an 8px backdrop blur that the hero's does not (#12).
  * That is not decoration: this is the one Eyebrow on the page with a picture
@@ -71,7 +79,7 @@ export async function QuizCta() {
   const tiles = await getWallTiles()
 
   return (
-    <section className="relative flex items-end px-5 py-10 tablet:px-5 tablet:pt-50 tablet:pb-10 desktop:h-[900px] desktop:px-10 desktop:py-0 desktop:pb-20">
+    <section className="relative flex items-end px-5 py-10 tablet:px-5 tablet:pt-50 tablet:pb-10 desktop:h-[90vh] desktop:px-10 desktop:py-0 desktop:pb-20">
       <TickerColumns columns={columnsOf(tiles)} />
 
       {/*

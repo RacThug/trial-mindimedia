@@ -214,6 +214,17 @@
    * thing, which is why it is a token rather than a rounding. */
   --color-text-warm: #fffbf7;
 
+  /* The footer by-line's two prose links on hover, measured in #30: white at
+   * 60%, reached over 200ms.
+   *
+   * Written as an `rgba()` rather than as `text-text/60`, which is the same
+   * colour and not the same computed value - Tailwind's opacity modifier emits
+   * a `color-mix()` in oklab, and a probe comparing the Clone's computed styles
+   * against the Reference's reads `oklab(0.999994 ...)` against
+   * `rgba(255, 255, 255, 0.6)` and calls it a difference. The pixels agree
+   * either way; the token is what lets a measurement agree too. */
+  --color-text-hover: rgba(255, 255, 255, 0.6);
+
   /* ---- Shape (PRD section 4) -------------------------------------------- */
   --radius-*: initial;
 
@@ -392,6 +403,37 @@
    * custom property what it holds. Those two have to move together. */
   --wall-width-phone: min(100vw, 400px);
   --wall-height-phone: calc(4.91 * (var(--wall-width-phone) - 16px) / 3 + 40px);
+
+  /* ---- the visual fades (PRD 6.5 and 6.6), measured in #30 ---------------
+   *
+   * Six more boxes fade their own bottom edge out, the same way the Template
+   * Wall above does and for the same reason: the page behind them is black, so
+   * a clip that stops being drawn reads as a black gradient. Nothing is laid
+   * over the media - a title set across the bottom of a bright clip gets its
+   * contrast from the clip disappearing under it.
+   *
+   * A census of the Reference found 18 masked boxes and this build had 12 of
+   * them; these are the six that were missed, and the tutorials card is the one
+   * that shows it worst - white copy over a lit face, unreadable without the
+   * fade. Every stop below is the Reference's own and none of them move with
+   * the Breakpoint: the percentages are of each box, and the boxes are already
+   * the measured sizes.
+   *
+   * The framed card is the only two-layer one. Its second layer ramps in from
+   * the left, which is why its clip is dark in the corner the card's own text
+   * sits nearest. See the `visual-fade-*` utilities below for the compositing,
+   * which cannot live in a custom property.
+   *
+   * `-15%` on the thumbnails is not a typo: the stop is off the top of the box,
+   * so the column starts already fading and never reaches full opacity. */
+  --visual-fade-framed:
+    linear-gradient(#000000 38%, rgba(0, 0, 0, 0) 100%),
+    linear-gradient(90deg, rgba(0, 0, 0, 0) -7%, #000000 35%);
+  --visual-fade-tutorials: linear-gradient(#000000 35%, rgba(0, 0, 0, 0) 86%);
+  --visual-fade-hosting: linear-gradient(#000000 35%, rgba(0, 0, 0, 0) 91%);
+  --visual-fade-seo: linear-gradient(#000000 6%, rgba(0, 0, 0, 0) 29%);
+  --visual-fade-cms: linear-gradient(#000000 9%, rgba(0, 0, 0, 0) 52%);
+  --visual-fade-thumbnails: linear-gradient(#000000 -15%, rgba(0, 0, 0, 0) 100%);
 }
 
 @layer base {
@@ -516,6 +558,46 @@
 }
 
 /*
+ * The six visual fades (#30), one utility each because the stops belong to the
+ * box they were measured on and a shared one would invite a card to borrow
+ * another card's numbers.
+ *
+ * Named after the card rather than after the shape: `35% to 86%` says nothing
+ * about which clip it was read from, and the next session to re-measure one of
+ * these needs to change exactly one pair of stops.
+ *
+ * The `-webkit-` spelling is here for the same reason it is above. Only the
+ * framed card needs compositing: `intersect` is what makes two layers dim
+ * together rather than fill each other's gaps in.
+ */
+@utility visual-fade-framed {
+  mask-image: var(--visual-fade-framed);
+  mask-composite: intersect, add;
+  -webkit-mask-image: var(--visual-fade-framed);
+  -webkit-mask-composite: intersect, add;
+}
+@utility visual-fade-tutorials {
+  mask-image: var(--visual-fade-tutorials);
+  -webkit-mask-image: var(--visual-fade-tutorials);
+}
+@utility visual-fade-hosting {
+  mask-image: var(--visual-fade-hosting);
+  -webkit-mask-image: var(--visual-fade-hosting);
+}
+@utility visual-fade-seo {
+  mask-image: var(--visual-fade-seo);
+  -webkit-mask-image: var(--visual-fade-seo);
+}
+@utility visual-fade-cms {
+  mask-image: var(--visual-fade-cms);
+  -webkit-mask-image: var(--visual-fade-cms);
+}
+@utility visual-fade-thumbnails {
+  mask-image: var(--visual-fade-thumbnails);
+  -webkit-mask-image: var(--visual-fade-thumbnails);
+}
+
+/*
  * Step 1's thumbnail column travels; the Template Wall does not (PRD 6.3, 6.6).
  * The list is rendered twice and shifted by exactly one copy, so the wrap is
  * invisible. Under `prefers-reduced-motion` the animation is dropped and the
@@ -527,6 +609,42 @@
   }
   to {
     transform: translateY(calc(-1 * var(--thumbnails-cycle)));
+  }
+}
+
+/*
+ * The footer by-line portrait, which rocks between +8deg and -12deg for ever
+ * (#30). `byline-rock.ts` has the measurement and hands this the cycle and the
+ * spring, as a `linear()`.
+ *
+ * The stops are the measured 617ms hold against the 2834ms cycle, written out
+ * because `@keyframes` cannot read a custom property for a stop. `byline-rock.ts`
+ * exports the same two numbers and `tests/motion/byline-rock.test.ts` fails if
+ * this stylesheet and that module ever disagree.
+ *
+ * The spring rides on the element's `animation` shorthand rather than on a
+ * keyframe, which is a Chromium limitation and a quiet one: an
+ * `animation-timing-function: var(--x)` written *inside* a keyframe does not
+ * resolve at all - it falls back to `ease` and takes the overshoot with it,
+ * measured at a peak of 100.0deg against the 101.82 the same curve reaches when
+ * it is written out. A shorthand easing applies to every segment instead, which
+ * is what is wanted here anyway: the two segments that travel get the spring,
+ * and the two that hold get a curve across a value that does not change.
+ *
+ * Under `prefers-reduced-motion` the animation is dropped and the portrait sits
+ * at the -12deg it is served at.
+ */
+@keyframes byline-rock {
+  0%,
+  21.771% {
+    rotate: 8deg;
+  }
+  50%,
+  71.771% {
+    rotate: -12deg;
+  }
+  100% {
+    rotate: 8deg;
   }
 }
 
@@ -543,5 +661,74 @@
   }
   to {
     transform: translateY(-50%);
+  }
+}
+
+/*
+ * Scroll-Appear, run by CSS (#14). PRD 6.15 has the measurements.
+ *
+ * This was Motion until #14, and moving it here is a performance decision:
+ * 39 kB gzipped on a homepage whose whole remaining Lighthouse gap was a
+ * simulated LCP queued behind the JavaScript. The spring is the one #13 fitted,
+ * converted by `spring-easing.ts` into the same `linear()` easing Motion itself
+ * hands the Web Animations API - so the animation did not change, only what runs
+ * it.
+ *
+ * Both curves, both durations and the travel arrive as custom properties from
+ * `appear-style.ts`, derived from the measurement rather than retyped here.
+ *
+ * Two animations rather than one, because the Reference's two values stop at
+ * different times: a Section's 30px travel at ~570ms and its opacity at ~755ms.
+ * That is the detail that says spring rather than tween, and one duration for
+ * both would throw it away.
+ */
+@keyframes appear-rise {
+  from {
+    transform: translateY(var(--appear-travel));
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes appear-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/*
+ * Two triggers, one animation. The hero is on screen at load at every
+ * Breakpoint, so it starts when it is parsed and needs no JavaScript at all;
+ * every Section below the fold waits for the IntersectionObserver in
+ * `scroll-appear.tsx` to set `data-appeared`.
+ *
+ * A CSS animation overrides an inline declaration carrying no `!important`,
+ * which is what lets the resting state be server-rendered inline - nothing
+ * paints before it is asked to - and still be animated away from here.
+ */
+[data-appear-on-load],
+[data-appear][data-appeared] {
+  animation:
+    appear-rise var(--appear-travel-duration) var(--appear-travel-ease) both,
+    appear-fade var(--appear-opacity-duration) var(--appear-opacity-ease) both;
+}
+
+/*
+ * Reduced motion: the same end state without the journey.
+ *
+ * `!important` on the two properties, not just `animation: none`, because the
+ * resting state is inline. Dropping the animation alone would leave a Section
+ * that has been told to appear sitting at `opacity: 0` for good.
+ */
+@media (prefers-reduced-motion: reduce) {
+  [data-appear-on-load],
+  [data-appear][data-appeared] {
+    animation: none;
+    opacity: 1 !important;
+    transform: none !important;
   }
 }

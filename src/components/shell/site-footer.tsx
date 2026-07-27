@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import { bylineRockStyle } from '@/components/motion/byline-rock.ts'
 import { getLinks, type Link as ContentLink } from '@/lib/content'
 import { media } from '@/lib/media'
 import { SiteLink } from '../ui/site-link.tsx'
@@ -19,18 +20,27 @@ import { TextLink } from './text-link.tsx'
  * `links.json`.
  */
 /*
- * A Deviation, and a deliberate one. The Reference sets `Framer` and
- * `Ramish Aziz` in white inside `--color-text-muted` prose and nothing else -
- * no underline, no weight change - which is colour alone at a 1.4:1 ratio
- * against the text around them, so a reader who cannot tell those two greys
- * apart cannot find the links. It fails WCAG 1.4.1 and the axe scan in PRD
- * section 9 catches it. The same reasoning as PRD 6.14: where copying the
- * Reference would ship an accessibility defect, we do not copy it.
+ * The two prose links, drawn the Reference's way: white inside
+ * `--color-text-muted` prose, no underline and no weight change, fading to 60%
+ * white over 200ms on hover. All four values measured in #30.
+ *
+ * **This was underlined until #30 and the underline was a Deviation**, taken
+ * because white against `--color-text-muted` is colour alone at 1.4:1 and a
+ * reader who cannot tell those two greys apart cannot find the link. That
+ * reasoning has not changed; the owner asked for the Reference's look here, and
+ * a fidelity clone is the owner's call to make. What is kept is everything that
+ * costs nothing at rest: the hover fade the Reference itself has, and a
+ * focus-visible ring, so a keyboard user still sees where they are. The
+ * Deviations register in the README records the removal rather than quietly
+ * dropping the entry.
  *
  * Only prose links. The nav and the footer's own columns are standalone links
  * in a row of links, which is not the case this rule is about.
  */
-const INLINE_LINK = 'text-text underline underline-offset-2'
+const INLINE_LINK =
+  'text-text transition-colors duration-200 ease-[cubic-bezier(0.44,0,0.56,1)] ' +
+  'hover:text-text-hover ' +
+  'focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-text'
 
 /*
  * `text-wrap: balance`, measured on the Reference and easy to miss because it
@@ -101,14 +111,25 @@ export async function SiteFooter() {
           <p className="flex h-8 items-center gap-2">
             Created by
             <span className="flex items-center gap-2">
-              {/* Decorative: the name is right beside it (PRD 6.14). */}
-              <Image
-                src={media['avatar/ramish'].src}
-                alt=""
-                width={38}
-                height={38}
-                className="size-[38px] rounded-[6px] object-cover"
-              />
+              {/* Decorative: the name is right beside it (PRD 6.14).
+               *
+               * It rocks, and never stops - see `byline-rock.ts` for the
+               * measurement. The wrapper carries the animation rather than the
+               * image so that `next/image` is free to write whatever it likes
+               * into the `<img>`, and `-rotate-12` is what a visitor who has
+               * asked for reduced motion is left with. */}
+              <span
+                className="-rotate-12 [animation:byline-rock_var(--byline-rock-duration)_var(--byline-rock-ease)_infinite] motion-reduce:[animation:none]"
+                style={bylineRockStyle()}
+              >
+                <Image
+                  src={media['avatar/ramish'].src}
+                  alt=""
+                  width={38}
+                  height={38}
+                  className="block size-[38px] rounded-[6px] object-cover"
+                />
+              </span>
               <SiteLink href="https://x.com/ramishdotdesign" className={INLINE_LINK}>
                 Ramish Aziz
               </SiteLink>

@@ -19,6 +19,12 @@ import { SiteLink } from './site-link.tsx'
  * (PRD section 10), so the crossfade is ours - the second image is measured,
  * the 300ms is not.
  *
+ * The second one is drawn only where a pointer can hover. A phone has no way to
+ * reach it and downloaded all three anyway - 59 kB and 3 requests of PRD section
+ * 8's budget, measured at 412px - because an image is lazy, not conditional, and
+ * Chrome starts a lazy image well before it is on screen. `display: none` is
+ * what actually stops the fetch; `opacity: 0` never did.
+ *
  * Shared with `/templates`, which renders the same card from what the API
  * returns. It takes `sizes` rather than assuming one, because the same card is
  * 387px wide in the featured row and 45vw in that catalogue.
@@ -63,7 +69,7 @@ export function TemplateCard({ template, sizes, headingLevel }: TemplateCardProp
             alt=""
             fill
             sizes={sizes}
-            className="object-cover opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+            className="hidden object-cover opacity-0 transition-opacity duration-300 group-hover:opacity-100 [@media(hover:hover)]:block"
           />
         )}
       </div>

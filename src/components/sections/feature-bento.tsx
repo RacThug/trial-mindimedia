@@ -72,13 +72,22 @@ export async function FeatureBento() {
             feature={feature('tutorials')}
             sizes={SIZES.tutorials}
             className="h-[332px] tablet:h-auto"
+            fade="visual-fade-tutorials"
           />
         </div>
 
         <div className="flex flex-col gap-4 tablet:grid tablet:h-[536px] tablet:grid-cols-[341fr_389fr] tablet:gap-0 desktop:grid-cols-[576fr_624fr]">
           <div className="flex flex-col tablet:rule-r">
-            <ClippedCard feature={feature('seo')} className="rule-b" />
-            <ClippedCard feature={feature('cms')} className="rule-b tablet:rule-none" />
+            <ClippedCard
+              feature={feature('seo')}
+              className="rule-b"
+              fade="visual-fade-seo"
+            />
+            <ClippedCard
+              feature={feature('cms')}
+              className="rule-b tablet:rule-none"
+              fade="visual-fade-cms"
+            />
           </div>
 
           <BleedCard
@@ -86,6 +95,7 @@ export async function FeatureBento() {
             sizes={SIZES.hosting}
             className="h-[352px] tablet:h-auto"
             titleWidth="desktop:max-w-[314px]"
+            fade="visual-fade-hosting"
           />
         </div>
       </div>
@@ -107,10 +117,15 @@ function bySlug(features: readonly Feature[], slug: string): Feature {
 function FramedCard({ feature }: { readonly feature: Feature }) {
   return (
     <div className="flex flex-col justify-center gap-4 overflow-clip p-6 rule-b tablet:h-[340px] tablet:rule-r desktop:h-[542px]">
+      {/* The fade takes the card's own 1px edge with it, which is the
+       * Reference's own behaviour: there the edge is a `::after` inside the
+       * masked box, and here it is an inset shadow on it - either way the
+       * bottom corners soften away rather than outlining a clip that has
+       * stopped being drawn. */}
       <CardVisual
         visual={feature.media}
         sizes={SIZES.responsive}
-        className="relative aspect-[704/406] w-full shrink-0 rounded-visual rule-ring"
+        className="relative aspect-[704/406] w-full shrink-0 rounded-visual rule-ring visual-fade-framed"
       />
       <h3 className={`${TITLE} desktop:max-w-[427px]`}>{feature.title}</h3>
     </div>
@@ -122,11 +137,14 @@ function BleedCard({
   feature,
   sizes,
   className,
+  fade,
   titleWidth = '',
 }: {
   readonly feature: Feature
   readonly sizes: string
   readonly className: string
+  /** The card's measured `visual-fade-*` utility (#30). */
+  readonly fade: string
   readonly titleWidth?: string
 }) {
   return (
@@ -134,8 +152,18 @@ function BleedCard({
       {/* The padding is on the title rather than on the card, so that `inset-0`
        * is the card's own edge: an absolutely positioned box is placed against
        * its ancestor's padding box, and a padded card would crop and rescale
-       * the clip by 24px on every side. */}
-      <CardVisual visual={feature.media} sizes={sizes} className="absolute inset-0" />
+       * the clip by 24px on every side.
+       *
+       * The fade is what makes the title readable. Both these clips are lit
+       * scenes and the title sits across the bottom of one, so the clip is
+       * masked out from 35% of the card's height down and the black page shows
+       * through - which is the Reference's own answer, and better than a scrim
+       * because there is nothing to see the edge of. */}
+      <CardVisual
+        visual={feature.media}
+        sizes={sizes}
+        className={`absolute inset-0 ${fade}`}
+      />
       <div className="relative p-6">
         <h3 className={`${TITLE} ${titleWidth}`}>{withEmphasis(feature.title)}</h3>
       </div>
@@ -147,19 +175,27 @@ function BleedCard({
 function ClippedCard({
   feature,
   className,
+  fade,
 }: {
   readonly feature: Feature
   readonly className: string
+  /** The card's measured `visual-fade-*` utility (#30). */
+  readonly fade: string
 }) {
   return (
     <div
       className={`flex h-[285px] flex-col gap-6 overflow-clip p-6 tablet:h-[268px] ${className}`}
     >
       <h3 className={TITLE}>{feature.title}</h3>
+      {/* These two fade fastest of the six - out by 29% of the still on the SEO
+       * card and by 52% on the CMS one - because the fade is measured against
+       * the whole still and the card only ever shows its top. The screenshot
+       * stops being drawn a little above the card's own edge, so what reads as
+       * the card cutting the picture off is the picture going out. */}
       <CardVisual
         visual={feature.media}
         sizes={SIZES.panel}
-        className="relative w-full shrink-0 rounded-visual rule-ring"
+        className={`relative w-full shrink-0 rounded-visual rule-ring ${fade}`}
         style={{ aspectRatio: feature.media.aspect }}
       />
     </div>

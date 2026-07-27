@@ -51,13 +51,13 @@ Recorded here so nothing is re-litigated mid-build. Two have ADRs.
 | Decision | Choice | Rationale |
 | --- | --- | --- |
 | Framework | Next.js App Router, TypeScript | [ADR-0001](../blob/develop/docs/adr/0001-nextjs-over-nuxt.md). Motion for React shares its lineage with Framer's own animation engine. |
-| Animation | Motion for React | Same engine family as the Reference. |
+| Animation | CSS keyframes, from the measured spring | Motion for React until #14, chosen in #13 for sharing the Reference's engine family. Removed for 39 kB gzipped; `spring-easing.ts` emits the same `linear()` easing Motion generated, so the animation is unchanged. |
 | Styling | Tailwind v4, `@theme` tokens | Reference's design system is small and regular; tokens beat scattered magic numbers. |
 | Data | JSON + typed data layer + Route Handlers | [ADR-0002](../blob/develop/docs/adr/0002-data-access-shape.md). Homepage imports directly to stay static; `/templates` proves the API over HTTP. |
 | Assets | Downloaded, re-encoded, committed | Needed to beat the Reference on performance and to remove a third-party dependency mid-review. |
-| Content | Verbatim, plus `noindex, nofollow` | Maximum fidelity; the robots directive keeps a lookalike out of search results. |
+| Content | Verbatim, indexable | Maximum fidelity. `noindex, nofollow` was set for the reason below and removed in #14 at the owner's direction; it cost 37 points of Lighthouse SEO. |
 | Off-page links | Real placeholder routes | Nothing 404s or dead-ends; demonstrates the App Router layout model. |
-| Fonts | Geist, self-hosted via `next/font` | Removes the render-blocking `fonts.gstatic.com` round-trip the Reference pays. |
+| Fonts | Geist, self-hosted via `next/font`, **latin subset** | Removes the render-blocking `fonts.gstatic.com` round-trip the Reference pays. Subset in #14: 68 kB to 29 kB, which is what the LCP was waiting for. |
 
 ---
 
@@ -425,6 +425,11 @@ Three card shapes, and which card gets which is layout rather than content:
 - **clipped** (3, 4): the title on top, then the still at its own intrinsic aspect - taller
   than the card, and cut off by it. The overflow is the point.
 
+**All five visuals fade out downwards**, each on its own measured mask - see 6.17, which has
+the stops. It is not decoration on the bleed cards: their titles sit over lit clips and are
+unreadable without it, and the fade is the whole of the contrast, since the Reference lays
+nothing over the media at all.
+
 Two details that read as mistakes and are not. Row heights are **set** at the two wider
 Breakpoints with the contents centred inside them, so tablet row 1 crops a few pixels off the
 framed card (183 + 16 + 108 of content in 292 of room). And two of the five titles carry a
@@ -466,7 +471,8 @@ than scale and the card height is what moves.
 **Step 1's visual is not a grid.** PRD 6.6 called it "a grid of eight Template thumbnails at a
 flat 275px" until #11 measured it: it is **two 275px columns of eight 275x199 tiles**, 16px
 apart, 28px between the columns, each column **rotated 16deg** and **travelling upwards at
-29px/s**, clipped by the card and running under the badge and the text. The Template Wall
+29px/s**, clipped by the card, fading out downwards (6.17) and running under the badge and
+the text. The Template Wall
 (6.3) is the static one; this is the only thing on the page that travels. The eight tiles are
 the Traction card's own screenshot reused plus `step/pick-02..08`, and their alt text carries
 the other Templates' names.
@@ -636,14 +642,22 @@ marquee that looks like the Wall, and mixing the two up is the easiest mistake o
 
 | | desktop >= 1200 | tablet 810-1199 | phone <= 809 |
 | --- | --- | --- | --- |
-| band | 900 tall, 0 40 80 | 200 20 40 | 40 20 |
+| band | **90vh**, 0 40 80 | 200 20 40 | 40 20 |
 | copy | row, button right and bottom | as desktop | column, button full width |
 | H2 | 56/67.2, 715 wide | 48/57.6 | 36/43.2 |
 | body | 16/25.6, 476 wide | 16/25.6, 476 | 14/22.4, balanced |
 | columns | 4 x (100vw-48)/4, 16 gap | 3 x (100vw-48)/3, 16 gap | 3 x 239, 8 gap |
 
-The desktop band's 900px is a height and not the viewport's; the copy is pinned to its bottom
-edge, and the tablet's 200px of top padding is the only room the columns get there.
+**The desktop band is `90vh`. This section said 900px until #14.** The fidelity harness put
+the Clone's band at 900 and the Reference's at 810 and every band below it out by the same
+90px, with no other Section off by a pixel; re-measured at three window heights the Reference
+reads 648 at 720, 810 at 900 and 1080 at 1200. 900px was a real measurement taken at one
+window height that happened to be 1000 - the failure mode a single reading of a
+viewport-relative length always has, and the first thing the harness found that a
+computed-style probe had not.
+
+The copy is pinned to the band's bottom edge, so the well grows upwards, and the tablet's
+200px of top padding is the only room the columns get there.
 
 The dimming is a **mask** rather than an opacity: `linear-gradient(#000 53%, transparent
 100%)` intersected with `linear-gradient(transparent 0%, #000 121%)`, which peaks at about
@@ -708,8 +722,19 @@ to **14px/22.4px on phone**, where everything centres and the two columns become
 The 38px portrait overflows its 32px row rather than growing it.
 
 Both prose links (`Framer`, `Ramish Aziz`) are white inside grey text with no other
-distinction, which is colour alone at 1.4:1 and fails the axe scan. We underline them - the
-same reasoning as 6.14.
+distinction, fading to 60% white over 200ms `cubic-bezier(0.44, 0, 0.56, 1)` on hover
+(measured in #30). That is colour alone at 1.7:1 and fails the axe scan; it was underlined
+from #9 to #14 as a Deviation and #30 restored the Reference's drawing at the owner's
+direction. The README's register carries the reasoning and the scan still runs the rule
+against those two links by name.
+
+**The 38px portrait rocks and never stops** (#30). It swings between `+8deg` and `-12deg` on
+a spring - mass 1, stiffness 110, damping 16.5 - taking 800ms to travel and holding 617ms at
+each end, so the cycle is 2834ms. Framer drives it from Motion's rAF loop, writing the angle
+into the inline style every frame, so nothing surfaces in `getAnimations()`; it was read by
+sampling `getComputedStyle` at 60fps for 9s with the page held still. Six swings and five
+holds agreed to within 4ms, and the spring fits the swing to an RMS of 0.19deg over a 20deg
+travel.
 
 ### 6.13 Quiz modal
 
@@ -797,6 +822,29 @@ bento (6.5), how it works (6.6), the social proof grid (6.7), pricing (6.9) and 
 at all - they are simply in the viewport on load, where it runs immediately, and a probe that
 attaches after the page settles has already missed it.
 
+**All of it runs in CSS rather than in Motion since #14, and Motion is gone from the build.**
+That is a reversal of #13's choice and a performance decision: Motion was 39 kB gzipped on a
+page whose remaining Lighthouse gap was a simulated LCP queued behind its JavaScript. What it
+was buying was a spring solver, and `src/components/motion/spring-easing.ts` converts the
+spring #13 fitted into the same `linear()` easing Motion itself hands the Web Animations API
+for opacity and transform. Every parameter above survives, both settle times survive, and the
+trigger is the same IntersectionObserver it always was - `scroll-appear.tsx` now sets
+`data-appeared` and `globals.css` runs the keyframes.
+
+It did not move the score, which is recorded in section 8 as a prediction that did not hold;
+it took 40 kB off the wire and left one animation mechanism where there were two.
+
+**The hero needs no trigger at all, and that is the #14 fix that did move things.** It is the
+one Section that is on screen at load at every Breakpoint, so its appear never waited for a
+scroll - only for the JavaScript that would tell it there had not been one. Motion writes the
+resting state into the server markup, so the hero shipped at `opacity: 0` and stayed there
+until 270 kB of JavaScript had arrived: LCP 3.9s against FCP 0.9s on a throttled mobile
+profile. `src/components/motion/spring-easing.ts` converts the spring above into the same
+`linear()` easing Motion hands the Web Animations API for opacity and transform, so the
+animation is unchanged and both settle times survive - and the hero now paints in the low
+hundreds of milliseconds with no JavaScript involved. Everything below the fold stays on Motion, because those Sections
+genuinely wait for a scroll and a CSS animation has no way to know about one.
+
 The other two animate as cards *inside* a Section rather than as Sections: the quiz CTA's
 card (6.10) at 10px, and the case study's card (6.8) with no travel at all. The two nest
 differently, and both follow the Reference:
@@ -839,6 +887,67 @@ same end state with no travel and no fade; the Reference honours no such thing. 
 resting state - `opacity: 0`, 30px down - is server-rendered, so without JavaScript nothing
 would ever ask a Section to appear and the page would be blank below the nav. The Reference
 has exactly that hole. A `<noscript>` rule in `layout.tsx` closes it.
+
+### 6.16 Smooth scrolling - measured
+
+**The Reference does not scroll natively.** `<html>` carries a `lenis` class: Framer's
+smooth-scrolling page setting ships Lenis, which cancels the wheel event and moves the page
+from its own rAF loop. Measured in #30 at 1440x900, sampling `scrollY` every frame:
+
+| input | travelled | fit |
+| --- | --- | --- |
+| 1 notch of 120 | 120px | exponential, tau 287ms, rms 0.34px over 96 frames |
+| 1 notch of 600 | 600px | exponential, tau 290ms, rms 1.20px |
+
+So **one wheel pixel is one page pixel** - there is no multiplier, which is the first thing to
+check and the easiest to get wrong by feel - and the page takes about a third of a second to
+arrive where the wheel has already put it. A duration-and-easing curve fits the same data
+equally well (expo-out over ~2.0s, to the same 0.34px) and Lenis can be configured either
+way; the Clone implements the exponential, because that is what a damped follow *is* - an
+interrupted swing has no duration to restart, and real scrolling is a stream of interruptions.
+
+The Clone hijacks the wheel and nothing else: a drag on the bar, a swipe, Page Down, an anchor
+and `scrollIntoView` all move the page natively and the follow re-aims at wherever they left
+it. Lenis leaves touch native by default too, and a swipe is the one gesture where a follow
+this long reads as lag. It stands down for a pinch-zoom, for a box that scrolls itself, and
+while a `<dialog>` is open - the Reference stops Lenis for its own modal, which is why a wheel
+event on a Reference capture taken six seconds in moves nothing at all.
+
+**A Deviation.** `prefers-reduced-motion: reduce` hands the wheel straight back rather than
+shortening the curve; the Reference honours no such thing. Smoothing is motion the visitor did
+not ask for.
+
+Three traps cost a reading each, all worth knowing before re-measuring: the quiz modal stops
+Lenis outright, headless Chromium throttles rAF to ~9fps unless backgrounding is disabled, and
+a wheel event goes nowhere until the pointer has been moved over the page.
+
+### 6.17 Visual fades - measured
+
+Eighteen boxes on the Reference fade their own edge out with a `mask-image` rather than laying
+a scrim over anything. The page behind them is black, so a clip that stops being drawn reads
+as a black gradient - and a title set across the bottom of a bright clip gets its contrast
+from the clip disappearing under it.
+
+A census in #30 found all eighteen and the Clone had twelve. The six that were missing, with
+the stops measured off each box and identical at 1440, 810 and 390:
+
+| box | mask |
+| --- | --- |
+| 6.5 framed card visual (704x406) | `#000 38%, transparent 100%` **and** `90deg, transparent -7%, #000 35%`, composited `intersect, add` |
+| 6.5 tutorials card clip (448x542) | `#000 35%, transparent 86%` |
+| 6.5 hosting card clip (624x536) | `#000 35%, transparent 91%` |
+| 6.5 SEO card still (528x510) | `#000 6%, transparent 29%` |
+| 6.5 CMS card still (528x374) | `#000 9%, transparent 52%` |
+| 6.6 step 1 thumbnail strip (400x453) | `#000 -15%, transparent 100%` |
+
+The percentages are of each box, not of the card that crops it, which is why the two clipped
+cards fade so early: the mask is measured against the whole screenshot and the card only ever
+shows its top. What reads as the card cutting the picture off is the picture going out.
+
+`-15%` is not a typo - the strip starts already fading and never reaches full opacity.
+
+The fade takes each box's own 1px edge with it, on both sides: the Reference draws that edge
+as a `::after` inside the masked box and the Clone as an inset shadow on it.
 
 ---
 
@@ -900,14 +1009,94 @@ The Reference is slow, which makes this winnable. Measured: **FCP 3040ms**, load
 **4.0 MB** transfer over **141** requests, of which **video alone is 2.43 MB (61%)**. One
 hero-wall video is 839 KB.
 
-| Metric | Reference | Target |
-| --- | --- | --- |
-| Lighthouse Performance (mobile) | not measured | **>= 95** |
-| FCP | 3040 ms | **< 1200 ms** |
-| LCP | not measured | **< 1500 ms** |
-| Initial transfer | 4.0 MB | **< 1.0 MB** |
-| Initial requests | 141 | **< 40** |
-| CLS | not measured | **< 0.02** |
+| Metric | Reference | Target | Clone (#14) | |
+| --- | --- | --- | --- | --- |
+| Lighthouse Performance (mobile) | not measured | **>= 95** | 93 | MISS |
+| FCP | 3040 ms | **< 1200 ms** | 136 ms | pass |
+| LCP | not measured | **< 1500 ms** | 136 ms | pass |
+| Initial transfer | 4.0 MB | **< 1.0 MB** | 0.50 MB | pass |
+| Initial requests | 141 | **< 40** | 39 | pass |
+| CLS | not measured | **< 0.02** | 0.000 | pass |
+
+**Re-measured after #30**, which added a client component and a non-passive wheel listener
+(6.16): initial transfer 0.50 -> **0.51 MB** over the same **39** requests, FCP and LCP
+132ms, CLS 0.000, and Lighthouse medians of 93 and 95 on two consecutive runs of five. The
+Lighthouse row is where it was; the kilobyte is the smooth scroll.
+
+Measured by `npm run perf`, which runs both sides the same way and exits non-zero on a miss.
+The Reference column above is the reading section 1 took; the same script re-measures it at
+412x823 as **3.20 MB over 111 requests, FCP and LCP 3160ms, CLS 0.340**, which corroborates
+section 1's 3040ms and 141 requests at a narrower viewport.
+
+**The Reference's own numbers move between runs and ours barely do**, which is worth knowing
+before anyone re-measures and finds different figures: three runs read it at 2.38, 2.37 and
+3.20 MB with an FCP between 284ms and 3160ms, because it is a live site over the open
+internet with a CDN cache that may or may not be warm. Ours is a local production build and
+reads 0.58 MB and 39 requests every time. Take the Reference column as an order of magnitude
+and the Clone column as a measurement.
+
+Every row above except the Lighthouse one is **unthrottled**, on the connection and CPU
+section 1's Reference numbers were taken on. Under Lighthouse's simulated slow 4G and 4x CPU
+the same page reports FCP 909ms, LCP 3474ms, TBT 20ms and CLS 0 - both regimes are printed by
+`npm run perf` for the reason this paragraph exists, which is that a budget table quoting one
+regime and scoring in the other reads better than the page is.
+
+**Initial load is everything fetched from navigation until the network has been quiet for two
+seconds, with no scrolling.** That is deliberately generous to our own trick: a clip that a
+first-viewport IntersectionObserver starts is inside the window, so deferring work by half a
+second buys nothing. Bytes are `encodedDataLength` off the wire.
+
+Three changes got the transfer and request lines from 1.16 MB over 55 requests to here, all
+of them recorded as Deviations in the README:
+
+- **The Template Wall's clips do not run at phone widths.** 520 kB and 5 requests, 45% of the
+  whole budget, for a backdrop drawn 120px wide under a fade. `display: none` is the
+  mechanism, not a shortcut: an element with no box never intersects, so the observer never
+  fires and no video is requested.
+- **Nothing is prefetched.** `next/link` was fetching the payload of all seven placeholder
+  routes on load: 7 of 55 requests to make a navigation nobody will perform feel instant.
+- **A Template card's hover screenshot is drawn only where a pointer can hover.** 59 kB and 3
+  requests a phone downloaded and could never reach. `opacity: 0` never stopped the fetch;
+  `display: none` does.
+
+**The Lighthouse line is a miss at a median 93, and the reason is worth recording rather
+than rounding off.** Every other audit is perfect - FCP 0.9s, TBT 10-30ms, CLS 0, Speed Index
+1.3s - and the whole gap is a simulated LCP of 2.9s under Lighthouse's slow-4G profile.
+
+The LCP element is the **nav wordmark**, a 115x26px span, and what it waits for is the font.
+That it is the smallest text on the page rather than the H1 is itself a consequence: Chrome
+does not accept an element that first paints at `opacity: 0` as an LCP candidate, and the
+hero starts there. It makes no difference to the number, because every candidate above the
+fold is text and `font-display: swap` repaints all of them when the face lands.
+
+Two levers were pulled at it, in this order, and only one of them did what it was expected to.
+
+**Subsetting the font to latin closed most of the gap**: 68 kB to 29 kB, LCP 3.9s to 2.9s,
+the score from 88 to a median 92. That is the whole reason the font mattered out of proportion
+to its size - every largest-contentful-paint candidate above the fold is text, and
+`font-display: swap` repaints each one when the face lands.
+
+**Dropping Motion did not.** It is 39 kB gzipped and its removal took the initial transfer
+from 0.54 MB to 0.50 MB, but the score stayed at a median 92-93: the LCP here is bound by the
+font on the critical path, not by the size of the JavaScript queued behind it. It was worth
+doing anyway - one animation mechanism instead of two, a dependency gone, and every measured
+parameter preserved - but it is recorded as a prediction that did not hold, because the next
+session should not pull that lever again expecting points.
+
+**The score moves five points between runs on a developer machine.** The same build has read
+88, 90, 91, 92, 93, 94 and 95; isolated runs on a quiet machine reach 95 and a median of five
+reads 92-93. `npm run perf` runs five with a pause between them and prints every one, because
+a single reading of this metric is not evidence of anything. Against a `>= 95` target that
+leaves this **short on the median and inside the noise band**, which is the honest way to
+state it: `/blog`, a placeholder with a heading and a sentence on the same shell, scores 98
+with an LCP of 2.4s, so what remains is the shell rather than this page's content.
+
+One real LCP defect *was* found and fixed on the way: Motion writes Scroll-Appear's resting
+state into the server markup, so the hero shipped at `opacity: 0` and stayed there until
+270 kB of JavaScript had arrived and hydrated - **LCP 3.9s against FCP 0.9s**, three seconds
+of blank page on a page whose HTML was complete in one. The hero now runs the same measured
+spring as a CSS animation, converted to a `linear()` easing by
+`src/components/motion/spring-easing.ts`, and needs no JavaScript at all. See 6.15.
 
 Levers, in order of payoff:
 
@@ -915,7 +1104,7 @@ Levers, in order of payoff:
    all 2.43 MB from initial load. Nothing above the fold needs video.
 2. **SSG.** Static HTML from Vercel's CDN.
 3. **AVIF/WebP** via `next/image` with correct `sizes`.
-4. **`next/font`** self-hosting Geist.
+4. **`next/font`** self-hosting Geist, subset to latin (#14).
 5. **Explicit aspect ratios on every wall tile**, or the grid will wreck CLS.
 
 ### Assets
@@ -990,14 +1179,98 @@ links and the social icons: realigned by one pixel they match at 97.3%, so it is
 positioning rather than layout. Worth knowing before #14 sets a threshold - a per-Section
 gate gets no higher than about 97% on text-heavy bands without allowing a 1px tolerance.
 
-It must, on **both** sides: freeze all video to poster frames, dismiss the quiz modal, and
-let Scroll-Appear settle. Otherwise it measures video frames and animation timing rather than
-layout.
+It must, on **both** sides: freeze all video, dismiss the quiz modal, and let Scroll-Appear
+settle. Otherwise it measures video frames and animation timing rather than layout.
 
 Not a CI gate: it depends on a live third-party site.
 
 Report the real number with its methodology. A measured "94% at 1440px, videos frozen, here
 is the script" is worth more than an unbacked claim of 99%.
+
+#### The harness, built in #14
+
+`npm run fidelity`, against a production build on `CLONE_URL`. It finds each Section on both
+sides by anchoring on a heading and climbing to the outermost ancestor that has not swallowed
+a neighbour's anchor - one rule, no knowledge of either DOM - and writes a diff mask per
+Section per Breakpoint into `docs/measure/fidelity/` beside the table.
+
+Three things in it are not what ADR-0003 assumed, and ADR-0005 records why: each cell carries
+**two** numbers, video is frozen to **frame 0** rather than to a poster, and a travelling
+backdrop is **excluded** with the excluded fraction printed. Read that ADR before changing
+any of the three; each was arrived at by trying the obvious thing first and measuring it.
+
+Twelve rows for thirteen Sections. 6.7 and 6.8 share one band and one framed grid on both
+sides - the case study is that grid's last row, not a band - so splitting them would mean
+inventing a boundary the Reference does not draw. 6.13 goes the other way and gets a capture
+pass of its own, because the main pass dismisses it.
+
+Measured against the Reference on 2026-07-27, pixel match / SSIM, and re-measured the same day
+after #30 added the six missing visual fades (6.17). The **after** column is the current
+reading; the **before** is kept for the two Sections the fades moved, because a
+seventeen-point jump on a band nobody had touched otherwise is the clearest evidence in this
+document that the harness measures something real:
+
+| Section | PRD | 1440 | 810 | 390 |
+| --- | --- | --- | --- | --- |
+| Nav | 6.1 | 97.8% / 0.971 | 96.1% / 0.948 | 99.2% / 0.995 |
+| Hero | 6.2 | 97.0% / 0.958 | 95.3% / 0.934 | 96.4% / 0.979 |
+| Template Wall | 6.3 | 48.2% / 0.796 | 39.0% / 0.777 | 15.9% / 0.212 |
+| Featured templates | 6.4 | 84.9% / 0.957 | 80.9% / 0.906 | 78.5% / 0.946 |
+| Feature bento | 6.5 | **80.7% / 0.882** | **82.4% / 0.873** | **76.2% / 0.829** |
+| Feature bento, before #30 | 6.5 | 63.3% / 0.784 | 65.3% / 0.763 | 60.0% / 0.712 |
+| How it works | 6.6 | **95.1% / 0.981** | **92.6% / 0.939** | **90.0% / 0.919** |
+| How it works, before #30 | 6.6 | 83.4% / 0.757 | 81.3% / 0.695 | 90.0% / 0.919 |
+| Social proof + case study | 6.7, 6.8 | 82.9% / 0.920 | 81.8% / 0.948 | 91.9% / 0.939 |
+| Pricing | 6.9 | 98.3% / 0.979 | 97.8% / 0.970 | 95.5% / 0.931 |
+| Quiz CTA | 6.10 | 98.9% / 0.986 | 96.2% / 0.947 | 93.4% / 0.923 |
+| Founder | 6.11 | 80.6% / 0.917 | 69.4% / 0.740 | 77.5% / 0.680 |
+| Footer | 6.12 | 96.7% / 0.944 | 94.1% / 0.946 | 95.5% / 0.972 |
+| Quiz modal | 6.13 | 99.0% / 0.990 | 98.6% / 0.985 | 95.6% / 0.940 |
+
+**One row did not move, and saying why is the point of keeping this table honest.** How it
+works at **390 reads 90.0 either way**, because the travel detector excludes 21% of that band
+- which is exactly the strip the fade is on. The number that moved at the other two widths is
+the same fade measured where it is not excluded.
+
+**The after column is the median of three consecutive runs on one build**, because two cells
+wobble. The bento at 810 read 82.4, 81.6 and once 66.3, the last with 84% of the band
+excluded as travelling; featured Templates read 84.9 at 1440 on all three runs of this build
+and 66.3 on a run taken against an earlier one. Both are the travelling-backdrop
+non-determinism the paragraphs below describe, and both are worth more than a footnote: a
+single run of this harness can move a cell by seventeen points without a line of the build
+changing.
+
+**It is not 99%, exactly as ADR-0003 said it would not be, and every low reading points at
+something already known.** The Sections in the nineties are the ones made of type; the ones
+in the sixties and seventies are the ones made of video, where the diff masks show the tile
+edges landing on the right pixel and the re-encode filling the inside - which is the encode
+`npm run assets:verify` already gates at SSIM 0.98, measured from the other direction. The
+Template Wall's **16.7% at 390** is the phone column-fill Deviation the README records: the
+Reference hand-arranges its three phone columns, the Clone fills into the measured height, so
+a different tile lands in each slot and every one of them differs.
+
+**A cell moves by a point or two between runs, and one thing makes it move more.**
+The Wall's Testimonial rotation swaps quote on a timer, so the two sides are on different
+quotes twenty seconds into a capture, and whether the harness catches it as travelling
+depends on whether it happened to sample mid-transition: the Wall at 810 read 72.7% on a run
+that missed it and 62.6% on one that caught it and excluded 71% of the band. Both readings
+are honest and neither is the other's error, but they are not comparable, and making that
+detection deterministic is the first thing to fix in this harness. The rotation is the only
+motion on the page driven by a timer rather than by a continuous transform.
+
+Two corroborations worth keeping. The nav reads 97.8 / 96.1 / 99.2 against #9's by-hand
+97.9 / 96.2 / 99.3, so the harness reproduces a measurement taken a different way. And every
+band's height now matches the Reference to the pixel or to two, at every Breakpoint, after
+the one height defect the harness found - the quiz CTA's `90vh` (6.10).
+
+**Two #14 changes were checked against this table rather than assumed harmless**, and the
+table is what makes that possible. Subsetting the font cost the hero 99.1 to 97.0 at 1440,
+which is glyph-edge rasterisation and nothing else: the H1 measures 1120 x 163.19px on both
+sides and the featured H2 616 x 134.41, identical to two decimals, so no letterform moved.
+Removing Motion cost nothing measurable - the nav, hero, footer, quiz CTA and quiz modal all
+read identically before and after, and pricing improved - while the Wall and how-it-works
+moved several points in both directions on the same code, which is the travel-detection
+wobble above rather than the animation.
 
 ---
 
@@ -1028,6 +1301,12 @@ Five commands gate a PR, run before pushing: `typecheck`, `lint`, `format:check`
 `build`. `test:e2e` runs beside them and builds the app itself, so it is a sixth check
 rather than a sixth gate. `build` is last of the five and is not redundant - content that no
 test happens to read still fails there, because the data layer validates lazily (ADR-0004).
+
+`npm run fidelity` and `npm run perf` are neither, and for different reasons. The fidelity
+harness depends on a live third-party site (ADR-0003). `npm run perf` depends only on our own
+page and does exit non-zero on a miss, so it is a check you can run - but there is no workflow
+to run it in, and its Lighthouse leg takes three minutes. Both want a production build
+already serving on `CLONE_URL`.
 
 `format:check` could not pass on a Windows clone until #8. Prettier writes and checks LF while
 `core.autocrlf=true` leaves a CRLF working tree, so every committed file failed locally and
@@ -1115,8 +1394,15 @@ Each child issue lands on its own `feature/*` branch and opens a PR into `develo
 - [ ] #11 Sections: feature bento, how it works, social proof, case study
 - [ ] #12 Sections: pricing, quiz CTA, founder, quiz modal
 - [x] #13 Motion: scroll-appear across all sections
-- [ ] #14 Fidelity harness and performance budget
+- [x] #14 Fidelity harness and performance budget
 - [ ] #15 Docs: README and ANSWERS.md
+- [x] #30 Fidelity: the visual fades, smooth scrolling, and the by-line
 
 #6 and #7 unblock everything. #8 unblocks #9 through #12. #13 needs the sections in place.
-#14 needs a complete page. #15 needs #14's numbers.
+#14 needs a complete page. #15 needs #14's numbers, which are in section 8's two tables.
+
+**#30 is not one of the planned packages, and was filed after its own work had landed.** Three
+defects were reported against the live Reference once #14's tables existed to check them
+against; the issue is the durable record of what was measured rather than a brief anyone
+worked from. Sections 6.16 and 6.17 exist because of it. Expect more of these than of the
+numbered packages from here.

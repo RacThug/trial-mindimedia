@@ -7,13 +7,15 @@
  * Framer's build of Motion writes an inline `style` attribute every frame, so a
  * MutationObserver on `style` records the whole curve.
  *
- * That is a fact about the Reference and **not** about this build. Motion has
- * two animation paths, and ours takes the other one: for plain opacity and
- * transform it hands the work to the Web Animations API, converting the spring
- * to a generated `linear()` easing, and WAAPI does not touch inline styles until
- * the animation ends. Anything measuring the Clone has to read
- * `getComputedStyle`; a probe reading `element.style.opacity` sees 0 for the
- * whole animation and then 1, and reports a spring as an instant cut.
+ * That is a fact about the Reference and **not** about this build, which since
+ * #14 does not run Motion at all: `spring-easing.ts` converts the spring below
+ * into a `linear()` easing and CSS plays it. That is the same conversion Motion
+ * performed internally for opacity and transform - it handed both to the Web
+ * Animations API - so what a probe sees is unchanged: anything measuring the
+ * Clone has to read `getComputedStyle`, because neither WAAPI nor a CSS
+ * animation touches the inline `style` attribute. A probe reading
+ * `element.style.opacity` sees the resting 0 for the whole animation and reports
+ * a spring as an instant cut.
  *
  * The full method, the fitted curves and the Clone-against-Reference comparison
  * are recorded in issue #13. The probe and fit scripts are in `docs/measure/`,
@@ -50,6 +52,15 @@ export type AppearPreset = {
   /** Pixels the element rises through, `translateY(travel) -> 0`. */
   readonly travel: number
   readonly spring: AppearSpring
+  /**
+   * Seconds each value takes to come to rest, measured per value.
+   *
+   * Two numbers rather than one because the Reference's two stop at different
+   * times, which is the detail that says spring rather than tween. Motion read
+   * neither - it settled on its own rest thresholds - and a CSS animation has to
+   * be told, so #14 measured them out of #13's captures and put them here.
+   */
+  readonly settle: { readonly travel: number; readonly opacity: number }
 }
 
 /**
@@ -84,11 +95,15 @@ const NESTED_SPRING: AppearSpring = {
 
 export const APPEAR = {
   /** A whole Section. Eight of the thirteen use this, the hero included. */
-  section: { travel: 30, spring: SECTION_SPRING },
+  section: {
+    travel: 30,
+    spring: SECTION_SPRING,
+    settle: { travel: 0.57, opacity: 0.755 },
+  },
   /** A card inside a Section, rising a third as far: the quiz CTA's. */
-  block: { travel: 10, spring: NESTED_SPRING },
+  block: { travel: 10, spring: NESTED_SPRING, settle: { travel: 2.3, opacity: 2.3 } },
   /** A card inside a Section that arrives without travelling: the case study's. */
-  inPlace: { travel: 0, spring: NESTED_SPRING },
+  inPlace: { travel: 0, spring: NESTED_SPRING, settle: { travel: 2.5, opacity: 2.5 } },
 } as const satisfies Record<string, AppearPreset>
 
 export type AppearVariant = keyof typeof APPEAR
@@ -110,9 +125,10 @@ export const APPEAR_VISIBLE_FRACTION = 0.5
  * Sections of 619, 692, 1008, 1317 and 1694px all fired at half of whichever was
  * smaller, themselves or the 900px viewport. It also happens to be what keeps
  * this safe, because `IntersectionObserver` reports a ratio against the
- * element's own height and Motion hands `viewport.amount` straight to it without
- * clamping - so a Section more than twice the viewport tall, which is ordinary
- * at phone widths, would sit at `opacity: 0` and never be seen.
+ * element's own height, and Motion handed `viewport.amount` straight to it
+ * without clamping - so a Section more than twice the viewport tall, which is
+ * ordinary at phone widths, would sit at `opacity: 0` and never be seen. The
+ * clamp outlived the library that made it urgent.
  */
 export function appearThreshold(elementHeight: number, viewportHeight: number): number {
   /* A hidden or not-yet-laid-out element: fire on any intersection at all. */

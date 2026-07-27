@@ -38,6 +38,7 @@
 import { stat } from 'node:fs/promises'
 import path from 'node:path'
 import sharp from 'sharp'
+import { meanSsim } from '../lib/ssim.ts'
 import { SOURCE_ASSETS, type SourceImage } from './manifest.ts'
 import { CACHE, PUBLIC_MEDIA } from './paths.ts'
 
@@ -76,14 +77,6 @@ const GRAIN_FLOORS: Readonly<Record<string, number>> = {
 
 const floorFor = (slug: string) => GRAIN_FLOORS[slug] ?? MIN_SSIM
 
-/* Window geometry: the 8x8 blocks WebP itself works in, stepped by half. */
-const WINDOW = 8
-const STRIDE = 4
-
-/* Wang et al.'s stabilisers for an 8-bit range: (0.01 * 255)^2, (0.03 * 255)^2. */
-const C1 = 6.5025
-const C2 = 58.5225
-
 type Result = {
   slug: string
   /** At the committed width, which is what the budget gates on. */
@@ -92,57 +85,6 @@ type Result = {
   atBreakpoints?: number
   rmse: number
   ok: boolean
-}
-
-/**
- * Mean SSIM over the luma plane. Both buffers are single-channel, `width` wide.
- */
-function meanSsim(a: Buffer, b: Buffer, width: number, height: number): number {
-  let total = 0
-  let windows = 0
-
-  for (let top = 0; top + WINDOW <= height; top += STRIDE) {
-    for (let left = 0; left + WINDOW <= width; left += STRIDE) {
-      let meanA = 0
-      let meanB = 0
-      for (let y = 0; y < WINDOW; y++) {
-        for (let x = 0; x < WINDOW; x++) {
-          const i = (top + y) * width + left + x
-          meanA += a[i]!
-          meanB += b[i]!
-        }
-      }
-      const n = WINDOW * WINDOW
-      meanA /= n
-      meanB /= n
-
-      let varianceA = 0
-      let varianceB = 0
-      let covariance = 0
-      for (let y = 0; y < WINDOW; y++) {
-        for (let x = 0; x < WINDOW; x++) {
-          const i = (top + y) * width + left + x
-          const deltaA = a[i]! - meanA
-          const deltaB = b[i]! - meanB
-          varianceA += deltaA * deltaA
-          varianceB += deltaB * deltaB
-          covariance += deltaA * deltaB
-        }
-      }
-      /* Sample variance, so n - 1. */
-      varianceA /= n - 1
-      varianceB /= n - 1
-      covariance /= n - 1
-
-      total +=
-        ((2 * meanA * meanB + C1) * (2 * covariance + C2)) /
-        ((meanA * meanA + meanB * meanB + C1) * (varianceA + varianceB + C2))
-      windows++
-    }
-  }
-
-  if (windows === 0) throw new Error('image is smaller than one SSIM window')
-  return total / windows
 }
 
 /**
