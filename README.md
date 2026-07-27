@@ -185,14 +185,28 @@ for "fast loading times, optimized assets, and overall smooth experience"; these
 the stricter bar chosen to chase it, and `npm run perf` exits non-zero on any row that is
 under.
 
-| Metric | Reference | Self-imposed budget | Clone | |
-| --- | --- | --- | --- | --- |
-| Lighthouse Performance (mobile) | not measured | >= 95 | 93 | under budget |
-| First Contentful Paint | 3040 ms | < 1200 ms | 132 ms | pass |
-| Largest Contentful Paint | not measured | < 1500 ms | 132 ms | pass |
-| Initial transfer | 4.0 MB | < 1.0 MB | 0.51 MB | pass |
-| Initial requests | 141 | < 40 | 39 | pass |
-| Cumulative Layout Shift | not measured | < 0.02 | 0.000 | pass |
+**Deployed** is the live Vercel URL, which is what a reviewer will actually open. **Local** is
+a production build on the machine this was written on, which is the column the budget was
+tracked against during the build.
+
+| Metric | Reference | Self-imposed budget | Deployed | Local | |
+| --- | --- | --- | --- | --- | --- |
+| Lighthouse Performance (mobile) | not measured | >= 95 | **98** | 93 | pass |
+| First Contentful Paint | 3040 ms | < 1200 ms | 232-448 ms | 132 ms | pass |
+| Largest Contentful Paint | not measured | < 1500 ms | 232-448 ms | 132 ms | pass |
+| Initial transfer | 4.0 MB | < 1.0 MB | 0.48 MB | 0.51 MB | pass |
+| Initial requests | 141 | < 40 | 39 | 39 | pass |
+| Cumulative Layout Shift | not measured | < 0.02 | 0.000 | 0.000 | pass |
+
+**The deployed Lighthouse figure is the median of five: 100, 98, 98, 97, 97.** It is measured
+on Lighthouse's mobile preset with its simulated slow 4G and 4x CPU, the same regime as the
+local 93 - the difference is Vercel's CDN against a local server on a working machine, not a
+change of throttling. Under that same throttled profile the deployment reports FCP 970 ms,
+LCP 2426 ms, TBT 33 ms, CLS 0 and Speed Index 1198 ms.
+
+**The first request after an idle period reads FCP 3120 ms, and that is a cold edge cache
+rather than the page.** Three consecutive loads then read 448, 272 and 232 ms with TTFB
+falling from 257 ms to 124 ms. Worth knowing before anyone measures once and believes it.
 
 The Reference column is the reading taken during the original capture. The same script
 re-measures the Reference at 412x823 as **3.20 MB over 111 requests, FCP and LCP 3160 ms, CLS
@@ -201,9 +215,9 @@ re-measures the Reference at 412x823 as **3.20 MB over 111 requests, FCP and LCP
 **The Reference's own numbers move between runs and ours barely do**, which matters before
 anyone re-measures and finds different figures: three runs read it at 2.38, 2.37 and 3.20 MB
 with an FCP between 284 ms and 3160 ms, because it is a live site over the open internet with
-a CDN cache that may or may not be warm. Ours is a local production build and reads the same
-every time. Take the Reference column as an order of magnitude and the Clone column as a
-measurement.
+a CDN cache that may or may not be warm. The local column reads the same every time; the
+deployed one now carries the same caveat as the Reference, which is why its FCP is a range
+rather than a figure. Take the Reference column as an order of magnitude.
 
 Every row except the Lighthouse one is **unthrottled**, on the connection and CPU the
 Reference numbers were taken on. Under Lighthouse's simulated slow 4G and 4x CPU the same page
@@ -211,8 +225,9 @@ reports FCP 909 ms, LCP 3474 ms, TBT 20 ms and CLS 0. Both regimes are printed b
 `npm run perf`, because a budget quoting one regime and scoring in the other reads better than
 the page is.
 
-**The Lighthouse line reads a median 93, and where it goes is worth recording rather than
-rounding off.** Every other audit is perfect - FCP 0.9s, TBT 10-30 ms, CLS 0, Speed Index 1.3s -
+**The local Lighthouse line reads a median 93, and where it goes is worth recording rather
+than rounding off**, because it is the same page the deployment scores 98 on. Every other
+audit is perfect - FCP 0.9s, TBT 10-30 ms, CLS 0, Speed Index 1.3s -
 and the whole gap is a simulated LCP of 2.9s. The LCP element is the nav wordmark, a 115x26px
 span, and what it waits for is the font; it makes no difference that it is the smallest text on
 the page, because every candidate above the fold is text and `font-display: swap` repaints all

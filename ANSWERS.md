@@ -113,9 +113,9 @@ What got it there, in order of what each was worth:
 - **Real dimensions on every image and video**, which is the 0.000 layout shift.
 - **Nothing downloaded that a device cannot use**, such as a hover screenshot on a phone.
 
-Lighthouse performance reads a median 93, against the `>= 95` budget I set for myself in the
-PRD. The whole gap is the nav wordmark waiting for the font; every other audit is clean, and
-the same build scores anywhere from 88 to 95 between runs on a working machine.
+Lighthouse performance on the deployed site reads a **median 98** across five runs, on
+Lighthouse's mobile preset with its simulated slow 4G and 4x CPU. The same build served from a
+local machine reads 93, and the gap is Vercel's CDN rather than a change of throttling.
 
 Method and the full table are in [`README.md`](README.md#performance).
 
