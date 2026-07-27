@@ -1,5 +1,6 @@
 import { CardVisual } from '@/components/media/card-visual.tsx'
 import { ScrollAppear } from '@/components/motion/scroll-appear.tsx'
+import { CASE_STUDY_TEMPLATE_HREF } from '@/components/sections/case-study-copy.ts'
 import { ButtonLink } from '@/components/ui/button.tsx'
 import { resolveVisual } from '@/lib/content'
 
@@ -79,7 +80,7 @@ export function CaseStudy() {
         {/* Both CTAs take half the measure at tablet and desktop, whatever their
          * labels are worth, and the full width stacked on phone. */}
         <div className="flex flex-col gap-3 tablet:flex-row">
-          <ButtonLink href="/templates/reformr" className="tablet:flex-1">
+          <ButtonLink href={CASE_STUDY_TEMPLATE_HREF} className="tablet:flex-1">
             View template Matt used
           </ButtonLink>
           <ButtonLink href="/live-examples" variant="secondary" className="tablet:flex-1">
