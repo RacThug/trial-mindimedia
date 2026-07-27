@@ -74,8 +74,9 @@ the Reference's selection.
 _Avoid_: add-on, extra, upsell, radio
 
 **Testimonial**:
-A customer quote with a star rating, name, and avatar. Nine unique Testimonials appear,
-reused across two Sections.
+A customer quote with a star rating, name, and avatar. Twelve unique Testimonials appear
+across two Sections - nine in the social proof grid, six over the Template Wall, three of
+them in both.
 _Avoid_: review, quote, social proof
 
 **Eyebrow**:

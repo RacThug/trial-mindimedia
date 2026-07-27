@@ -50,13 +50,13 @@ Recorded here so nothing is re-litigated mid-build. Two have ADRs.
 
 | Decision | Choice | Rationale |
 | --- | --- | --- |
-| Framework | Next.js App Router, TypeScript | [ADR-0001](../blob/develop/docs/adr/0001-nextjs-over-nuxt.md). Motion for React shares its lineage with Framer's own animation engine. |
+| Framework | Next.js App Router, TypeScript | [ADR-0001](docs/adr/0001-nextjs-over-nuxt.md). Motion for React shares its lineage with Framer's own animation engine. |
 | Animation | CSS keyframes, from the measured spring | Motion for React until #14, chosen in #13 for sharing the Reference's engine family. Removed for 39 kB gzipped; `spring-easing.ts` emits the same `linear()` easing Motion generated, so the animation is unchanged. |
 | Styling | Tailwind v4, `@theme` tokens | Reference's design system is small and regular; tokens beat scattered magic numbers. |
-| Data | JSON + typed data layer + Route Handlers | [ADR-0002](../blob/develop/docs/adr/0002-data-access-shape.md). Homepage imports directly to stay static; `/templates` proves the API over HTTP. |
+| Data | JSON + typed data layer + Route Handlers | [ADR-0002](docs/adr/0002-data-access-shape.md). Homepage imports directly to stay static; `/templates` proves the API over HTTP. |
 | Assets | Downloaded, re-encoded, committed | Needed to beat the Reference on performance and to remove a third-party dependency mid-review. |
 | Content | Verbatim, indexable | Maximum fidelity. `noindex, nofollow` was set for the reason below and removed in #14 at the owner's direction; it cost 37 points of Lighthouse SEO. |
-| Off-page links | Real placeholder routes | Nothing 404s or dead-ends; demonstrates the App Router layout model. |
+| Off-page links | Real placeholder routes | Nothing 404s or dead-ends; demonstrates the App Router layout model. All eleven internal destinations resolve, the four `/templates/<slug>` ones since #34 - see section 10 for why they did not for four work packages. |
 | Fonts | Geist, self-hosted via `next/font`, **latin subset** | Removes the render-blocking `fonts.gstatic.com` round-trip the Reference pays. Subset in #14: 68 kB to 29 kB, which is what the LCP was waiting for. |
 
 ---
@@ -955,8 +955,8 @@ as a `::after` inside the masked box and the Clone as an inset shadow on it.
 
 JSON in the repo, read by one typed data-access module that validates on read. Server
 Components import that module directly. Route Handlers at `/api/*` wrap the same module. See
-[ADR-0002](../blob/develop/docs/adr/0002-data-access-shape.md) for that asymmetry and
-[ADR-0004](../blob/develop/docs/adr/0004-content-is-entities-and-references.md) for what
+[ADR-0002](docs/adr/0002-data-access-shape.md) for that asymmetry and
+[ADR-0004](docs/adr/0004-content-is-entities-and-references.md) for what
 counts as content.
 
 Built in #8 as eight files under `src/lib/content/data/`, one per Collection, validated by
@@ -1009,19 +1009,22 @@ The Reference is slow, which makes this winnable. Measured: **FCP 3040ms**, load
 **4.0 MB** transfer over **141** requests, of which **video alone is 2.43 MB (61%)**. One
 hero-wall video is 839 KB.
 
-| Metric | Reference | Target | Clone (#14) | |
-| --- | --- | --- | --- | --- |
-| Lighthouse Performance (mobile) | not measured | **>= 95** | 93 | MISS |
-| FCP | 3040 ms | **< 1200 ms** | 136 ms | pass |
-| LCP | not measured | **< 1500 ms** | 136 ms | pass |
-| Initial transfer | 4.0 MB | **< 1.0 MB** | 0.50 MB | pass |
-| Initial requests | 141 | **< 40** | 39 | pass |
-| CLS | not measured | **< 0.02** | 0.000 | pass |
+The Clone column is the **current** reading, re-measured after #30. The #14 column is kept
+beside it because two rows moved and a table that quietly overwrites itself cannot show that:
 
-**Re-measured after #30**, which added a client component and a non-passive wheel listener
-(6.16): initial transfer 0.50 -> **0.51 MB** over the same **39** requests, FCP and LCP
-132ms, CLS 0.000, and Lighthouse medians of 93 and 95 on two consecutive runs of five. The
-Lighthouse row is where it was; the kilobyte is the smooth scroll.
+| Metric | Reference | Target | Clone (#14) | Clone (now) | |
+| --- | --- | --- | --- | --- | --- |
+| Lighthouse Performance (mobile) | not measured | **>= 95** | 93 | 93 | MISS |
+| FCP | 3040 ms | **< 1200 ms** | 136 ms | 132 ms | pass |
+| LCP | not measured | **< 1500 ms** | 136 ms | 132 ms | pass |
+| Initial transfer | 4.0 MB | **< 1.0 MB** | 0.50 MB | 0.51 MB | pass |
+| Initial requests | 141 | **< 40** | 39 | 39 | pass |
+| CLS | not measured | **< 0.02** | 0.000 | 0.000 | pass |
+
+**What #30 changed** was a client component and a non-passive wheel listener (6.16): one
+kilobyte of initial transfer, over the same 39 requests, and Lighthouse medians of 93 and 95
+on two consecutive runs of five. The Lighthouse row is where it was; the kilobyte is the
+smooth scroll. The README quotes the **Clone (now)** column.
 
 Measured by `npm run perf`, which runs both sides the same way and exits non-zero on a miss.
 The Reference column above is the reading section 1 took; the same script re-measures it at
@@ -1128,8 +1131,12 @@ Measured in #7, and again in #12 with those ten:
 | | Framer originals | Committed |
 | --- | --- | --- |
 | Video, 13 clips | 49.50 MB | 3.42 MB |
-| Stills, 57 files | 22.94 MB | 1.50 MB, plus 13 generated poster frames |
-| **Total** | **73.63 MB over 70 files** | **5.19 MB over 83 files**, 93.0% saved |
+| Stills, 57 files | 22.94 MB | 1.47 MB, plus 0.17 MB of generated poster frames |
+| **Total** | **73.63 MB over 70 files** | **5.07 MB over 83 files**, 93.1% saved |
+
+The committed column is re-measured from `public/media` in #15. It read 5.19 MB over 83 files
+until then, which did not add up to its own rows - 3.42 and 1.50 leave no room for thirteen
+posters inside 5.19 - and the total was the figure that was wrong.
 
 The modal's ten are the one group whose weight is not in the initial load at all: it mounts
 on a timer, so they are fetched after everything the budget above covers.
@@ -1149,8 +1156,10 @@ Four Deviations, all in the encode:
   `scripts/assets/build.ts`.
 
 Image fidelity is gated by `npm run assets:verify`: luma SSIM against the Framer original,
-budget >= 0.98, worst graded asset 0.9840. Two dark, film-grained screenshots sit on a
-recorded lower floor with the reasoning in `scripts/assets/verify.ts`. It needs the download
+budget >= 0.98, worst graded asset 0.9840. Four dark, film-grained screenshots sit on
+recorded lower floors with the reasoning in `scripts/assets/verify.ts` - two from #7 and the
+two `quiz/*` that joined them in #12, which is why this line read "two" until #15. It needs
+the download
 cache, so it runs beside `npm run assets` and is not a CI gate.
 
 Each asset's measured render width per Breakpoint is recorded as `rendered` in the manifest,
@@ -1245,7 +1254,7 @@ something already known.** The Sections in the nineties are the ones made of typ
 in the sixties and seventies are the ones made of video, where the diff masks show the tile
 edges landing on the right pixel and the re-encode filling the inside - which is the encode
 `npm run assets:verify` already gates at SSIM 0.98, measured from the other direction. The
-Template Wall's **16.7% at 390** is the phone column-fill Deviation the README records: the
+Template Wall's **15.9% at 390** is the phone column-fill Deviation the README records: the
 Reference hand-arranges its three phone columns, the Clone fills into the measured height, so
 a different tile lands in each slot and every one of them differs.
 
@@ -1358,16 +1367,35 @@ Honest gaps. Measure during the build, do not guess.
    90% at 570ms. That is a spring; the Clone runs
    `cubic-bezier(0.16, 1, 0.3, 1)` over 1400ms, which tracks it closely but is a fit rather
    than a measurement.
+8. ~~**Four `/templates/<slug>` links 404, and section 3 claimed none did.**~~ **Closed in
+   #34**, and the record is kept because the way it survived is worth more than the fix.
+   Found in #15 by checking the claim before repeating it in the README: `/templates/selene`,
+   `/templates/zenna`, `/templates/traction` and `/templates/reformr` had no route behind
+   them, three of them from `templates.json`'s own `href` field and the fourth a literal in
+   `case-study.tsx`. They had 404ed since #11, on the deployment as well as locally.
+
+   **The test that owned the claim crawled `header a, footer a`**, and all four links live in
+   Sections, so a green suite covered everything except the place the bug was. A crawl scoped
+   to where the bug is not will pass forever. `tests/e2e/routes.spec.ts` now walks `main` too,
+   and both crawls share one assertion that fails when a selector stops matching, because a
+   loop over an empty list passes quietly.
+
+   **Nothing in this build type-checks an internal `href` against the routes that exist**,
+   whether it is stored as content or written as a literal, so the claim always rested on
+   somebody having checked by hand. `case-study-copy.ts` now holds the case study's slug and
+   both the link and the route read it, which closes that gap for the one link that is not
+   already generated from a Collection. The rest of the page's `href` literals are still
+   unchecked by anything but that crawl.
 
 ---
 
 ## 11. Deliverables
 
-- [ ] GitHub repository, work landed through `feature/*` to `develop` per `AGENTS.md`
-- [ ] Deployed on Vercel, URL in the README
-- [ ] `README.md`: live URL, setup, measured fidelity table, measured performance table vs
+- [x] GitHub repository, work landed through `feature/*` to `develop` per `AGENTS.md`
+- [x] Deployed on Vercel: **https://trial-mindimedia.vercel.app**, in the README
+- [x] `README.md`: live URL, setup, measured fidelity table, measured performance table vs
       the Reference, and every Deviation stated
-- [ ] `ANSWERS.md`: the seven brief questions. Four are answered by this build (JSON
+- [x] `ANSWERS.md`: the seven brief questions. Four are answered by this build (JSON
       structure, own API, slow connections, image optimization) and should cite files and
       measured numbers rather than describe intentions. Three are hypothetical (custom
       domain, admin panel, secure forms) and get concise design proposals.
@@ -1386,16 +1414,16 @@ Honest gaps. Measure during the build, do not guess.
 Each child issue lands on its own `feature/*` branch and opens a PR into `develop`, per
 `AGENTS.md`. Roughly in dependency order.
 
-- [ ] #6 Scaffold: Next.js, TypeScript, Tailwind theme tokens
-- [ ] #7 Asset pipeline: download and re-encode images and video
-- [ ] #8 Data layer: JSON store, typed access module, `/api` routes
-- [ ] #9 Shell: nav, footer, mobile menu, placeholder routes
-- [ ] #10 Sections: hero, template wall, featured templates
-- [ ] #11 Sections: feature bento, how it works, social proof, case study
-- [ ] #12 Sections: pricing, quiz CTA, founder, quiz modal
+- [x] #6 Scaffold: Next.js, TypeScript, Tailwind theme tokens
+- [x] #7 Asset pipeline: download and re-encode images and video
+- [x] #8 Data layer: JSON store, typed access module, `/api` routes
+- [x] #9 Shell: nav, footer, mobile menu, placeholder routes
+- [x] #10 Sections: hero, template wall, featured templates
+- [x] #11 Sections: feature bento, how it works, social proof, case study
+- [x] #12 Sections: pricing, quiz CTA, founder, quiz modal
 - [x] #13 Motion: scroll-appear across all sections
 - [x] #14 Fidelity harness and performance budget
-- [ ] #15 Docs: README and ANSWERS.md
+- [x] #15 Docs: README and ANSWERS.md
 - [x] #30 Fidelity: the visual fades, smooth scrolling, and the by-line
 
 #6 and #7 unblock everything. #8 unblocks #9 through #12. #13 needs the sections in place.
