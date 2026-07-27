@@ -625,7 +625,7 @@ Measured in #8, from the markup rather than the render:
 **Option behaviour is a deliberate Deviation.** On the Reference these rows are inert: clicking
 `Add Figma designs` leaves the price at $129, verified. In the Clone they recalculate, **but
 the default selection matches the Reference**, so an at-rest screenshot diff stays identical
-and the Deviation only appears if the reviewer clicks. Document this in the README.
+and the Deviation only appears if the reviewer clicks.
 
 ### 6.10 Quiz CTA
 
@@ -768,7 +768,7 @@ colour.
 
 The Reference's own modal *is* dismissible - Escape and an outside click both close it,
 measured - but it offers no visible control and reopens on every navigation. Three
-Deviations follow, all accessibility, all in the README: ours adds a close button, it traps
+Three Deviations follow, all of them accessibility: ours adds a close button, it traps
 focus and returns it (a `<dialog>` does both, which is also where the scrim and the top layer
 come from), and it stays shut for the session once dismissed.
 
@@ -781,7 +781,7 @@ commas, and `Selene Framer Template for AI SAAS companie` truncated mid-word.
 
 We write our own. Alt text is invisible, so this costs nothing in Fidelity, and copying the
 Reference here would fail the axe scan in section 9 and contradict the brief's
-"reliable, production-ready" instruction. Record it in the README as a Deviation.
+"reliable, production-ready" instruction.
 
 Decorative media gets **no** alt text rather than invented description: the 48 Template Wall
 tiles are a backdrop, and a Testimonial avatar sits beside the person's name in text, so both
@@ -1067,7 +1067,7 @@ first-viewport IntersectionObserver starts is inside the window, so deferring wo
 second buys nothing. Bytes are `encodedDataLength` off the wire.
 
 Three changes got the transfer and request lines from 1.16 MB over 55 requests to here, all
-of them recorded as Deviations in the README:
+of them:
 
 - **The Template Wall's clips do not run at phone widths.** 520 kB and 5 requests, 45% of the
   whole budget, for a backdrop drawn 120px wide under a fade. `display: none` is the
@@ -1272,7 +1272,7 @@ it chose to measure rather than assert. The Sections in the nineties are the one
 in the sixties and seventies are the ones made of video, where the diff masks show the tile
 edges landing on the right pixel and the re-encode filling the inside - which is the encode
 `npm run assets:verify` already gates at SSIM 0.98, measured from the other direction. The
-Template Wall's **15.9% at 390** is the phone column-fill Deviation the README records: the
+Template Wall's **15.9% at 390** is the phone column-fill Deviation 6.3 records: the
 Reference hand-arranges its three phone columns, the Clone fills into the measured height, so
 a different tile lands in each slot and every one of them differs.
 
