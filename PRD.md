@@ -1081,14 +1081,14 @@ Measured against the Reference on 2026-07-27, pixel match / SSIM:
 | --- | --- | --- | --- | --- |
 | Nav | 6.1 | 97.9% / 0.971 | 96.3% / 0.948 | 99.2% / 0.995 |
 | Hero | 6.2 | 99.1% / 0.989 | 98.4% / 0.979 | 98.5% / 0.995 |
-| Template Wall | 6.3 | 62.7% / 0.864 | 72.7% / 0.944 | 16.6% / 0.237 |
-| Featured templates | 6.4 | 87.6% / 0.975 | 84.5% / 0.930 | 77.5% / 0.947 |
-| Feature bento | 6.5 | 63.9% / 0.796 | 68.0% / 0.800 | 56.6% / 0.646 |
-| How it works | 6.6 | 95.8% / 0.989 | 92.6% / 0.943 | 90.5% / 0.931 |
-| Social proof + case study | 6.7, 6.8 | 83.2% / 0.950 | 83.3% / 0.974 | 90.8% / 0.963 |
+| Template Wall | 6.3 | 62.7% / 0.865 | 62.6% / 0.874 | 16.7% / 0.236 |
+| Featured templates | 6.4 | 87.6% / 0.975 | 84.6% / 0.931 | 77.5% / 0.947 |
+| Feature bento | 6.5 | 64.7% / 0.803 | 66.3% / 0.792 | 57.0% / 0.743 |
+| How it works | 6.6 | 95.7% / 0.989 | 92.4% / 0.937 | 90.5% / 0.931 |
+| Social proof + case study | 6.7, 6.8 | 84.1% / 0.950 | 83.3% / 0.974 | 90.6% / 0.963 |
 | Pricing | 6.9 | 96.6% / 0.989 | 96.7% / 0.981 | 93.6% / 0.941 |
-| Quiz CTA | 6.10 | 99.3% / 0.998 | 97.0% / 0.973 | 94.5% / 0.964 |
-| Founder | 6.11 | 80.0% / 0.926 | 69.1% / 0.739 | 76.9% / 0.683 |
+| Quiz CTA | 6.10 | 99.3% / 0.998 | 93.1% / 0.866 | 94.5% / 0.964 |
+| Founder | 6.11 | 79.7% / 0.924 | 69.1% / 0.739 | 76.9% / 0.683 |
 | Footer | 6.12 | 97.0% / 0.945 | 94.2% / 0.948 | 95.5% / 0.973 |
 | Quiz modal | 6.13 | 99.0% / 0.986 | 98.9% / 0.986 | 96.6% / 0.952 |
 
@@ -1097,9 +1097,18 @@ something already known.** The Sections in the nineties are the ones made of typ
 in the sixties and seventies are the ones made of video, where the diff masks show the tile
 edges landing on the right pixel and the re-encode filling the inside - which is the encode
 `npm run assets:verify` already gates at SSIM 0.98, measured from the other direction. The
-Template Wall's **16.6% at 390** is the phone column-fill Deviation the README records: the
+Template Wall's **16.7% at 390** is the phone column-fill Deviation the README records: the
 Reference hand-arranges its three phone columns, the Clone fills into the measured height, so
 a different tile lands in each slot and every one of them differs.
+
+**A cell moves by a point or two between runs, and one thing makes it move more.**
+The Wall's Testimonial rotation swaps quote on a timer, so the two sides are on different
+quotes twenty seconds into a capture, and whether the harness catches it as travelling
+depends on whether it happened to sample mid-transition: the Wall at 810 read 72.7% on a run
+that missed it and 62.6% on one that caught it and excluded 71% of the band. Both readings
+are honest and neither is the other's error, but they are not comparable, and making that
+detection deterministic is the first thing to fix in this harness. The rotation is the only
+motion on the page driven by a timer rather than by a continuous transform.
 
 Two corroborations worth keeping. The nav reads 97.9 / 96.3 / 99.2 against #9's by-hand
 97.9 / 96.2 / 99.3, so the harness reproduces a measurement taken a different way. And every

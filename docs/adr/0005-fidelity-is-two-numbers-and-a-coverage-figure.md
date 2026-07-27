@@ -49,10 +49,17 @@ top of the page, found every backdrop on the Clone and none on the Reference - F
 tickers pause off screen and ours are CSS animations that do not - and hiding what only one
 side was running made the score worse than leaving both alone.
 
+The one thing this does not yet catch deterministically is the Template Wall's Testimonial
+rotation, which swaps quote on a timer rather than travelling on a transform. It is caught
+when the sample lands mid-transition and missed when it does not, and the Wall at 810 reads
+62.6% on a run that caught it against 72.7% on one that did not. Both are honest readings of
+the same page; they are not comparable, and closing that is the first thing to do to this
+harness.
+
 ## Consequences
 
 The table is wider and takes more explaining than ADR-0003 imagined, and it is still not a CI
 gate for the reason given there. What it buys is a number a reviewer can act on. Every low
-reading in it now points at something real: the Template Wall's 17.6% at 390 is the phone
+reading in it now points at something real: the Template Wall's 16.7% at 390 is the phone
 column-fill Deviation already recorded in the README, drawn plainly in the diff mask the
 harness writes beside the table.
