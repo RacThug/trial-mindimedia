@@ -56,7 +56,7 @@ Recorded here so nothing is re-litigated mid-build. Two have ADRs.
 | Data | JSON + typed data layer + Route Handlers | [ADR-0002](../blob/develop/docs/adr/0002-data-access-shape.md). Homepage imports directly to stay static; `/templates` proves the API over HTTP. |
 | Assets | Downloaded, re-encoded, committed | Needed to beat the Reference on performance and to remove a third-party dependency mid-review. |
 | Content | Verbatim, indexable | Maximum fidelity. `noindex, nofollow` was set for the reason below and removed in #14 at the owner's direction; it cost 37 points of Lighthouse SEO. |
-| Off-page links | Real placeholder routes | Nothing 404s or dead-ends; demonstrates the App Router layout model. |
+| Off-page links | Real placeholder routes | Demonstrates the App Router layout model. **Six of the eleven internal destinations are covered; the four `/templates/<slug>` detail links and nothing else still 404** - see section 10. |
 | Fonts | Geist, self-hosted via `next/font`, **latin subset** | Removes the render-blocking `fonts.gstatic.com` round-trip the Reference pays. Subset in #14: 68 kB to 29 kB, which is what the LCP was waiting for. |
 
 ---
@@ -1358,6 +1358,20 @@ Honest gaps. Measure during the build, do not guess.
    90% at 570ms. That is a spring; the Clone runs
    `cubic-bezier(0.16, 1, 0.3, 1)` over 1400ms, which tracks it closely but is a fit rather
    than a measurement.
+8. **Four `/templates/<slug>` links 404, and section 3 claimed none did.** Found in #15 by
+   checking the claim before repeating it in the README: the homepage carries **eleven
+   distinct internal destinations**, and `/templates/selene`, `/templates/zenna`,
+   `/templates/traction` and `/templates/reformr` have no route behind them. Three come from
+   `templates.json`'s own `href` field; the fourth is a literal in `case-study.tsx`. The
+   other seven destinations are fine. Verified against the deployment, not just the dev
+   server.
+
+   The fix is one `templates/[slug]/page.tsx` reading the Template the data layer already
+   exports, which is a work package rather than a docs correction - so what lands in #15 is
+   the honest statement, and the route is somebody's next issue. **The lesson worth keeping
+   is that nothing in this build type-checks an internal `href` against the routes that
+   exist**, whether it is stored as content or written as a literal, and a claim that
+   nothing 404s therefore rested on somebody having checked by hand. Nobody had.
 
 ---
 

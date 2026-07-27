@@ -85,8 +85,9 @@ npm run assets:verify  # luma SSIM of every committed image against the Framer o
 
 ```
 src/app/          routes. page.tsx is the homepage's thirteen Sections; api/* are three
-                  force-static Route Handlers; the rest are placeholder routes so nothing
-                  on the page dead-ends
+                  force-static Route Handlers; templates/ is the one page that reads its
+                  content over HTTP rather than importing it; the other six are
+                  placeholder routes, so most off-page links land somewhere real
 src/components/   sections/ one file per Section, ui/ the shared primitives, media/ the
                   deferred-video and ticker machinery, shell/ nav and footer, motion/
                   scroll-appear and smooth scroll
