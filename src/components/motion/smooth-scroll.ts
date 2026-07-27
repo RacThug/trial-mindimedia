@@ -1,5 +1,5 @@
 /*
- * The Reference does not scroll natively, and #15 measured what it does instead.
+ * The Reference does not scroll natively, and #30 measured what it does instead.
  *
  * `<html>` carries a `lenis` class: Framer's smooth-scrolling page setting ships
  * Lenis, which cancels the wheel event and moves the page from its own rAF loop.
@@ -23,7 +23,7 @@
  * `docs/measure/fit-15-scroll.mjs`.
  *
  * Three traps cost a reading each on the way to those numbers, all recorded in
- * issue #15: the quiz modal stops Lenis outright, headless throttles rAF to
+ * issue #30: the quiz modal stops Lenis outright, headless throttles rAF to
  * ~9fps unless backgrounding is disabled, and a wheel event goes nowhere unless
  * the pointer has been moved over the page first.
  */

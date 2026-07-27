@@ -10,7 +10,7 @@ import {
 } from '@/components/motion/byline-rock.ts'
 
 /*
- * The by-line portrait's rock (#15), split across two files that cannot import
+ * The by-line portrait's rock (#30), split across two files that cannot import
  * each other: the measurement is in `byline-rock.ts` and the keyframes are in
  * `globals.css`, because `@keyframes` cannot read a custom property for a stop.
  *

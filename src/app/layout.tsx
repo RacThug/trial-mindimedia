@@ -83,7 +83,7 @@ export default function RootLayout({
         {/*
          * The Reference's wheel does not scroll the page directly; it aims at a
          * position the page then takes about a third of a second to reach
-         * (#15). Renders nothing, and hands the wheel straight back under
+         * (#30). Renders nothing, and hands the wheel straight back under
          * `prefers-reduced-motion`.
          */}
         <SmoothScroll />

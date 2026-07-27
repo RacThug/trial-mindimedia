@@ -88,7 +88,7 @@ distinction, which is colour alone at 1.7:1 against the prose around them - shor
 that would let colour carry it - so a reader who cannot tell those two greys apart cannot
 find either link.
 
-They were underlined from #9 to #14, as a Deviation of ours. #15 took the underline back out
+They were underlined from #9 to #14, as a Deviation of ours. #30 took the underline back out
 at the owner's direction: this is a fidelity clone, the Reference draws them plain, and which
 side of that trade to take is the owner's call rather than the implementer's.
 

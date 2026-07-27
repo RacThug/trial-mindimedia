@@ -143,7 +143,7 @@ function BleedCard({
   readonly feature: Feature
   readonly sizes: string
   readonly className: string
-  /** The card's measured `visual-fade-*` utility (#15). */
+  /** The card's measured `visual-fade-*` utility (#30). */
   readonly fade: string
   readonly titleWidth?: string
 }) {
@@ -179,7 +179,7 @@ function ClippedCard({
 }: {
   readonly feature: Feature
   readonly className: string
-  /** The card's measured `visual-fade-*` utility (#15). */
+  /** The card's measured `visual-fade-*` utility (#30). */
   readonly fade: string
 }) {
   return (

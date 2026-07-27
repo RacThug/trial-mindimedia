@@ -214,7 +214,7 @@
    * thing, which is why it is a token rather than a rounding. */
   --color-text-warm: #fffbf7;
 
-  /* The footer by-line's two prose links on hover, measured in #15: white at
+  /* The footer by-line's two prose links on hover, measured in #30: white at
    * 60%, reached over 200ms.
    *
    * Written as an `rgba()` rather than as `text-text/60`, which is the same
@@ -404,7 +404,7 @@
   --wall-width-phone: min(100vw, 400px);
   --wall-height-phone: calc(4.91 * (var(--wall-width-phone) - 16px) / 3 + 40px);
 
-  /* ---- the visual fades (PRD 6.5 and 6.6), measured in #15 ---------------
+  /* ---- the visual fades (PRD 6.5 and 6.6), measured in #30 ---------------
    *
    * Six more boxes fade their own bottom edge out, the same way the Template
    * Wall above does and for the same reason: the page behind them is black, so
@@ -558,7 +558,7 @@
 }
 
 /*
- * The six visual fades (#15), one utility each because the stops belong to the
+ * The six visual fades (#30), one utility each because the stops belong to the
  * box they were measured on and a shared one would invite a card to borrow
  * another card's numbers.
  *
@@ -614,7 +614,7 @@
 
 /*
  * The footer by-line portrait, which rocks between +8deg and -12deg for ever
- * (#15). `byline-rock.ts` has the measurement and hands this the cycle and the
+ * (#30). `byline-rock.ts` has the measurement and hands this the cycle and the
  * spring, as a `linear()`.
  *
  * The stops are the measured 617ms hold against the 2834ms cycle, written out

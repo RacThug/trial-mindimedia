@@ -7,7 +7,7 @@ import {
 } from '@/components/motion/smooth-scroll.ts'
 
 /*
- * The follow #15 measured off the Reference. These pin the two properties that
+ * The follow #30 measured off the Reference. These pin the two properties that
  * make it the Reference's curve rather than a plausible one: it arrives where
  * the wheel asked and it takes the measured time getting there, whatever frame
  * rate it is played at.
@@ -60,7 +60,7 @@ describe('scrollStep', () => {
 
   it('matches the Reference trace it was fitted to', () => {
     /*
-     * Three frames of the measured 120px notch (issue #15), to the pixel the
+     * Three frames of the measured 120px notch (issue #30), to the pixel the
      * sampling could resolve: 49px at 160.8ms, 88px at 396.4ms, 116px at
      * 976.8ms.
      *
