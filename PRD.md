@@ -51,13 +51,13 @@ Recorded here so nothing is re-litigated mid-build. Two have ADRs.
 | Decision | Choice | Rationale |
 | --- | --- | --- |
 | Framework | Next.js App Router, TypeScript | [ADR-0001](../blob/develop/docs/adr/0001-nextjs-over-nuxt.md). Motion for React shares its lineage with Framer's own animation engine. |
-| Animation | Motion for React | Same engine family as the Reference. |
+| Animation | CSS keyframes, from the measured spring | Motion for React until #14, chosen in #13 for sharing the Reference's engine family. Removed for 39 kB gzipped; `spring-easing.ts` emits the same `linear()` easing Motion generated, so the animation is unchanged. |
 | Styling | Tailwind v4, `@theme` tokens | Reference's design system is small and regular; tokens beat scattered magic numbers. |
 | Data | JSON + typed data layer + Route Handlers | [ADR-0002](../blob/develop/docs/adr/0002-data-access-shape.md). Homepage imports directly to stay static; `/templates` proves the API over HTTP. |
 | Assets | Downloaded, re-encoded, committed | Needed to beat the Reference on performance and to remove a third-party dependency mid-review. |
-| Content | Verbatim, plus `noindex, nofollow` | Maximum fidelity; the robots directive keeps a lookalike out of search results. |
+| Content | Verbatim, indexable | Maximum fidelity. `noindex, nofollow` was set for the reason below and removed in #14 at the owner's direction; it cost 37 points of Lighthouse SEO. |
 | Off-page links | Real placeholder routes | Nothing 404s or dead-ends; demonstrates the App Router layout model. |
-| Fonts | Geist, self-hosted via `next/font` | Removes the render-blocking `fonts.gstatic.com` round-trip the Reference pays. |
+| Fonts | Geist, self-hosted via `next/font`, **latin subset** | Removes the render-blocking `fonts.gstatic.com` round-trip the Reference pays. Subset in #14: 68 kB to 29 kB, which is what the LCP was waiting for. |
 
 ---
 
@@ -636,14 +636,22 @@ marquee that looks like the Wall, and mixing the two up is the easiest mistake o
 
 | | desktop >= 1200 | tablet 810-1199 | phone <= 809 |
 | --- | --- | --- | --- |
-| band | 900 tall, 0 40 80 | 200 20 40 | 40 20 |
+| band | **90vh**, 0 40 80 | 200 20 40 | 40 20 |
 | copy | row, button right and bottom | as desktop | column, button full width |
 | H2 | 56/67.2, 715 wide | 48/57.6 | 36/43.2 |
 | body | 16/25.6, 476 wide | 16/25.6, 476 | 14/22.4, balanced |
 | columns | 4 x (100vw-48)/4, 16 gap | 3 x (100vw-48)/3, 16 gap | 3 x 239, 8 gap |
 
-The desktop band's 900px is a height and not the viewport's; the copy is pinned to its bottom
-edge, and the tablet's 200px of top padding is the only room the columns get there.
+**The desktop band is `90vh`. This section said 900px until #14.** The fidelity harness put
+the Clone's band at 900 and the Reference's at 810 and every band below it out by the same
+90px, with no other Section off by a pixel; re-measured at three window heights the Reference
+reads 648 at 720, 810 at 900 and 1080 at 1200. 900px was a real measurement taken at one
+window height that happened to be 1000 - the failure mode a single reading of a
+viewport-relative length always has, and the first thing the harness found that a
+computed-style probe had not.
+
+The copy is pinned to the band's bottom edge, so the well grows upwards, and the tablet's
+200px of top padding is the only room the columns get there.
 
 The dimming is a **mask** rather than an opacity: `linear-gradient(#000 53%, transparent
 100%)` intersected with `linear-gradient(transparent 0%, #000 121%)`, which peaks at about
@@ -797,6 +805,29 @@ bento (6.5), how it works (6.6), the social proof grid (6.7), pricing (6.9) and 
 at all - they are simply in the viewport on load, where it runs immediately, and a probe that
 attaches after the page settles has already missed it.
 
+**All of it runs in CSS rather than in Motion since #14, and Motion is gone from the build.**
+That is a reversal of #13's choice and a performance decision: Motion was 39 kB gzipped on a
+page whose remaining Lighthouse gap was a simulated LCP queued behind its JavaScript. What it
+was buying was a spring solver, and `src/components/motion/spring-easing.ts` converts the
+spring #13 fitted into the same `linear()` easing Motion itself hands the Web Animations API
+for opacity and transform. Every parameter above survives, both settle times survive, and the
+trigger is the same IntersectionObserver it always was - `scroll-appear.tsx` now sets
+`data-appeared` and `globals.css` runs the keyframes.
+
+It did not move the score, which is recorded in section 8 as a prediction that did not hold;
+it took 40 kB off the wire and left one animation mechanism where there were two.
+
+**The hero needs no trigger at all, and that is the #14 fix that did move things.** It is the
+one Section that is on screen at load at every Breakpoint, so its appear never waited for a
+scroll - only for the JavaScript that would tell it there had not been one. Motion writes the
+resting state into the server markup, so the hero shipped at `opacity: 0` and stayed there
+until 270 kB of JavaScript had arrived: LCP 3.9s against FCP 0.9s on a throttled mobile
+profile. `src/components/motion/spring-easing.ts` converts the spring above into the same
+`linear()` easing Motion hands the Web Animations API for opacity and transform, so the
+animation is unchanged and both settle times survive - and the hero now paints in the low
+hundreds of milliseconds with no JavaScript involved. Everything below the fold stays on Motion, because those Sections
+genuinely wait for a scroll and a CSS animation has no way to know about one.
+
 The other two animate as cards *inside* a Section rather than as Sections: the quiz CTA's
 card (6.10) at 10px, and the case study's card (6.8) with no travel at all. The two nest
 differently, and both follow the Reference:
@@ -900,14 +931,89 @@ The Reference is slow, which makes this winnable. Measured: **FCP 3040ms**, load
 **4.0 MB** transfer over **141** requests, of which **video alone is 2.43 MB (61%)**. One
 hero-wall video is 839 KB.
 
-| Metric | Reference | Target |
-| --- | --- | --- |
-| Lighthouse Performance (mobile) | not measured | **>= 95** |
-| FCP | 3040 ms | **< 1200 ms** |
-| LCP | not measured | **< 1500 ms** |
-| Initial transfer | 4.0 MB | **< 1.0 MB** |
-| Initial requests | 141 | **< 40** |
-| CLS | not measured | **< 0.02** |
+| Metric | Reference | Target | Clone (#14) | |
+| --- | --- | --- | --- | --- |
+| Lighthouse Performance (mobile) | not measured | **>= 95** | 93 | MISS |
+| FCP | 3040 ms | **< 1200 ms** | 136 ms | pass |
+| LCP | not measured | **< 1500 ms** | 136 ms | pass |
+| Initial transfer | 4.0 MB | **< 1.0 MB** | 0.50 MB | pass |
+| Initial requests | 141 | **< 40** | 39 | pass |
+| CLS | not measured | **< 0.02** | 0.000 | pass |
+
+Measured by `npm run perf`, which runs both sides the same way and exits non-zero on a miss.
+The Reference column above is the reading section 1 took; the same script re-measures it at
+412x823 as **3.20 MB over 111 requests, FCP and LCP 3160ms, CLS 0.340**, which corroborates
+section 1's 3040ms and 141 requests at a narrower viewport.
+
+**The Reference's own numbers move between runs and ours barely do**, which is worth knowing
+before anyone re-measures and finds different figures: three runs read it at 2.38, 2.37 and
+3.20 MB with an FCP between 284ms and 3160ms, because it is a live site over the open
+internet with a CDN cache that may or may not be warm. Ours is a local production build and
+reads 0.58 MB and 39 requests every time. Take the Reference column as an order of magnitude
+and the Clone column as a measurement.
+
+Every row above except the Lighthouse one is **unthrottled**, on the connection and CPU
+section 1's Reference numbers were taken on. Under Lighthouse's simulated slow 4G and 4x CPU
+the same page reports FCP 909ms, LCP 3474ms, TBT 20ms and CLS 0 - both regimes are printed by
+`npm run perf` for the reason this paragraph exists, which is that a budget table quoting one
+regime and scoring in the other reads better than the page is.
+
+**Initial load is everything fetched from navigation until the network has been quiet for two
+seconds, with no scrolling.** That is deliberately generous to our own trick: a clip that a
+first-viewport IntersectionObserver starts is inside the window, so deferring work by half a
+second buys nothing. Bytes are `encodedDataLength` off the wire.
+
+Three changes got the transfer and request lines from 1.16 MB over 55 requests to here, all
+of them recorded as Deviations in the README:
+
+- **The Template Wall's clips do not run at phone widths.** 520 kB and 5 requests, 45% of the
+  whole budget, for a backdrop drawn 120px wide under a fade. `display: none` is the
+  mechanism, not a shortcut: an element with no box never intersects, so the observer never
+  fires and no video is requested.
+- **Nothing is prefetched.** `next/link` was fetching the payload of all seven placeholder
+  routes on load: 7 of 55 requests to make a navigation nobody will perform feel instant.
+- **A Template card's hover screenshot is drawn only where a pointer can hover.** 59 kB and 3
+  requests a phone downloaded and could never reach. `opacity: 0` never stopped the fetch;
+  `display: none` does.
+
+**The Lighthouse line is a miss at a median 93, and the reason is worth recording rather
+than rounding off.** Every other audit is perfect - FCP 0.9s, TBT 10-30ms, CLS 0, Speed Index
+1.3s - and the whole gap is a simulated LCP of 2.9s under Lighthouse's slow-4G profile.
+
+The LCP element is the **nav wordmark**, a 115x26px span, and what it waits for is the font.
+That it is the smallest text on the page rather than the H1 is itself a consequence: Chrome
+does not accept an element that first paints at `opacity: 0` as an LCP candidate, and the
+hero starts there. It makes no difference to the number, because every candidate above the
+fold is text and `font-display: swap` repaints all of them when the face lands.
+
+Two levers were pulled at it, in this order, and only one of them did what it was expected to.
+
+**Subsetting the font to latin closed most of the gap**: 68 kB to 29 kB, LCP 3.9s to 2.9s,
+the score from 88 to a median 92. That is the whole reason the font mattered out of proportion
+to its size - every largest-contentful-paint candidate above the fold is text, and
+`font-display: swap` repaints each one when the face lands.
+
+**Dropping Motion did not.** It is 39 kB gzipped and its removal took the initial transfer
+from 0.54 MB to 0.50 MB, but the score stayed at a median 92-93: the LCP here is bound by the
+font on the critical path, not by the size of the JavaScript queued behind it. It was worth
+doing anyway - one animation mechanism instead of two, a dependency gone, and every measured
+parameter preserved - but it is recorded as a prediction that did not hold, because the next
+session should not pull that lever again expecting points.
+
+**The score moves five points between runs on a developer machine.** The same build has read
+88, 90, 91, 92, 93, 94 and 95; isolated runs on a quiet machine reach 95 and a median of five
+reads 92-93. `npm run perf` runs five with a pause between them and prints every one, because
+a single reading of this metric is not evidence of anything. Against a `>= 95` target that
+leaves this **short on the median and inside the noise band**, which is the honest way to
+state it: `/blog`, a placeholder with a heading and a sentence on the same shell, scores 98
+with an LCP of 2.4s, so what remains is the shell rather than this page's content.
+
+One real LCP defect *was* found and fixed on the way: Motion writes Scroll-Appear's resting
+state into the server markup, so the hero shipped at `opacity: 0` and stayed there until
+270 kB of JavaScript had arrived and hydrated - **LCP 3.9s against FCP 0.9s**, three seconds
+of blank page on a page whose HTML was complete in one. The hero now runs the same measured
+spring as a CSS animation, converted to a `linear()` easing by
+`src/components/motion/spring-easing.ts`, and needs no JavaScript at all. See 6.15.
 
 Levers, in order of payoff:
 
@@ -915,7 +1021,7 @@ Levers, in order of payoff:
    all 2.43 MB from initial load. Nothing above the fold needs video.
 2. **SSG.** Static HTML from Vercel's CDN.
 3. **AVIF/WebP** via `next/image` with correct `sizes`.
-4. **`next/font`** self-hosting Geist.
+4. **`next/font`** self-hosting Geist, subset to latin (#14).
 5. **Explicit aspect ratios on every wall tile**, or the grid will wreck CLS.
 
 ### Assets
@@ -990,14 +1096,79 @@ links and the social icons: realigned by one pixel they match at 97.3%, so it is
 positioning rather than layout. Worth knowing before #14 sets a threshold - a per-Section
 gate gets no higher than about 97% on text-heavy bands without allowing a 1px tolerance.
 
-It must, on **both** sides: freeze all video to poster frames, dismiss the quiz modal, and
-let Scroll-Appear settle. Otherwise it measures video frames and animation timing rather than
-layout.
+It must, on **both** sides: freeze all video, dismiss the quiz modal, and let Scroll-Appear
+settle. Otherwise it measures video frames and animation timing rather than layout.
 
 Not a CI gate: it depends on a live third-party site.
 
 Report the real number with its methodology. A measured "94% at 1440px, videos frozen, here
 is the script" is worth more than an unbacked claim of 99%.
+
+#### The harness, built in #14
+
+`npm run fidelity`, against a production build on `CLONE_URL`. It finds each Section on both
+sides by anchoring on a heading and climbing to the outermost ancestor that has not swallowed
+a neighbour's anchor - one rule, no knowledge of either DOM - and writes a diff mask per
+Section per Breakpoint into `docs/measure/fidelity/` beside the table.
+
+Three things in it are not what ADR-0003 assumed, and ADR-0005 records why: each cell carries
+**two** numbers, video is frozen to **frame 0** rather than to a poster, and a travelling
+backdrop is **excluded** with the excluded fraction printed. Read that ADR before changing
+any of the three; each was arrived at by trying the obvious thing first and measuring it.
+
+Twelve rows for thirteen Sections. 6.7 and 6.8 share one band and one framed grid on both
+sides - the case study is that grid's last row, not a band - so splitting them would mean
+inventing a boundary the Reference does not draw. 6.13 goes the other way and gets a capture
+pass of its own, because the main pass dismisses it.
+
+Measured against the Reference on 2026-07-27, pixel match / SSIM:
+
+| Section | PRD | 1440 | 810 | 390 |
+| --- | --- | --- | --- | --- |
+| Nav | 6.1 | 97.8% / 0.971 | 96.1% / 0.948 | 99.2% / 0.995 |
+| Hero | 6.2 | 97.0% / 0.958 | 95.3% / 0.934 | 96.4% / 0.979 |
+| Template Wall | 6.3 | 48.2% / 0.796 | 39.0% / 0.779 | 15.9% / 0.212 |
+| Featured templates | 6.4 | 84.9% / 0.957 | 67.4% / 0.638 | 78.5% / 0.946 |
+| Feature bento | 6.5 | 63.3% / 0.784 | 65.3% / 0.763 | 60.0% / 0.712 |
+| How it works | 6.6 | 83.4% / 0.757 | 81.3% / 0.695 | 90.0% / 0.919 |
+| Social proof + case study | 6.7, 6.8 | 83.0% / 0.921 | 82.4% / 0.948 | 92.0% / 0.940 |
+| Pricing | 6.9 | 98.3% / 0.979 | 97.8% / 0.970 | 95.5% / 0.931 |
+| Quiz CTA | 6.10 | 98.9% / 0.986 | 96.2% / 0.947 | 93.4% / 0.923 |
+| Founder | 6.11 | 80.2% / 0.914 | 69.4% / 0.740 | 77.5% / 0.680 |
+| Footer | 6.12 | 96.7% / 0.943 | 94.1% / 0.943 | 95.4% / 0.970 |
+| Quiz modal | 6.13 | 99.0% / 0.990 | 98.6% / 0.985 | 95.5% / 0.940 |
+
+**It is not 99%, exactly as ADR-0003 said it would not be, and every low reading points at
+something already known.** The Sections in the nineties are the ones made of type; the ones
+in the sixties and seventies are the ones made of video, where the diff masks show the tile
+edges landing on the right pixel and the re-encode filling the inside - which is the encode
+`npm run assets:verify` already gates at SSIM 0.98, measured from the other direction. The
+Template Wall's **16.7% at 390** is the phone column-fill Deviation the README records: the
+Reference hand-arranges its three phone columns, the Clone fills into the measured height, so
+a different tile lands in each slot and every one of them differs.
+
+**A cell moves by a point or two between runs, and one thing makes it move more.**
+The Wall's Testimonial rotation swaps quote on a timer, so the two sides are on different
+quotes twenty seconds into a capture, and whether the harness catches it as travelling
+depends on whether it happened to sample mid-transition: the Wall at 810 read 72.7% on a run
+that missed it and 62.6% on one that caught it and excluded 71% of the band. Both readings
+are honest and neither is the other's error, but they are not comparable, and making that
+detection deterministic is the first thing to fix in this harness. The rotation is the only
+motion on the page driven by a timer rather than by a continuous transform.
+
+Two corroborations worth keeping. The nav reads 97.8 / 96.1 / 99.2 against #9's by-hand
+97.9 / 96.2 / 99.3, so the harness reproduces a measurement taken a different way. And every
+band's height now matches the Reference to the pixel or to two, at every Breakpoint, after
+the one height defect the harness found - the quiz CTA's `90vh` (6.10).
+
+**Two #14 changes were checked against this table rather than assumed harmless**, and the
+table is what makes that possible. Subsetting the font cost the hero 99.1 to 97.0 at 1440,
+which is glyph-edge rasterisation and nothing else: the H1 measures 1120 x 163.19px on both
+sides and the featured H2 616 x 134.41, identical to two decimals, so no letterform moved.
+Removing Motion cost nothing measurable - the nav, hero, footer, quiz CTA and quiz modal all
+read identically before and after, and pricing improved - while the Wall and how-it-works
+moved several points in both directions on the same code, which is the travel-detection
+wobble above rather than the animation.
 
 ---
 
@@ -1028,6 +1199,12 @@ Five commands gate a PR, run before pushing: `typecheck`, `lint`, `format:check`
 `build`. `test:e2e` runs beside them and builds the app itself, so it is a sixth check
 rather than a sixth gate. `build` is last of the five and is not redundant - content that no
 test happens to read still fails there, because the data layer validates lazily (ADR-0004).
+
+`npm run fidelity` and `npm run perf` are neither, and for different reasons. The fidelity
+harness depends on a live third-party site (ADR-0003). `npm run perf` depends only on our own
+page and does exit non-zero on a miss, so it is a check you can run - but there is no workflow
+to run it in, and its Lighthouse leg takes three minutes. Both want a production build
+already serving on `CLONE_URL`.
 
 `format:check` could not pass on a Windows clone until #8. Prettier writes and checks LF while
 `core.autocrlf=true` leaves a CRLF working tree, so every committed file failed locally and
@@ -1115,8 +1292,8 @@ Each child issue lands on its own `feature/*` branch and opens a PR into `develo
 - [ ] #11 Sections: feature bento, how it works, social proof, case study
 - [ ] #12 Sections: pricing, quiz CTA, founder, quiz modal
 - [x] #13 Motion: scroll-appear across all sections
-- [ ] #14 Fidelity harness and performance budget
+- [x] #14 Fidelity harness and performance budget
 - [ ] #15 Docs: README and ANSWERS.md
 
 #6 and #7 unblock everything. #8 unblocks #9 through #12. #13 needs the sections in place.
-#14 needs a complete page. #15 needs #14's numbers.
+#14 needs a complete page. #15 needs #14's numbers, which are in section 8's two tables.

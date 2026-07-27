@@ -19,10 +19,19 @@ import { expect, test, type Page } from '@playwright/test'
 const DESKTOP = { width: 1440, height: 900 }
 const PHONE = { width: 390, height: 844 }
 
-/** Sections taking the 30px Section treatment, per PRD 6.15. */
-const SECTION_ISLANDS = 8
+/**
+ * Sections taking the 30px Section treatment through Motion, per PRD 6.15.
+ *
+ * Seven of the eight. The hero takes the same treatment from CSS instead (#14):
+ * it is the one Section on screen at load at every Breakpoint, so its appear
+ * never waited for a scroll - only for the JavaScript that would tell it there
+ * had not been one, which cost LCP 3.9s against FCP 0.9s. It is asserted
+ * separately below, because what has to be true of it is different: it must
+ * **not** be hidden behind JavaScript.
+ */
+const MOTION_SECTION_ISLANDS = 7
 /** Those, plus the quiz CTA's card and the case study's card. */
-const ALL_ISLANDS = 10
+const ALL_ISLANDS = 9
 
 /** Opacity and vertical offset of every appear island, as rendered right now. */
 const appearState = (page: Page) =>
@@ -62,23 +71,82 @@ test.describe('Scroll-Appear', () => {
     const html = (await response?.text()) ?? ''
     const resting = html.match(/opacity:0;transform:translateY\(30px\)/g) ?? []
     /*
-     * Exactly the eight Sections that take the 30px treatment on the Reference
-     * (PRD 6.15): hero, Template Wall, featured Templates, feature bento, how it
-     * works, social proof, pricing, founder. Exact rather than "at least",
-     * because the claim this issue makes is that Scroll-Appear is applied
+     * Exactly the seven Motion-driven Sections that take the 30px treatment on
+     * the Reference (PRD 6.15): Template Wall, featured Templates, feature
+     * bento, how it works, social proof, pricing, founder. Exact rather than
+     * "at least", because the claim #13 makes is that Scroll-Appear is applied
      * consistently - and a `>=` lets a Section quietly lose it and still pass.
      */
-    expect(resting.length).toBe(SECTION_ISLANDS)
+    expect(resting.length).toBe(MOTION_SECTION_ISLANDS)
+
+    /*
+     * And the hero is the eighth, animating from CSS. Its markup must carry no
+     * hidden resting state at all: the whole point of #14's change is that its
+     * content is paintable the moment the HTML arrives.
+     */
+    expect(html).toContain('data-appear-on-load')
 
     await scrollThrough(page)
 
     const state = await appearState(page)
-    /* Those eight plus the quiz CTA's card and the case study's card. */
+    /* Those seven plus the quiz CTA's card and the case study's card. */
     expect(state.length).toBe(ALL_ISLANDS)
     for (const island of state) {
       expect(island.opacity).toBe(1)
       expect(island.y).toBe(0)
     }
+  })
+
+  /*
+   * The hero's own two claims, which are the reason #14 moved it off Motion. It
+   * has to arrive without JavaScript, and it has to stop moving under reduced
+   * motion the way the Motion-driven Sections do - the second is what a CSS
+   * animation quietly loses if nobody writes the media query.
+   */
+  test('the hero arrives with JavaScript disabled', async ({ browser }) => {
+    const context = await browser.newContext({
+      viewport: DESKTOP,
+      javaScriptEnabled: false,
+    })
+    const page = await context.newPage()
+    await page.goto('/')
+    /* Past the measured 755ms opacity settle. */
+    await page.waitForTimeout(1500)
+
+    const state = await page.evaluate(() => {
+      const hero = document.querySelector('[data-appear-on-load]')
+      if (!hero) return null
+      const style = getComputedStyle(hero)
+      const matrix = new DOMMatrixReadOnly(
+        style.transform === 'none' ? undefined : style.transform,
+      )
+      return { opacity: Number(style.opacity), y: Math.round(matrix.m42) }
+    })
+
+    expect(state).toEqual({ opacity: 1, y: 0 })
+    await expect(page.locator('h1')).toBeVisible()
+    await context.close()
+  })
+
+  test('the hero does not move under prefers-reduced-motion', async ({ browser }) => {
+    const context = await browser.newContext({
+      viewport: DESKTOP,
+      reducedMotion: 'reduce',
+    })
+    const page = await context.newPage()
+    await page.goto('/')
+
+    /* Sampled immediately: with the animation dropped there is no first frame
+     * at `opacity: 0` to catch, which is the whole difference. */
+    const state = await page.evaluate(() => {
+      const hero = document.querySelector('[data-appear-on-load]')
+      if (!hero) return null
+      const style = getComputedStyle(hero)
+      return { opacity: Number(style.opacity), animation: style.animationName }
+    })
+
+    expect(state).toEqual({ opacity: 1, animation: 'none' })
+    await context.close()
   })
 
   test('plays once and does not replay on the way back up', async ({ page }) => {

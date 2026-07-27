@@ -95,7 +95,17 @@ One of exactly three layout widths inherited from the Reference: desktop (≥120
 tablet (810-1199px), phone (≤809px).
 _Avoid_: viewport, screen size, device
 
+**Travelling backdrop**:
+Decorative media that moves on a loop behind a Section's copy, for as long as the page is
+open: Step 1's thumbnail columns, the Quiz CTA's four Template columns, and the quiz modal's
+two. Distinct from the Template Wall, which looks like one and is static. A Travelling
+backdrop has no canonical frame - two implementations start the same loop at different
+offsets - which is why the Fidelity Harness hides one rather than comparing it.
+_Avoid_: marquee, ticker, carousel
+
 **Fidelity Harness**:
 The script that captures Clone and Reference side by side and reports a measured
-Fidelity percentage per Section. The only authority on whether a Fidelity claim is true.
+Fidelity figure per Section. The only authority on whether a Fidelity claim is true.
+Each figure is a pair - a strict pixel match and an SSIM - because one number cannot
+separate "is it in the right place" from "does it look the same" (ADR-0005).
 _Avoid_: visual regression, screenshot test, diff tool
