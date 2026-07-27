@@ -1009,19 +1009,22 @@ The Reference is slow, which makes this winnable. Measured: **FCP 3040ms**, load
 **4.0 MB** transfer over **141** requests, of which **video alone is 2.43 MB (61%)**. One
 hero-wall video is 839 KB.
 
-| Metric | Reference | Target | Clone (#14) | |
-| --- | --- | --- | --- | --- |
-| Lighthouse Performance (mobile) | not measured | **>= 95** | 93 | MISS |
-| FCP | 3040 ms | **< 1200 ms** | 136 ms | pass |
-| LCP | not measured | **< 1500 ms** | 136 ms | pass |
-| Initial transfer | 4.0 MB | **< 1.0 MB** | 0.50 MB | pass |
-| Initial requests | 141 | **< 40** | 39 | pass |
-| CLS | not measured | **< 0.02** | 0.000 | pass |
+The Clone column is the **current** reading, re-measured after #30. The #14 column is kept
+beside it because two rows moved and a table that quietly overwrites itself cannot show that:
 
-**Re-measured after #30**, which added a client component and a non-passive wheel listener
-(6.16): initial transfer 0.50 -> **0.51 MB** over the same **39** requests, FCP and LCP
-132ms, CLS 0.000, and Lighthouse medians of 93 and 95 on two consecutive runs of five. The
-Lighthouse row is where it was; the kilobyte is the smooth scroll.
+| Metric | Reference | Target | Clone (#14) | Clone (now) | |
+| --- | --- | --- | --- | --- | --- |
+| Lighthouse Performance (mobile) | not measured | **>= 95** | 93 | 93 | MISS |
+| FCP | 3040 ms | **< 1200 ms** | 136 ms | 132 ms | pass |
+| LCP | not measured | **< 1500 ms** | 136 ms | 132 ms | pass |
+| Initial transfer | 4.0 MB | **< 1.0 MB** | 0.50 MB | 0.51 MB | pass |
+| Initial requests | 141 | **< 40** | 39 | 39 | pass |
+| CLS | not measured | **< 0.02** | 0.000 | 0.000 | pass |
+
+**What #30 changed** was a client component and a non-passive wheel listener (6.16): one
+kilobyte of initial transfer, over the same 39 requests, and Lighthouse medians of 93 and 95
+on two consecutive runs of five. The Lighthouse row is where it was; the kilobyte is the
+smooth scroll. The README quotes the **Clone (now)** column.
 
 Measured by `npm run perf`, which runs both sides the same way and exits non-zero on a miss.
 The Reference column above is the reading section 1 took; the same script re-measures it at
