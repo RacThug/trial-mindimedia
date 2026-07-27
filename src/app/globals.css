@@ -545,3 +545,47 @@
     transform: translateY(-50%);
   }
 }
+
+/*
+ * The hero's Scroll-Appear, run by CSS rather than by Motion (#14).
+ *
+ * The hero is the one Section that is on screen at load at every Breakpoint, so
+ * its appear never waited for a scroll - only for the JavaScript that would tell
+ * it there had not been one. Rendered at `opacity: 0` in the server markup, that
+ * cost **LCP 3.9s against FCP 0.9s** on a throttled mobile profile, which was
+ * the whole distance between this build and PRD section 8's Performance target.
+ *
+ * The two curves and both durations come in as custom properties from
+ * `appear-on-load.tsx`, derived from the measured spring rather than retyped, so
+ * this Section and the seven still on Motion move identically. See PRD 6.15.
+ */
+@keyframes appear-on-load-rise {
+  from {
+    transform: translateY(var(--appear-travel));
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes appear-on-load-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+[data-appear-on-load] {
+  animation:
+    appear-on-load-rise var(--appear-travel-duration) var(--appear-travel-ease) both,
+    appear-on-load-fade var(--appear-opacity-duration) var(--appear-opacity-ease) both;
+}
+
+/* The same end state without the journey, as `scroll-appear.tsx` does. */
+@media (prefers-reduced-motion: reduce) {
+  [data-appear-on-load] {
+    animation: none;
+  }
+}

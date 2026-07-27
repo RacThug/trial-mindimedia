@@ -86,6 +86,46 @@ The hero's `RATED 4.92/5` is the one step on the Reference that is not Geist. We
 Geist at the same 12/18/700/0.07em metrics rather than load a second family for twelve
 characters. It costs about 5px of width on one label.
 
+### The Template Wall's clips do not run on a phone (PRD 6.3, section 8)
+
+At 412px the Wall's top edge sits 217px into the first viewport, so five of its six clips
+start on load and cost **520 kB of a 1.0 MB budget** - 45% of it - for a backdrop that draws
+each tile 120px wide under a fade. Below the tablet Breakpoint the `<video>` is
+`display: none`, which is the mechanism rather than a shortcut: an element with no box never
+intersects, so the IntersectionObserver never fires and not one byte of video is requested.
+
+The poster underneath is the frame the clip opens on, so the Wall still reads as the
+Reference's. What a phone loses is movement inside tiles too small to see it in - and what it
+gets back is half the page's weight and six fewer video decoders.
+
+### Nothing is prefetched (PRD section 8)
+
+`next/link` fetches the payload of every internal link that scrolls into view, which on this
+page was **seven requests** of a forty-request budget. Seven of the eight destinations are
+the placeholder routes, which are a heading and a sentence; the eighth is `/templates`.
+Spending a seventh of the budget to make a navigation nobody reviewing this page will perform
+feel instant is the wrong trade.
+
+### A Template card's hover screenshot is drawn only where a pointer can hover (PRD 6.4)
+
+Each card carries two stacked screenshots and reveals the second on hover. A phone has no way
+to reach it and downloaded all three anyway - 59 kB and 3 requests - because an image is lazy,
+not conditional, and Chrome starts a lazy image well before it is on screen. `opacity: 0`
+never stopped the fetch; `display: none` does.
+
+### The hero's Scroll-Appear runs in CSS, not in Motion (PRD 6.15, section 8)
+
+Motion writes Scroll-Appear's resting state into the server markup, so the hero shipped at
+`opacity: 0` and stayed there until 270 kB of JavaScript had arrived and hydrated: **LCP 3.9s
+against an FCP of 0.9s** on Lighthouse's throttled mobile profile, three seconds of blank
+page on a page whose HTML was complete in one.
+
+The hero is the one Section on screen at load at every Breakpoint, so its appear never waited
+for a scroll. It now runs the same measured spring as a CSS animation, converted to the same
+`linear()` easing Motion itself hands the Web Animations API, and both measured settle times
+survive. It is a Deviation only in mechanism: the motion is identical, and the hero paints at
+144ms with no JavaScript involved.
+
 ### The encode (PRD section 8)
 
 Every committed asset is re-encoded rather than copied: WebP for stills, H.264 for clips,
