@@ -56,6 +56,20 @@ when the sample lands mid-transition and missed when it does not, and the Wall a
 the same page; they are not comparable, and closing that is the first thing to do to this
 harness.
 
+## Both sides have to lay out at the same width, and that has to be checked
+
+A page with a scroll lock still on it has no scrollbar, so it lays out about 15px wider than
+the same page that does. Every centred element then sits half that difference away from its
+twin, and the diff reads as a page that moved rather than a harness that photographed two
+different widths. It cost a run: the nav read **86.3% at 810 against 96.1% on either side of
+it**, and the only visible evidence was a doubled wordmark in the mask.
+
+So the harness does two things about it. It forces `overflow: visible` on both roots after
+dismissing the modal, rather than clearing an inline lock that may never have been inline;
+and it compares `document.documentElement.clientWidth` across the two captures and says
+plainly that the column is not comparable when they differ. A number that is wrong for a
+reason nobody can see is worse than no number.
+
 ## Consequences
 
 The table is wider and takes more explaining than ADR-0003 imagined, and it is still not a CI

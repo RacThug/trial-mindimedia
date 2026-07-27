@@ -547,20 +547,24 @@
 }
 
 /*
- * The hero's Scroll-Appear, run by CSS rather than by Motion (#14).
+ * Scroll-Appear, run by CSS (#14). PRD 6.15 has the measurements.
  *
- * The hero is the one Section that is on screen at load at every Breakpoint, so
- * its appear never waited for a scroll - only for the JavaScript that would tell
- * it there had not been one. Rendered at `opacity: 0` in the server markup, that
- * cost **LCP 3.9s against FCP 0.9s** on a throttled mobile profile - most of the
- * distance between this build and PRD section 8's Performance target, which the
- * PRD records as still short by the 68 kB font swap behind it.
+ * This was Motion until #14, and moving it here is a performance decision:
+ * 39 kB gzipped on a homepage whose whole remaining Lighthouse gap was a
+ * simulated LCP queued behind the JavaScript. The spring is the one #13 fitted,
+ * converted by `spring-easing.ts` into the same `linear()` easing Motion itself
+ * hands the Web Animations API - so the animation did not change, only what runs
+ * it.
  *
- * The two curves and both durations come in as custom properties from
- * `appear-on-load.tsx`, derived from the measured spring rather than retyped, so
- * this Section and the seven still on Motion move identically. See PRD 6.15.
+ * Both curves, both durations and the travel arrive as custom properties from
+ * `appear-style.ts`, derived from the measurement rather than retyped here.
+ *
+ * Two animations rather than one, because the Reference's two values stop at
+ * different times: a Section's 30px travel at ~570ms and its opacity at ~755ms.
+ * That is the detail that says spring rather than tween, and one duration for
+ * both would throw it away.
  */
-@keyframes appear-on-load-rise {
+@keyframes appear-rise {
   from {
     transform: translateY(var(--appear-travel));
   }
@@ -569,7 +573,7 @@
   }
 }
 
-@keyframes appear-on-load-fade {
+@keyframes appear-fade {
   from {
     opacity: 0;
   }
@@ -578,15 +582,35 @@
   }
 }
 
-[data-appear-on-load] {
+/*
+ * Two triggers, one animation. The hero is on screen at load at every
+ * Breakpoint, so it starts when it is parsed and needs no JavaScript at all;
+ * every Section below the fold waits for the IntersectionObserver in
+ * `scroll-appear.tsx` to set `data-appeared`.
+ *
+ * A CSS animation overrides an inline declaration carrying no `!important`,
+ * which is what lets the resting state be server-rendered inline - nothing
+ * paints before it is asked to - and still be animated away from here.
+ */
+[data-appear-on-load],
+[data-appear][data-appeared] {
   animation:
-    appear-on-load-rise var(--appear-travel-duration) var(--appear-travel-ease) both,
-    appear-on-load-fade var(--appear-opacity-duration) var(--appear-opacity-ease) both;
+    appear-rise var(--appear-travel-duration) var(--appear-travel-ease) both,
+    appear-fade var(--appear-opacity-duration) var(--appear-opacity-ease) both;
 }
 
-/* The same end state without the journey, as `scroll-appear.tsx` does. */
+/*
+ * Reduced motion: the same end state without the journey.
+ *
+ * `!important` on the two properties, not just `animation: none`, because the
+ * resting state is inline. Dropping the animation alone would leave a Section
+ * that has been told to appear sitting at `opacity: 0` for good.
+ */
 @media (prefers-reduced-motion: reduce) {
-  [data-appear-on-load] {
+  [data-appear-on-load],
+  [data-appear][data-appeared] {
     animation: none;
+    opacity: 1 !important;
+    transform: none !important;
   }
 }

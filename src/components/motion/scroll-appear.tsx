@@ -1,24 +1,36 @@
 'use client'
 
-import { motion, useReducedMotion } from 'motion/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { APPEAR, appearThreshold, type AppearVariant } from './appear.ts'
+import { appearThreshold, type AppearVariant } from './appear.ts'
+import { appearStyle } from './appear-style.ts'
 
 /*
  * Scroll-Appear: the animation that plays once as a Section first enters the
  * viewport (CONTEXT.md), to the parameters measured in `./appear.ts`.
  *
- * This is the only client island the Sections need. It takes its content as
- * `children`, so everything inside stays a Server Component - the Section
- * bodies, their content reads, and their markup all still render on the server,
- * and what ships to the browser is this wrapper and Motion.
+ * **This ran on Motion until #14 and now runs on CSS**, which is a performance
+ * decision and a reversal of #13's. Motion cost 39 kB gzipped on a homepage
+ * whose entire remaining Lighthouse gap was a simulated LCP queued behind the
+ * JavaScript; what it was buying was a spring solver, and `spring-easing.ts`
+ * converts the same measured spring into the same `linear()` easing Motion
+ * itself hands the Web Animations API for opacity and transform. The parameters,
+ * the trigger and both settle times are unchanged - what left is the library.
  *
- * The trigger is a plain IntersectionObserver rather than Motion's `whileInView`
- * on purpose. `whileInView`'s `viewport.amount` is handed to the observer
- * unclamped, and the Reference's rule is half the element *or half the
- * viewport*, whichever is smaller; expressed as a bare `amount: 0.5` a Section
- * more than twice the viewport tall would never reach that ratio and would stay
- * invisible. See `appearThreshold`.
+ * So all this component does now is answer one question: has the Section entered
+ * far enough yet. When it has, it sets `data-appeared` and `globals.css` runs the
+ * keyframes. The resting state is inline and server-rendered, so nothing paints
+ * before it is asked to.
+ *
+ * The trigger stays a plain IntersectionObserver, which is what it was under
+ * Motion too and for the same reason. `whileInView`'s `viewport.amount` is handed
+ * to the observer unclamped, and the Reference's rule is half the element *or
+ * half the viewport*, whichever is smaller; expressed as a bare `amount: 0.5` a
+ * Section more than twice the viewport tall would never reach that ratio and
+ * would stay invisible. See `appearThreshold`.
+ *
+ * Reduced motion is handled in CSS rather than here. `useReducedMotion` had to
+ * be read after hydration to avoid the server disagreeing with the visitor's
+ * setting; a media query has no such problem and needs no JavaScript at all.
  */
 
 type ScrollAppearProps = {
@@ -35,36 +47,17 @@ export function ScrollAppear({
   className,
   children,
 }: ScrollAppearProps) {
-  const { travel, spring } = APPEAR[variant]
   const [element, setElement] = useState<HTMLElement | null>(null)
   const appeared = useAppeared(element)
-
-  /*
-   * Read once, at the first render that matters. `useReducedMotion` samples the
-   * media query rather than subscribing, and on the server it can only answer
-   * "no" - so it must not reach the markup, or hydration would disagree with
-   * whatever the visitor actually prefers. It does not: the resting state below
-   * is the same either way, and this only chooses how the element leaves it.
-   */
-  const reduced = useReducedMotion()
-
-  const Component = as === 'div' ? motion.div : motion.section
+  const Component = as === 'div' ? 'div' : 'section'
 
   return (
     <Component
       ref={setElement}
-      data-appear=""
+      data-appear={variant}
+      data-appeared={appeared ? '' : undefined}
       className={className}
-      /*
-       * Rendered inline by Motion on the server, which is what stops the flash
-       * of a Section that paints before it is asked to appear. It is also why
-       * `layout.tsx` carries a `<noscript>` rule: with the animation never
-       * arriving, this alone would leave the page blank.
-       */
-      initial={{ opacity: 0, y: travel }}
-      animate={appeared ? { opacity: 1, y: 0 } : { opacity: 0, y: travel }}
-      /* Reduced motion: same end state, no travel and no fade to get there. */
-      transition={reduced ? { duration: 0 } : spring}
+      style={appearStyle(variant)}
     >
       {children}
     </Component>

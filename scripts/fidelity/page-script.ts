@@ -170,6 +170,21 @@ export function resolveBands({
 export const BAND_ATTRIBUTE = 'data-fidelity-band'
 
 /**
+ * The width the page actually laid out in, which is not always the viewport's.
+ *
+ * A classic scrollbar takes ~15px out of the layout viewport, and a page with
+ * `overflow: hidden` still on it - a modal that has been dismissed but whose
+ * scroll lock has not been lifted - keeps those 15px. Two captures taken at
+ * different content widths are not comparable at all: every centred element
+ * shifts by half the difference, and the diff reads as though the whole page
+ * moved. It cost a 96.1% nav band a run at 86.3% before this was checked, and
+ * the only way to see it was to notice a doubled wordmark in the mask.
+ */
+export function layoutWidth(): number {
+  return document.documentElement.clientWidth
+}
+
+/**
  * Take the quiz modal out of the page, on whichever side this is.
  *
  * The Reference's reappears on every navigation and offers no visible control,
@@ -203,8 +218,21 @@ export function dismissQuizModal(): number {
     removed += 1
   }
 
-  document.documentElement.style.overflow = ''
-  document.body.style.overflow = ''
+  /*
+   * Forced rather than cleared, and on both sides.
+   *
+   * Clearing the inline `overflow` only lifts a lock that was applied inline. A
+   * modal that locked scrolling through a class, or a `<dialog>` whose top-layer
+   * state has not finished unwinding, leaves the page unscrollable - and an
+   * unscrollable page has no scrollbar, so it lays out ~15px wider than the same
+   * page that does. Two captures at two content widths shift every centred
+   * element against each other and the whole column reads as a page that moved.
+   * Both sides overflow this viewport, so `visible` gives both a scrollbar and
+   * one width.
+   */
+  for (const root of [document.documentElement, document.body]) {
+    root.style.setProperty('overflow', 'visible', 'important')
+  }
   return removed
 }
 

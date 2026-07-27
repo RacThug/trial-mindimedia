@@ -121,6 +121,20 @@ async function main(): Promise<void> {
         }
       }
 
+      /*
+       * Refuse the comparison rather than report it. Two captures laid out at
+       * different widths shift every centred element against each other, and the
+       * table that comes out looks like a page that moved rather than a harness
+       * that measured two different pages.
+       */
+      if (clone.layoutWidth !== reference.layoutWidth) {
+        warnings.push(
+          `${width}: laid out at ${clone.layoutWidth}px on the Clone and ` +
+            `${reference.layoutWidth}px on the Reference - a scroll lock left on one side. ` +
+            'This column is not comparable; re-run it.',
+        )
+      }
+
       for (const section of SECTIONS) {
         const compared = await compareSection(clone, reference, section.id, width)
         cellsFor(section.id)[column] = compared?.cell ?? null

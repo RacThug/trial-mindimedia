@@ -30,7 +30,18 @@ async function pendingIslands(page: Page): Promise<number[]> {
     [...document.querySelectorAll('[data-appear]')]
       .map((element, index) => {
         const style = getComputedStyle(element)
-        const arrived = Number(style.opacity) === 1 && style.transform === 'none'
+        /*
+         * The identity matrix counts as untransformed, and has to since #14
+         * moved Scroll-Appear from Motion to a CSS animation. A `both`-filled
+         * animation whose last keyframe is `transform: none` still reports
+         * `matrix(1, 0, 0, 1, 0, 0)` rather than the string `none`, because an
+         * animation is applying a value either way. The element is exactly where
+         * it belongs; only the string differs, and reading it strictly failed
+         * three specs on a page where nothing had moved.
+         */
+        const still =
+          style.transform === 'none' || style.transform === 'matrix(1, 0, 0, 1, 0, 0)'
+        const arrived = Number(style.opacity) === 1 && still
         return arrived ? -1 : index
       })
       .filter((index) => index >= 0),

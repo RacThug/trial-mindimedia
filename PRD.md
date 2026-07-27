@@ -51,13 +51,13 @@ Recorded here so nothing is re-litigated mid-build. Two have ADRs.
 | Decision | Choice | Rationale |
 | --- | --- | --- |
 | Framework | Next.js App Router, TypeScript | [ADR-0001](../blob/develop/docs/adr/0001-nextjs-over-nuxt.md). Motion for React shares its lineage with Framer's own animation engine. |
-| Animation | Motion for React | Same engine family as the Reference. |
+| Animation | CSS keyframes, from the measured spring | Motion for React until #14, chosen in #13 for sharing the Reference's engine family. Removed for 39 kB gzipped; `spring-easing.ts` emits the same `linear()` easing Motion generated, so the animation is unchanged. |
 | Styling | Tailwind v4, `@theme` tokens | Reference's design system is small and regular; tokens beat scattered magic numbers. |
 | Data | JSON + typed data layer + Route Handlers | [ADR-0002](../blob/develop/docs/adr/0002-data-access-shape.md). Homepage imports directly to stay static; `/templates` proves the API over HTTP. |
 | Assets | Downloaded, re-encoded, committed | Needed to beat the Reference on performance and to remove a third-party dependency mid-review. |
 | Content | Verbatim, indexable | Maximum fidelity. `noindex, nofollow` was set for the reason below and removed in #14 at the owner's direction; it cost 37 points of Lighthouse SEO. |
 | Off-page links | Real placeholder routes | Nothing 404s or dead-ends; demonstrates the App Router layout model. |
-| Fonts | Geist, self-hosted via `next/font` | Removes the render-blocking `fonts.gstatic.com` round-trip the Reference pays. |
+| Fonts | Geist, self-hosted via `next/font`, **latin subset** | Removes the render-blocking `fonts.gstatic.com` round-trip the Reference pays. Subset in #14: 68 kB to 29 kB, which is what the LCP was waiting for. |
 
 ---
 
@@ -805,7 +805,19 @@ bento (6.5), how it works (6.6), the social proof grid (6.7), pricing (6.9) and 
 at all - they are simply in the viewport on load, where it runs immediately, and a probe that
 attaches after the page settles has already missed it.
 
-**The hero's runs in CSS rather than in Motion, and that is a #14 performance fix.** It is the
+**All of it runs in CSS rather than in Motion since #14, and Motion is gone from the build.**
+That is a reversal of #13's choice and a performance decision: Motion was 39 kB gzipped on a
+page whose remaining Lighthouse gap was a simulated LCP queued behind its JavaScript. What it
+was buying was a spring solver, and `src/components/motion/spring-easing.ts` converts the
+spring #13 fitted into the same `linear()` easing Motion itself hands the Web Animations API
+for opacity and transform. Every parameter above survives, both settle times survive, and the
+trigger is the same IntersectionObserver it always was - `scroll-appear.tsx` now sets
+`data-appeared` and `globals.css` runs the keyframes.
+
+It did not move the score, which is recorded in section 8 as a prediction that did not hold;
+it took 40 kB off the wire and left one animation mechanism where there were two.
+
+**The hero needs no trigger at all, and that is the #14 fix that did move things.** It is the
 one Section that is on screen at load at every Breakpoint, so its appear never waited for a
 scroll - only for the JavaScript that would tell it there had not been one. Motion writes the
 resting state into the server markup, so the hero shipped at `opacity: 0` and stayed there
@@ -921,10 +933,10 @@ hero-wall video is 839 KB.
 
 | Metric | Reference | Target | Clone (#14) | |
 | --- | --- | --- | --- | --- |
-| Lighthouse Performance (mobile) | not measured | **>= 95** | 91 | MISS |
-| FCP | 3040 ms | **< 1200 ms** | 216 ms | pass |
-| LCP | not measured | **< 1500 ms** | 216 ms | pass |
-| Initial transfer | 4.0 MB | **< 1.0 MB** | 0.58 MB | pass |
+| Lighthouse Performance (mobile) | not measured | **>= 95** | 93 | MISS |
+| FCP | 3040 ms | **< 1200 ms** | 136 ms | pass |
+| LCP | not measured | **< 1500 ms** | 136 ms | pass |
+| Initial transfer | 4.0 MB | **< 1.0 MB** | 0.50 MB | pass |
 | Initial requests | 141 | **< 40** | 39 | pass |
 | CLS | not measured | **< 0.02** | 0.000 | pass |
 
@@ -964,15 +976,37 @@ of them recorded as Deviations in the README:
   requests a phone downloaded and could never reach. `opacity: 0` never stopped the fetch;
   `display: none` does.
 
-**The Lighthouse line is a miss at 91, and the reason is worth recording rather than
-rounding off.** Every other audit is perfect - FCP 0.9s, TBT 20ms, CLS 0, Speed Index 1.4s -
-and the whole 9-point gap is a simulated LCP of 3.4s under Lighthouse's slow-4G profile. The
-LCP element is the nav wordmark, and what it waits for is the 68 kB Geist variable font
-swapping in. There is a floor under this that is not the homepage's: `/blog`, a placeholder
-page with a heading and a sentence on the same shell, scores 98 with an LCP of 2.4s. Closing
-the rest means shrinking the shell - dropping Motion from the homepage is 39 kB gzipped
-(#13), and subsetting the font is the other 68 kB - and both are their own decisions rather
-than something to fold into this work package.
+**The Lighthouse line is a miss at a median 93, and the reason is worth recording rather
+than rounding off.** Every other audit is perfect - FCP 0.9s, TBT 10-30ms, CLS 0, Speed Index
+1.3s - and the whole gap is a simulated LCP of 2.9s under Lighthouse's slow-4G profile.
+
+The LCP element is the **nav wordmark**, a 115x26px span, and what it waits for is the font.
+That it is the smallest text on the page rather than the H1 is itself a consequence: Chrome
+does not accept an element that first paints at `opacity: 0` as an LCP candidate, and the
+hero starts there. It makes no difference to the number, because every candidate above the
+fold is text and `font-display: swap` repaints all of them when the face lands.
+
+Two levers were pulled at it, in this order, and only one of them did what it was expected to.
+
+**Subsetting the font to latin closed most of the gap**: 68 kB to 29 kB, LCP 3.9s to 2.9s,
+the score from 88 to a median 92. That is the whole reason the font mattered out of proportion
+to its size - every largest-contentful-paint candidate above the fold is text, and
+`font-display: swap` repaints each one when the face lands.
+
+**Dropping Motion did not.** It is 39 kB gzipped and its removal took the initial transfer
+from 0.54 MB to 0.50 MB, but the score stayed at a median 92-93: the LCP here is bound by the
+font on the critical path, not by the size of the JavaScript queued behind it. It was worth
+doing anyway - one animation mechanism instead of two, a dependency gone, and every measured
+parameter preserved - but it is recorded as a prediction that did not hold, because the next
+session should not pull that lever again expecting points.
+
+**The score moves five points between runs on a developer machine.** The same build has read
+88, 90, 91, 92, 93, 94 and 95; isolated runs on a quiet machine reach 95 and a median of five
+reads 92-93. `npm run perf` runs five with a pause between them and prints every one, because
+a single reading of this metric is not evidence of anything. Against a `>= 95` target that
+leaves this **short on the median and inside the noise band**, which is the honest way to
+state it: `/blog`, a placeholder with a heading and a sentence on the same shell, scores 98
+with an LCP of 2.4s, so what remains is the shell rather than this page's content.
 
 One real LCP defect *was* found and fixed on the way: Motion writes Scroll-Appear's resting
 state into the server markup, so the hero shipped at `opacity: 0` and stayed there until
@@ -987,7 +1021,7 @@ Levers, in order of payoff:
    all 2.43 MB from initial load. Nothing above the fold needs video.
 2. **SSG.** Static HTML from Vercel's CDN.
 3. **AVIF/WebP** via `next/image` with correct `sizes`.
-4. **`next/font`** self-hosting Geist.
+4. **`next/font`** self-hosting Geist, subset to latin (#14).
 5. **Explicit aspect ratios on every wall tile**, or the grid will wreck CLS.
 
 ### Assets
@@ -1091,18 +1125,18 @@ Measured against the Reference on 2026-07-27, pixel match / SSIM:
 
 | Section | PRD | 1440 | 810 | 390 |
 | --- | --- | --- | --- | --- |
-| Nav | 6.1 | 97.9% / 0.971 | 96.3% / 0.948 | 99.2% / 0.995 |
-| Hero | 6.2 | 99.1% / 0.989 | 98.4% / 0.979 | 98.5% / 0.995 |
-| Template Wall | 6.3 | 62.7% / 0.865 | 62.6% / 0.874 | 16.7% / 0.236 |
-| Featured templates | 6.4 | 87.6% / 0.975 | 84.6% / 0.931 | 77.5% / 0.947 |
-| Feature bento | 6.5 | 64.7% / 0.803 | 66.3% / 0.792 | 57.0% / 0.743 |
-| How it works | 6.6 | 95.7% / 0.989 | 92.4% / 0.937 | 90.5% / 0.931 |
-| Social proof + case study | 6.7, 6.8 | 84.1% / 0.950 | 83.3% / 0.974 | 90.6% / 0.963 |
-| Pricing | 6.9 | 96.6% / 0.989 | 96.7% / 0.981 | 93.6% / 0.941 |
-| Quiz CTA | 6.10 | 99.3% / 0.998 | 93.1% / 0.866 | 94.5% / 0.964 |
-| Founder | 6.11 | 79.7% / 0.924 | 69.1% / 0.739 | 76.9% / 0.683 |
-| Footer | 6.12 | 97.0% / 0.945 | 94.2% / 0.948 | 95.5% / 0.973 |
-| Quiz modal | 6.13 | 99.0% / 0.986 | 98.9% / 0.986 | 96.6% / 0.952 |
+| Nav | 6.1 | 97.8% / 0.971 | 96.1% / 0.948 | 99.2% / 0.995 |
+| Hero | 6.2 | 97.0% / 0.958 | 95.3% / 0.934 | 96.4% / 0.979 |
+| Template Wall | 6.3 | 48.2% / 0.796 | 39.0% / 0.779 | 15.9% / 0.212 |
+| Featured templates | 6.4 | 84.9% / 0.957 | 67.4% / 0.638 | 78.5% / 0.946 |
+| Feature bento | 6.5 | 63.3% / 0.784 | 65.3% / 0.763 | 60.0% / 0.712 |
+| How it works | 6.6 | 83.4% / 0.757 | 81.3% / 0.695 | 90.0% / 0.919 |
+| Social proof + case study | 6.7, 6.8 | 83.0% / 0.921 | 82.4% / 0.948 | 92.0% / 0.940 |
+| Pricing | 6.9 | 98.3% / 0.979 | 97.8% / 0.970 | 95.5% / 0.931 |
+| Quiz CTA | 6.10 | 98.9% / 0.986 | 96.2% / 0.947 | 93.4% / 0.923 |
+| Founder | 6.11 | 80.2% / 0.914 | 69.4% / 0.740 | 77.5% / 0.680 |
+| Footer | 6.12 | 96.7% / 0.943 | 94.1% / 0.943 | 95.4% / 0.970 |
+| Quiz modal | 6.13 | 99.0% / 0.990 | 98.6% / 0.985 | 95.5% / 0.940 |
 
 **It is not 99%, exactly as ADR-0003 said it would not be, and every low reading points at
 something already known.** The Sections in the nineties are the ones made of type; the ones
@@ -1122,10 +1156,19 @@ are honest and neither is the other's error, but they are not comparable, and ma
 detection deterministic is the first thing to fix in this harness. The rotation is the only
 motion on the page driven by a timer rather than by a continuous transform.
 
-Two corroborations worth keeping. The nav reads 97.9 / 96.3 / 99.2 against #9's by-hand
+Two corroborations worth keeping. The nav reads 97.8 / 96.1 / 99.2 against #9's by-hand
 97.9 / 96.2 / 99.3, so the harness reproduces a measurement taken a different way. And every
 band's height now matches the Reference to the pixel or to two, at every Breakpoint, after
 the one height defect the harness found - the quiz CTA's `90vh` (6.10).
+
+**Two #14 changes were checked against this table rather than assumed harmless**, and the
+table is what makes that possible. Subsetting the font cost the hero 99.1 to 97.0 at 1440,
+which is glyph-edge rasterisation and nothing else: the H1 measures 1120 x 163.19px on both
+sides and the featured H2 616 x 134.41, identical to two decimals, so no letterform moved.
+Removing Motion cost nothing measurable - the nav, hero, footer, quiz CTA and quiz modal all
+read identically before and after, and pricing improved - while the Wall and how-it-works
+moved several points in both directions on the same code, which is the travel-detection
+wobble above rather than the animation.
 
 ---
 

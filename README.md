@@ -86,6 +86,24 @@ rather than fitted to one of them.
 `Framer` and `Ramish Aziz` in the footer are white inside grey text with no other
 distinction, which is colour alone at 1.4:1 and fails the axe scan. We underline them.
 
+### Geist is served as its latin subset (PRD section 3, section 8)
+
+The `geist` npm package ships one file carrying latin, latin-ext and cyrillic together -
+68 kB - and this page uses three characters past ASCII: the copyright sign and the acutes in
+`Dávid` and `café`, all inside `latin`. Asking `next/font` for that subset gives 29 kB, and
+the other two stay in the build unpreloaded.
+
+It is a Deviation only in what reaches the browser; the typeface, its metrics and its
+OpenType features are unchanged, and the fidelity table in PRD section 8 was re-measured
+after the switch. The reason it was worth doing is what waits for the font: every largest-
+contentful-paint candidate above the fold is text, and `font-display: swap` repaints each one
+when the face lands, so 39 kB off the font took LCP from 3.9s to 2.9s on Lighthouse's
+throttled mobile profile.
+
+The cost is a build-time dependency on `fonts.googleapis.com`. Nothing is fetched from Google
+at runtime - the face is downloaded during `next build` and served from our own origin - but
+a build with no network now fails where it used to pass.
+
 ### The rating label is Geist, not Inter Display (PRD section 4)
 
 The hero's `RATED 4.92/5` is the one step on the Reference that is not Geist. We render it in
@@ -119,18 +137,25 @@ to reach it and downloaded all three anyway - 59 kB and 3 requests - because an 
 not conditional, and Chrome starts a lazy image well before it is on screen. `opacity: 0`
 never stopped the fetch; `display: none` does.
 
-### The hero's Scroll-Appear runs in CSS, not in Motion (PRD 6.15, section 8)
+### Scroll-Appear runs in CSS, not in Motion (PRD 6.15, section 8)
+
+Not a Deviation from the Reference - the animation is the one #13 measured off it, to the
+same spring and both the same settle times. What changed is what runs it, and it is here
+because it reverses a decision the PRD recorded.
 
 Motion writes Scroll-Appear's resting state into the server markup, so the hero shipped at
-`opacity: 0` and stayed there until 270 kB of JavaScript had arrived and hydrated: **LCP 3.9s
-against an FCP of 0.9s** on Lighthouse's throttled mobile profile, three seconds of blank
-page on a page whose HTML was complete in one.
+`opacity: 0` and stayed there until the page's JavaScript had arrived and hydrated: **LCP
+3.9s against an FCP of 0.9s** on Lighthouse's throttled mobile profile, three seconds of
+blank page on a page whose HTML was complete in one. The hero is on screen at load at every
+Breakpoint, so its appear never waited for a scroll - only for the JavaScript that would tell
+it there had not been one. It now paints with the first frame.
 
-The hero is the one Section on screen at load at every Breakpoint, so its appear never waited
-for a scroll. It now runs the same measured spring as a CSS animation, converted to the same
-`linear()` easing Motion itself hands the Web Animations API, and both measured settle times
-survive. It is a Deviation only in mechanism: the motion is identical, and the hero paints at
-a couple of hundred milliseconds with no JavaScript involved.
+The rest of the page followed, and Motion left the build: 39 kB gzipped, and
+`src/components/motion/spring-easing.ts` emits the same `linear()` easing Motion itself
+generated for opacity and transform. **It did not move the Lighthouse score**, which is
+recorded in PRD section 8 as a prediction that did not hold - the LCP here is bound by the
+font, not by the JavaScript behind it. What it did buy is 40 kB and one animation mechanism
+where there were two.
 
 ### The encode (PRD section 8)
 

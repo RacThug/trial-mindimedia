@@ -14,6 +14,7 @@ import {
   BAND_ATTRIBUTE,
   dismissQuizModal,
   freezeVideo,
+  layoutWidth,
   hideTravelling,
   pendingIslands,
   resolveBands,
@@ -58,6 +59,8 @@ export type Capture = {
   readonly bands: readonly ResolvedBand[]
   /** Page-coordinate boxes of the travelling backdrops, which are not compared. */
   readonly excluded: readonly Box[]
+  /** The width the page laid out in, which a lingering scroll lock can change. */
+  readonly layoutWidth: number
   readonly warnings: readonly string[]
 }
 
@@ -158,7 +161,13 @@ export async function capturePage(
       animations: 'disabled',
       scale: 'css',
     })
-    return { png, bands, excluded, warnings }
+    return {
+      png,
+      bands,
+      excluded,
+      layoutWidth: await page.evaluate(layoutWidth),
+      warnings,
+    }
   } finally {
     await context.close()
   }

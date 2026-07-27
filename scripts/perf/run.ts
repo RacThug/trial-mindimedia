@@ -25,8 +25,26 @@ import { runLighthouse } from './lighthouse.ts'
 const CLONE_URL = process.env.CLONE_URL ?? 'http://localhost:3000'
 const REFERENCE_URL = process.env.REFERENCE_URL ?? 'https://browser.supply/'
 
-/** Odd, so there is a median. */
-const LIGHTHOUSE_RUNS = 3
+/**
+ * Odd, so there is a median, and five rather than three.
+ *
+ * Measured on the machine this was built on: the same page and build scored 88,
+ * 90, 93, 94 and 95 across runs, because a Lighthouse score is a simulation
+ * driven by a real CPU that is also doing other things. Three runs put the
+ * median anywhere in a five-point band, which is wider than most of the
+ * decisions anybody would make from it.
+ */
+const LIGHTHOUSE_RUNS = 5
+
+/**
+ * A pause between runs, because back-to-back runs measure the machine.
+ *
+ * A Lighthouse score is a simulation driven by a real CPU, and five runs in a
+ * row leave it hotter and busier than the first one found it. Lighthouse's own
+ * guidance is to measure on a quiet machine; this is the cheapest approximation
+ * of one.
+ */
+const LIGHTHOUSE_SETTLE_MS = 8000
 
 type Target = {
   readonly label: string
@@ -109,6 +127,7 @@ async function main(): Promise<void> {
   const scores: number[] = []
   const throttled: Readonly<Record<string, number>>[] = []
   for (let run = 0; run < LIGHTHOUSE_RUNS; run += 1) {
+    if (run > 0) await new Promise((resolve) => setTimeout(resolve, LIGHTHOUSE_SETTLE_MS))
     const result = await runLighthouse(CLONE_URL)
     scores.push(result.performance)
     throttled.push(result.metrics)
@@ -184,8 +203,12 @@ function render(
   )
   lines.push('nothing. Bytes are `encodedDataLength` off the wire, not decoded sizes.')
   lines.push(
-    `Lighthouse Performance is the median of ${scores.length}: ${scores.join(', ')}.`,
+    `Lighthouse Performance is the median of ${scores.length}: ${scores.join(', ')}. It moves`,
   )
+  lines.push(
+    'several points with whatever else the machine is doing, so read the spread rather than',
+  )
+  lines.push('the median alone.')
   lines.push('')
   /*
    * The table above and the Lighthouse row are two throttling regimes, and
