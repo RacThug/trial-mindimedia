@@ -88,9 +88,12 @@ from question 1, so the CMS changes those eight functions and no Section at all.
 
 ## 5. What techniques would you use to ensure the website loads quickly even on slow internet connections?
 
-Measured against the original site with the same script:
+Measured against the original site with the same script, both unthrottled, both served to the
+same machine. The deployment reads lower still - **0.48 MB** over the same 39 requests - but
+the local column is the one printed here, because it is the column the original was measured
+alongside:
 
-| | Original | This build |
+| | Original | This build, local |
 | --- | --- | --- |
 | First Contentful Paint | 3040 ms | **132 ms** |
 | Initial transfer | 4.0 MB | **0.51 MB** |

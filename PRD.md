@@ -842,8 +842,13 @@ until 270 kB of JavaScript had arrived: LCP 3.9s against FCP 0.9s on a throttled
 profile. `src/components/motion/spring-easing.ts` converts the spring above into the same
 `linear()` easing Motion hands the Web Animations API for opacity and transform, so the
 animation is unchanged and both settle times survive - and the hero now paints in the low
-hundreds of milliseconds with no JavaScript involved. Everything below the fold stays on Motion, because those Sections
-genuinely wait for a scroll and a CSS animation has no way to know about one.
+hundreds of milliseconds with no JavaScript involved.
+
+Everything below the fold still waits for a scroll, because a CSS animation has no way to
+know about one. What changed is only what listens: the IntersectionObserver in
+`scroll-appear.tsx` sets `data-appeared` and the keyframes in `globals.css` run, where before
+it was Motion's `whileInView`. The trigger is JavaScript on every Section but the hero; the
+animation is CSS on all of them.
 
 The other two animate as cards *inside* a Section rather than as Sections: the quiz CTA's
 card (6.10) at 10px, and the case study's card (6.8) with no travel at all. The two nest
@@ -878,9 +883,10 @@ crossfade reading. Measuring any of it needs the quiz modal stripped repeatedly 
 once - it reopens six seconds in, sits over the page, and makes every element report
 `:hover=false`.
 
-**It costs 39 KB gzipped.** Homepage JavaScript measured at 390px goes from 232 KB to
-271 KB transferred. That is the whole of Motion, for the page's dominant animation; the
-transfer budget in section 8 is dominated by video, and #14 owns it.
+**It cost 39 KB gzipped, while it was there.** Homepage JavaScript measured at 390px went
+from 232 KB to 271 KB transferred when #13 added Motion, and back when #14 removed it. That
+was the whole of Motion, for the page's dominant animation; the transfer budget in section 8
+is dominated by video, and #14 owns both.
 
 **Two Deviations.** `prefers-reduced-motion: reduce` removes the movement, arriving at the
 same end state with no travel and no fade; the Reference honours no such thing. And the
